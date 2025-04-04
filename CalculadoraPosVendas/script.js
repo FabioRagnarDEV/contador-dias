@@ -33,27 +33,50 @@ function processPVD() {
 
 // Processa a seção de Caso Pós Vendas  
 function processCPV() {  
-    const dataInput = document.getElementById('dataCPV').value;  
+    const dataInput = parseDate(document.getElementById('dataCPV').value);  
     const numeroCaso = document.getElementById('numeroCaso').value;  
-    const dataAberturaInput = document.getElementById('dataAbertura').value;  
+    const dataAberturaInput = parseDate(document.getElementById('dataAbertura').value);  
 
-    const data = new Date(dataInput);  
-    const dataAbertura = new Date(dataAberturaInput);  
+    // Validação de campo numérico obrigatório  
+    if (isNaN(parseInt(numeroCaso))) {  
+        alert("Por favor, digite apenas números no campo 'Número do caso'.");  
+        return;  
+    }  
+
+    // Validação de campo de data  
+    if (isNaN(parseInt(dataInput.getDate())) || isNaN(parseInt(dataAberturaInput.getDate()))) {  
+        alert("Por favor, digite apenas números e barras (formato DD/MM/AAAA) nos campos de data.");  
+        return;  
+    }  
+
+    const data = dataInput;  
+    const dataAbertura = dataAberturaInput;  
     const resultadoDiv = document.getElementById('resultadoCPV');  
-    
+
     // Contamos os dias úteis entre a data de abertura e a data atual  
     const diffBusinessDays = countBusinessDays(dataAbertura, data);  
 
     if (diffBusinessDays > 50) {  
-        resultadoDiv.textContent = "50 dias úteis excedidos. Por favor, abrir caso para vermelha comercial.";  
+        resultadoDiv.textContent = "50 dias úteis excedidos. Por favor, abra um caso para a área comercial.";  
     } else {  
-        const diasRestantes = 50 - diffBusinessDays;  
-        const verbo = diasRestantes > 1 ? "restam" : "resta";
-        const palavraDia = diasRestantes > 1 ? "dias" : "dia";
-        
-        resultadoDiv.textContent = `O caso ${numeroCaso} ainda ${verbo} ${diasRestantes} ${palavraDia} úteis para tratativa, por favor, acionar o departamento de Pós-vendas imediatamente para seguir com a demanda.`;  
+        const diasRestantes = 50 - diffBusinessDays;    
+        const palavraDia = diasRestantes === 1 ? "dia" : "dias";  
+    
+        resultadoDiv.textContent = `O caso ${numeroCaso} ainda resta ${diasRestantes} ${palavraDia} úteis para tratativa. Por favor, acione o departamento de Pós-vendas imediatamente para seguir com a demanda.`;  
     }  
-}    
+} 
+
+// Função para converter a entrada de texto em um objeto Date  
+function parseDate(dateString) {  
+    const parts = dateString.split('/');  
+    if (parts.length === 3) {  
+        const day = parseInt(parts[0], 10);  
+        const month = parseInt(parts[1], 10) - 1; // Meses em JavaScript são de 0 a 11  
+        const year = parseInt(parts[2], 10);  
+        return new Date(year, month, day);  
+    }  
+    return null;  
+}  
 
 // Funciona para verificar se um dia é um fim de semana  
 function isWeekend(date) {  
