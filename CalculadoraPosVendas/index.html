@@ -1,0 +1,63 @@
+<!DOCTYPE html>  
+    <html lang="pt-BR">  
+    <head>  
+        <meta charset="UTF-8">  
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+        <title>Pós Vendas</title>  
+        <script src="https://cdn.tailwindcss.com"></script>  
+        <style>  
+            body {  
+                font-family: 'Helvetica Neue', Arial, sans-serif;  
+                background-color: #f3f4f6; /* Cor de fundo suave */  
+            }  
+        </style>  
+    </head>  
+    <body class="flex flex-col items-center justify-center min-h-screen">  
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">Pós Vendas</h1>  
+
+        <!-- Botões para alternar entre as aplicações -->  
+        <div class="mb-6">  
+            <button id="btnPVD" class="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-500 transition duration-200 mr-4" onclick="showSection('pvd')">Pós Vendas Digital</button>  
+            <button id="btnCPV" class="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-500 transition duration-200" onclick="showSection('cpv')">Caso Pós Vendas</button>  
+        </div>  
+        
+        <!-- Seção: Pós Vendas Digital -->  
+        <div id="pvd" class="hidden bg-white p-8 rounded-lg shadow-lg w-full max-w-md">  
+            <label for="dataPVD" class="block mb-2 text-gray-700">Digite a data:</label>  
+            <input type="date" id="dataPVD" class="border border-gray-300 rounded-lg p-3 mb-4 w-full transition duration-200 focus:ring-2 focus:ring-blue-400 focus:border-transparent" required>  
+            
+            <p>Existe pós vendas digital efetivado em menos de 48 horas úteis?</p>  
+            <div class="flex justify-center items-center gap-4 mb-4">  
+                <button class="bg-green-500 text-white px-4 py-2 rounded-lg" id="btnSim" onclick="getEfetivacaoDate()">Sim</button>  
+                <button class="bg-red-500 text-white px-4 py-2 rounded-lg" id="btnNao" onclick="getEfetivacaoDate()">Não</button>  
+                <button class="bg-gray-300 text-black px-4 py-2 rounded-lg" onclick="resetPVD()">Zerar</button>  
+            </div>
+
+            <div id="efetivacaoDiv" class="hidden mt-4">  
+                <label for="dataEfetivacao" class="block mb-2 text-gray-700">Qual foi a data e o horário da efetivação?</label>  
+                <input type="datetime-local" id="dataEfetivacao" class="border border-gray-300 rounded-lg p-3 mb-4 w-full transition duration-200 focus:ring-2 focus:ring-blue-400 focus:border-transparent" required>  
+                <button class="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-500 transition duration-200" onclick="processPVD()">Enviar</button>  
+            </div>  
+
+            <div id="resultadoPVD" class="mt-6 text-lg font-semibold text-gray-800"></div>  
+        </div>  
+
+        <!-- Seção: Caso Pós Vendas -->  
+        <div id="cpv" class="hidden bg-white p-8 rounded-lg shadow-lg w-full max-w-md">  
+            <label for="dataCPV" class="block mb-2 text-gray-700">Digite a data:</label>  
+            <input type="date" id="dataCPV" class="border border-gray-300 rounded-lg p-3 mb-4 w-full transition duration-200 focus:ring-2 focus:ring-blue-400 focus:border-transparent" required>  
+
+            <label for="numeroCaso" class="block mb-2 text-gray-700">Número do caso:</label>  
+            <input type="text" id="numeroCaso" class="border border-gray-300 rounded-lg p-3 mb-4 w-full transition duration-200 focus:ring-2 focus:ring-blue-400 focus:border-transparent" required>  
+
+            <label for="dataAbertura" class="block mb-2 text-gray-700">Data de abertura:</label>  
+            <input type="date" id="dataAbertura" class="border border-gray-300 rounded-lg p-3 mb-4 w-full transition duration-200 focus:ring-2 focus:ring-blue-400 focus:border-transparent" required>  
+
+            <button class="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-500 transition duration-200" onclick="processCPV()">Verificar</button>  
+            <button class="bg-gray-300 text-black px-4 py-2 rounded-lg" onclick="resetCPV()">Zerar</button>  
+            <div id="resultadoCPV" class="mt-6 text-lg font-semibold text-gray-800"></div>  
+        </div>  
+        <a href="/indexPrincipal.html" class="bg-gray-300 text-black py-2 px-4 rounded-lg hover:bg-gray-400 transition duration-200 mt-4">Voltar ao Menu</a>
+        <script src="script.js"></script> 
+    </body>  
+    </html>  
