@@ -78,7 +78,7 @@ function parseDate(dateString) {
     return null;  
 }  
 
-// Funciona para verificar se um dia é um fim de semana  
+// Função para verificar se um dia é um fim de semana  
 function isWeekend(date) {  
     const day = date.getDay();  
     return day === 0 || day === 6; // 0 = Domingo, 6 = Sábado  
