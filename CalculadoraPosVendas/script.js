@@ -78,7 +78,6 @@ function processPVD() {
     }
 }
 
-// Processa o caso do Pós Vendas
 async function processCPV() {
     const dataInput = parseDate(document.getElementById('dataCPV').value);
     const numeroCaso = document.getElementById('numeroCaso').value;
@@ -106,8 +105,10 @@ async function processCPV() {
         resultadoDiv.textContent = "50 dias úteis excedidos. Por favor, abra um caso para a área comercial.";
     } else {
         const diasRestantes = 50 - diffBusinessDays;
-        const palavraDia = diasRestantes === 1 ? "dia" : "dias";
-        resultadoDiv.textContent = `O caso ${numeroCaso} ainda resta ${diasRestantes} ${palavraDia} úteis para tratativa. Por favor, abrir um caso de dúvida direcionada com a informação "Pós Vendas" e coloque na fila do setor.`;
+        const verbo = diasRestantes === 1 ? "resta" : "restam";
+        const plural = diasRestantes === 1 ? "dia útil" : "dias úteis";
+
+        resultadoDiv.textContent = `Para o caso ${numeroCaso}, ${verbo} ${diasRestantes} ${plural} para tratativa. Por favor, abra um caso de dúvida direcionada com a informação 'Pós-Vendas', e coloque-a na fila do setor.`;
     }
 }
 
