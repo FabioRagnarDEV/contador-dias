@@ -5,6 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Crédito em Espécie</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+    }
+  </style>
 </head>
 <body class="flex flex-col items-center justify-center min-h-screen bg-red-600 px-4 text-white">
   <h1 class="text-3xl font-bold mb-6 drop-shadow-lg text-center">Prazo Crédito em Espécie</h1>
@@ -17,9 +25,8 @@
     <div>
       <label for="data" class="block mb-1 font-medium">Data da contemplação:</label>
       <input type="text" id="data"
-       class="w-full border border-red-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-red-400"
-       placeholder="DD/MM/AAAA" required 
-       oninput="formatarData(this)" />
+             class="w-full border border-red-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-red-400"
+             placeholder="DD/MM/AAAA" required maxlength="10" />
     </div>
 
     <div>
@@ -29,12 +36,13 @@
              required />
     </div>
 
-    <button onclick="calcularData()"
+    <button id="calcular-btn"
             class="w-full bg-red-600 text-white py-3 rounded-lg hover:bg-red-500 shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 font-semibold">
       Calcular
     </button>
-
-    <div id="resultado" class="text-center mt-4 text-lg font-bold text-red-800"></div>
+    
+    <div id="mensagem-erro" class="text-center pt-2 text-sm font-bold text-yellow-500 min-h-[20px]"></div>
+    <div id="resultado" class="text-center text-lg font-bold text-red-800 transition-opacity duration-500 opacity-0"></div>
   </div>
 
   <a href="../index.html"
