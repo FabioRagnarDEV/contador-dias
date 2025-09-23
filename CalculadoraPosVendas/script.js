@@ -1,34 +1,92 @@
-let feriados = [];
+// --- Estado da Aplicação ---
+let feriadosPorAno = {}; // Armazena os feriados para evitar chamadas repetidas à API
 
-// Carrega os feriados do ano corrente via BrasilAPI
+// --- Elementos do DOM ---
+const pvdSection = document.getElementById('pvd');
+const cpvSection = document.getElementById('cpv');
+// PVD
+const dataEfetivacaoInput = document.getElementById('dataEfetivacao');
+const resultadoPVDDiv = document.getElementById('resultadoPVD');
+const erroPVDDiv = document.getElementById('erroPVD');
+// CPV
+const dataAberturaInput = document.getElementById('dataAbertura');
+const numeroCasoInput = document.getElementById('numeroCaso');
+const resultadoCPVDiv = document.getElementById('resultadoCPV');
+const erroCPVDiv = document.getElementById('erroCPV');
+
+
+// --- Funções de Ajuda (Helpers) ---
+
+/**
+ * Carrega e armazena os feriados de um ano específico via BrasilAPI.
+ * @param {number} ano O ano para carregar os feriados.
+ */
 async function carregarFeriados(ano) {
+    if (feriadosPorAno[ano]) {
+        return; // Feriados para este ano já foram carregados
+    }
     try {
         const response = await fetch(`https://brasilapi.com.br/api/feriados/v1/${ano}`);
+        if (!response.ok) throw new Error('Falha na resposta da API');
         const data = await response.json();
-        feriados = data.map(f => f.date); // Formato: "YYYY-MM-DD"
+        feriadosPorAno[ano] = data.map(f => f.date); // Armazena "YYYY-MM-DD"
     } catch (error) {
         console.error("Erro ao carregar feriados:", error);
-        alert("Não foi possível carregar os feriados. Verifique sua conexão com a internet.");
+        // Exibe o erro em ambas as seções, pois não sabemos qual está ativa
+        erroPVDDiv.textContent = "Erro ao carregar feriados. Verifique a conexão.";
+        erroCPVDiv.textContent = "Erro ao carregar feriados. Verifique a conexão.";
     }
 }
 
-// Verifica se uma data é feriado
+/**
+ * Verifica se uma data é um feriado.
+ * @param {Date} date O objeto Date a ser verificado.
+ * @returns {boolean}
+ */
 function isFeriado(date) {
-    const dataFormatada = date.toISOString().split('T')[0]; // YYYY-MM-DD
-    return feriados.includes(dataFormatada);
+    const ano = date.getFullYear();
+    if (!feriadosPorAno[ano]) return false; // Feriados do ano não carregados
+    const dataFormatada = date.toISOString().split('T')[0]; // "YYYY-MM-DD"
+    return feriadosPorAno[ano].includes(dataFormatada);
 }
 
-// Verifica se a data é fim de semana
+/**
+ * Verifica se uma data cai em um fim de semana (Sábado ou Domingo).
+ * @param {Date} date O objeto Date a ser verificado.
+ * @returns {boolean}
+ */
 function isWeekend(date) {
     const day = date.getDay();
-    return day === 0 || day === 6; // Domingo ou Sábado
+    return day === 0 || day === 6;
 }
 
-// Conta os dias úteis entre duas datas, excluindo fins de semana e feriados
+/**
+ * Adiciona um número específico de dias úteis a uma data, pulando fins de semana e feriados.
+ * @param {Date} startDate A data inicial.
+ * @param {number} days O número de dias úteis a adicionar.
+ * @returns {Date} A nova data após adicionar os dias úteis.
+ */
+function addBusinessDays(startDate, days) {
+    let currentDate = new Date(startDate);
+    let addedDays = 0;
+    while (addedDays < days) {
+        currentDate.setDate(currentDate.getDate() + 1);
+        if (!isWeekend(currentDate) && !isFeriado(currentDate)) {
+            addedDays++;
+        }
+    }
+    return currentDate;
+}
+
+/**
+ * Conta os dias úteis entre duas datas.
+ * @param {Date} startDate Data de início.
+ * @param {Date} endDate Data de fim.
+ * @returns {number} O número de dias úteis.
+ */
 function countBusinessDays(startDate, endDate) {
     let count = 0;
     const currentDate = new Date(startDate);
-
     while (currentDate <= endDate) {
         if (!isWeekend(currentDate) && !isFeriado(currentDate)) {
             count++;
@@ -38,97 +96,108 @@ function countBusinessDays(startDate, endDate) {
     return count;
 }
 
-// Converte data no formato DD/MM/AAAA para objeto Date
-function parseDate(dateString) {
-    const parts = dateString.split('/');
-    if (parts.length === 3) {
-        const day = parseInt(parts[0], 10);
-        const month = parseInt(parts[1], 10) - 1;
-        const year = parseInt(parts[2], 10);
-        return new Date(year, month, day);
+
+// --- Funções de Lógica Principal ---
+
+/**
+ * Processa a verificação do Pós Vendas Digital.
+ */
+async function processPVD() {
+    erroPVDDiv.textContent = '';
+    resultadoPVDDiv.textContent = '';
+
+    const efetivacaoValue = dataEfetivacaoInput.value;
+    if (!efetivacaoValue) {
+        erroPVDDiv.textContent = "Por favor, informe a data da efetivação.";
+        return;
     }
-    return null;
-}
 
-// Alterna entre as seções PVD e CPV
-function showSection(section) {
-    document.getElementById('pvd').classList.add('hidden');
-    document.getElementById('cpv').classList.add('hidden');
-    document.getElementById(section).classList.remove('hidden');
-}
+    const dataEfetivacao = new Date(efetivacaoValue);
+    await carregarFeriados(dataEfetivacao.getFullYear());
 
-// Mostra campo para inserir data de efetivação
-function getEfetivacaoDate() {
-    document.getElementById('efetivacaoDiv').classList.remove('hidden');
-}
-
-// Processa a verificação do Pós Vendas Digital
-function processPVD() {
-    const efetivacaoInput = document.getElementById('dataEfetivacao').value;
-    const dataEfetivacao = new Date(efetivacaoInput);
+    // O prazo é de 48h úteis, o que equivale a 2 dias úteis.
+    const prazoFinal = addBusinessDays(dataEfetivacao, 2);
     const dataAtual = new Date();
-    const resultadoDiv = document.getElementById('resultadoPVD');
 
-    const diffHours = (dataAtual - dataEfetivacao) / (1000 * 60 * 60);
-
-    if (diffHours < 48) {
-        resultadoDiv.textContent = "Por favor, direcione imediatamente para o pós vendas.";
+    if (dataAtual > prazoFinal) {
+        resultadoPVDDiv.textContent = "Prazo de 48h úteis excedido. Abrir vermelha comercial para a ouvidoria.";
+        resultadoPVDDiv.classList.remove('text-green-800');
+        resultadoPVDDiv.classList.add('text-red-800');
     } else {
-        resultadoDiv.textContent = "Tratativa digital pelo pós vendas realizada há mais de 48 horas úteis, por favor abrir vermelha comercial.";
+        resultadoPVDDiv.textContent = "Dentro do prazo de 48h úteis. Direcione para o pós-vendas.";
+        resultadoPVDDiv.classList.remove('text-red-800');
+        resultadoPVDDiv.classList.add('text-green-800');
     }
 }
 
+/**
+ * Processa a verificação do Caso Pós Vendas.
+ */
 async function processCPV() {
-    const dataInput = parseDate(document.getElementById('dataCPV').value);
-    const numeroCaso = document.getElementById('numeroCaso').value;
-    const dataAberturaInput = parseDate(document.getElementById('dataAbertura').value);
-    const resultadoDiv = document.getElementById('resultadoCPV');
+    erroCPVDiv.textContent = '';
+    resultadoCPVDiv.textContent = '';
+    
+    const dataAberturaValue = dataAberturaInput.value;
+    const numeroCasoValue = numeroCasoInput.value;
 
-    // Validações básicas
-    if (isNaN(parseInt(numeroCaso))) {
-        alert("Por favor, digite apenas números no campo 'Número do caso'.");
+    if (!dataAberturaValue || !numeroCasoValue) {
+        erroCPVDiv.textContent = "Por favor, preencha todos os campos.";
         return;
     }
-    if (!dataInput || !dataAberturaInput) {
-        alert("Por favor, insira datas válidas no formato DD/MM/AAAA.");
-        return;
-    }
+    
+    const dataAbertura = new Date(dataAberturaValue);
+    const dataAtual = new Date();
+    
+    // Carrega feriados para ambos os anos, caso o período atravesse a virada do ano
+    await carregarFeriados(dataAbertura.getFullYear());
+    await carregarFeriados(dataAtual.getFullYear());
 
-    // Carrega feriados se ainda não carregados
-    if (feriados.length === 0) {
-        await carregarFeriados(dataInput.getFullYear());
-    }
+    const diffBusinessDays = countBusinessDays(dataAbertura, dataAtual);
+    const prazoTotal = 50;
 
-    const diffBusinessDays = countBusinessDays(dataAberturaInput, dataInput);
-
-    if (diffBusinessDays > 50) {
-        resultadoDiv.textContent = "50 dias úteis excedidos. Por favor, abra um caso para a área comercial.";
+    if (diffBusinessDays > prazoTotal) {
+        resultadoCPVDiv.textContent = `${prazoTotal} dias úteis excedidos. Abrir um caso para a área comercial.`;
     } else {
-        const diasRestantes = 50 - diffBusinessDays;
+        const diasRestantes = prazoTotal - diffBusinessDays;
         const verbo = diasRestantes === 1 ? "resta" : "restam";
         const plural = diasRestantes === 1 ? "dia útil" : "dias úteis";
-
-        resultadoDiv.textContent = `Para o caso ${numeroCaso}, ${verbo} ${diasRestantes} ${plural} para tratativa. Por favor, abra um caso de dúvida direcionada com a informação 'Pós-Vendas', e coloque-a na fila do setor.`;
+        resultadoCPVDiv.textContent = `Para o caso ${numeroCasoValue}, ${verbo} ${diasRestantes} ${plural} para tratativa. Abrir caso de dúvida para a fila do setor 'Pós-Vendas'.`;
     }
 }
 
-// Zera os campos da seção Pós Vendas Digital
+
+function showSection(sectionId) {
+    pvdSection.classList.add('hidden');
+    cpvSection.classList.add('hidden');
+    document.getElementById(sectionId).classList.remove('hidden');
+}
+
 function resetPVD() {
-    document.getElementById('dataPVD').value = '';
-    document.getElementById('resultadoPVD').textContent = '';
-    document.getElementById('efetivacaoDiv').classList.add('hidden');
-    document.getElementById('dataEfetivacao').value = '';
+    dataEfetivacaoInput.value = '';
+    resultadoPVDDiv.textContent = '';
+    erroPVDDiv.textContent = '';
 }
 
-// Zera os campos da seção Caso Pós Vendas
 function resetCPV() {
-    document.getElementById('dataCPV').value = '';
-    document.getElementById('numeroCaso').value = '';
-    document.getElementById('dataAbertura').value = '';
-    document.getElementById('resultadoCPV').textContent = '';
+    dataAberturaInput.value = '';
+    numeroCasoInput.value = '';
+    resultadoCPVDiv.textContent = '';
+    erroCPVDiv.textContent = '';
 }
 
-// Carrega feriados automaticamente ao abrir a página
+
+// --- "Escutadores" de Eventos (Event Listeners) ---
+
+document.getElementById('btn-show-pvd').addEventListener('click', () => showSection('pvd'));
+document.getElementById('btn-show-cpv').addEventListener('click', () => showSection('cpv'));
+
+document.getElementById('btn-process-pvd').addEventListener('click', processPVD);
+document.getElementById('btn-reset-pvd').addEventListener('click', resetPVD);
+
+document.getElementById('btn-process-cpv').addEventListener('click', processCPV);
+document.getElementById('btn-reset-cpv').addEventListener('click', resetCPV);
+
+// Carrega os feriados do ano corrente ao iniciar a página, para uma resposta mais rápida no primeiro uso.
 window.addEventListener('DOMContentLoaded', () => {
     const anoAtual = new Date().getFullYear();
     carregarFeriados(anoAtual);

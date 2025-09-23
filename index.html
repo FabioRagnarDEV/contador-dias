@@ -1,32 +1,197 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Contador de Dias</title>
+  <title>Painel de Ferramentas</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
   <style>
-    body {
-      font-family: 'Helvetica Neue', Arial, sans-serif;
-      background-color: #b91c1c; /* vermelho escuro */
-    }
+    body { font-family: 'Inter', sans-serif; }
   </style>
 </head>
-<body class="flex flex-col items-center justify-center min-h-screen px-4 bg-red-700 text-white">
+<body class="bg-slate-100 text-slate-800">
 
-  <h1 class="text-5xl font-extrabold mb-10 drop-shadow-lg">Selecione uma Opção</h1>
+  <header class="bg-blue-600 shadow-md">
+    <nav class="container mx-auto px-4 py-3">
+      <h1 class="text-2xl font-bold text-white">Painel de Ferramentas</h1>
+    </nav>
+  </header>
 
-  <div class="flex flex-col space-y-6 w-full max-w-sm">
-    <a href="CalculadoraCreditoEspecie/creditoEmEspecie.html"
-       class="bg-white text-red-700 py-4 px-6 rounded-xl text-center shadow-lg transition-all duration-300 transform hover:scale-105 hover:bg-red-100 hover:shadow-2xl font-semibold text-lg">
-      Prazo Crédito em Espécie
-    </a>
+  <main class="container mx-auto px-4 py-8 sm:py-16">
+    <div class="text-center">
+      <div class="flex justify-center mb-4">
+          <svg class="h-20 w-20 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 15.75V18m-7.5-6.75h.008v.008H8.25v-.008Zm0 3h.008v.008H8.25v-.008Zm0 3h.008v.008H8.25v-.008Zm3-6h.008v.008H11.25v-.008Zm0 3h.008v.008H11.25v-.008Zm0 3h.008v.008H11.25v-.008Zm3-6h.008v.008H14.25v-.008Zm0 3h.008v.008H14.25v-.008ZM5.25 6H18.75a2.25 2.25 0 0 1 2.25 2.25v11.25a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 21.75V8.25A2.25 2.25 0 0 1 5.25 6ZM3.75 10.5h16.5" />
+          </svg>
+      </div>
+      <h2 id="saudacao" class="text-4xl sm:text-5xl font-extrabold text-slate-900 drop-shadow-sm">Carregando...</h2>
+      <p class="text-slate-500 mt-2 text-lg">Escolha uma das opções abaixo para começar.</p>
+    </div>
+    <div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+      <a href="CalculadoraCreditoEspecie/creditoEmEspecie.html" class="group block bg-white p-8 rounded-xl shadow-lg border border-transparent hover:border-blue-500 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+        <div class="flex items-center gap-4">
+          <div class="bg-blue-100 p-3 rounded-full">
+            <svg class="h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>
+          </div>
+          <div>
+            <h3 class="text-xl font-bold text-slate-800 group-hover:text-blue-600 transition-colors">Prazo Crédito em Espécie</h3>
+            <p class="text-slate-500 mt-1">Calcule a data final para recebimento do crédito.</p>
+          </div>
+        </div>
+      </a>
+      <a href="CalculadoraPosVendas/posVendas.html" class="group block bg-white p-8 rounded-xl shadow-lg border border-transparent hover:border-blue-500 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+        <div class="flex items-center gap-4">
+          <div class="bg-blue-100 p-3 rounded-full">
+              <svg class="h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 12c0 2.104.859 4.023 2.273 5.482l.227.227.227.227a3.375 3.375 0 0 0 4.243 4.243l.227.227.227.227a3.375 3.375 0 0 0 5.482-2.273Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9c-1.356-1.356-3.137-2.25-5.25-2.25S6.606 7.644 5.25 9" /></svg>
+          </div>
+          <div>
+            <h3 class="text-xl font-bold text-slate-800 group-hover:text-blue-600 transition-colors">Pós Vendas</h3>
+            <p class="text-slate-500 mt-1">Acompanhe os prazos de atendimento do setor.</p>
+          </div>
+        </div>
+      </a>
+    </div>
+  </main>
 
-    <a href="CalculadoraPosVendas/posVendas.html"
-       class="bg-white text-red-700 py-4 px-6 rounded-xl text-center shadow-lg transition-all duration-300 transform hover:scale-105 hover:bg-red-100 hover:shadow-2xl font-semibold text-lg">
-      Pós Vendas
-    </a>
+  <footer class="w-full text-center py-6 mt-8">
+    <p class="text-sm text-slate-500">&copy; 2025 Suas Ferramentas. Todos os direitos reservados.</p>
+  </footer>
+
+  <div id="modal-overlay" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 transition-opacity duration-300 hidden">
+    <div id="modal-box" class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-sm transform scale-95 transition-transform duration-300">
+      <h3 class="text-2xl font-bold text-slate-900 text-center">Bem-vinda(o) ao Painel!</h3>
+      <p class="text-slate-500 text-center mt-2 mb-6">Para começar, qual é o seu nome?</p>
+      <input type="text" id="name-input" class="w-full border border-slate-300 rounded-lg p-3 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Digite seu primeiro nome...">
+      <div id="name-error" class="text-red-500 text-sm mt-2 min-h-[20px]"></div>
+      <button id="name-submit-btn" class="w-full bg-blue-600 text-white mt-4 py-3 rounded-lg hover:bg-blue-700 transition font-semibold text-lg">
+        Continuar
+      </button>
+    </div>
   </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // --- Seleção de Elementos ---
+      const saudacaoEl = document.getElementById('saudacao');
+      const modalOverlay = document.getElementById('modal-overlay');
+      const modalBox = document.getElementById('modal-box');
+      const nameInput = document.getElementById('name-input');
+      const nameSubmitBtn = document.getElementById('name-submit-btn');
+      const nameError = document.getElementById('name-error');
+
+      /**
+       * Função para consultar a API do IBGE e determinar o gênero mais provável de um nome.
+       * @param {string} name O primeiro nome a ser verificado.
+       * @returns {Promise<string>} Retorna 'M' para masculino, 'F' para feminino, ou 'N' para neutro/não encontrado.
+       */
+      async function getGender(name) {
+        try {
+          // Faz duas chamadas à API em paralelo: uma para o sexo Masculino, outra para o Feminino.
+          const [resM, resF] = await Promise.all([
+            fetch(`https://servicodados.ibge.gov.br/api/v2/censos/nomes/${name}?sexo=M`),
+            fetch(`https://servicodados.ibge.gov.br/api/v2/censos/nomes/${name}?sexo=F`)
+          ]);
+
+          const dataM = await resM.json();
+          const dataF = await resF.json();
+
+          // Soma a frequência total para cada gênero (a API retorna um array)
+          const freqM = dataM.length > 0 ? dataM[0].res.reduce((acc, item) => acc + item.frequencia, 0) : 0;
+          const freqF = dataF.length > 0 ? dataF[0].res.reduce((acc, item) => acc + item.frequencia, 0) : 0;
+          
+          if (freqM > freqF) return 'M';
+          if (freqF > freqM) return 'F';
+          return 'N'; // Retorna 'Neutro' se as frequências forem iguais ou zero
+        } catch (error) {
+          console.error("Erro ao consultar API do IBGE:", error);
+          return 'N'; // Em caso de erro, assume neutro
+        }
+      }
+
+      /**
+       * Monta a saudação final na tela.
+       * @param {string} name O nome do utilizador.
+       * @param {string} gender O gênero ('M', 'F', ou 'N').
+       */
+      function displayGreeting(name, gender) {
+          const horaAtual = new Date().getHours();
+          let saudacaoDoDia;
+          let boasVindas;
+
+          if (horaAtual >= 5 && horaAtual < 12) saudacaoDoDia = 'Bom dia';
+          else if (horaAtual >= 12 && horaAtual < 18) saudacaoDoDia = 'Boa tarde';
+          else saudacaoDoDia = 'Boa noite';
+          
+          if (gender === 'M') boasVindas = 'Seja bem-vindo.';
+          else if (gender === 'F') boasVindas = 'Seja bem-vinda.';
+          else boasVindas = 'Seja bem-vinda(o).';
+
+          saudacaoEl.innerHTML = `${saudacaoDoDia}, <span class="text-blue-600">${name}</span>! <br class="sm:hidden"/> ${boasVindas}`;
+      }
+
+      /**
+       * Função principal que orquestra a lógica da página.
+       */
+      async function main() {
+        const nome = localStorage.getItem('nomeUsuario');
+        const genero = localStorage.getItem('generoUsuario');
+
+        if (nome && genero) {
+          displayGreeting(nome, genero);
+        } else {
+          // Mostra o modal com uma pequena animação
+          modalOverlay.classList.remove('hidden');
+          setTimeout(() => {
+            modalOverlay.classList.remove('opacity-0');
+            modalBox.classList.remove('scale-95');
+          }, 10); // Pequeno delay para a transição funcionar
+        }
+      }
+
+      /**
+       * Lida com o envio do nome pelo utilizador.
+       */
+      async function handleNameSubmit() {
+        const nome = nameInput.value.trim().split(' ')[0]; // Pega apenas o primeiro nome
+        
+        if (!nome) {
+          nameError.textContent = 'Por favor, digite seu nome.';
+          return;
+        }
+
+        nameError.textContent = '';
+        nameSubmitBtn.textContent = 'Aguarde...';
+        nameSubmitBtn.disabled = true;
+
+        const genero = await getGender(nome);
+
+        localStorage.setItem('nomeUsuario', nome);
+        localStorage.setItem('generoUsuario', genero);
+
+        // Esconde o modal com animação
+        modalOverlay.classList.add('opacity-0');
+        modalBox.classList.add('scale-95');
+        setTimeout(() => {
+          modalOverlay.classList.add('hidden');
+          displayGreeting(nome, genero);
+        }, 300); // Espera a animação terminar
+      }
+
+      // --- "Escutadores" de Eventos ---
+      nameSubmitBtn.addEventListener('click', handleNameSubmit);
+      nameInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+          handleNameSubmit();
+        }
+      });
+
+      // Inicia a aplicação
+      main();
+    });
+  </script>
 
 </body>
 </html>
