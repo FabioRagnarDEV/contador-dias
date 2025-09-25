@@ -156,7 +156,7 @@ async function processCPV() {
     const prazoTotal = 50;
 
     if (diffBusinessDays > prazoTotal) {
-        resultadoCPVDiv.textContent = `${prazoTotal} dias úteis excedidos. Abrir um caso para a área comercial.`;
+        resultadoCPVDiv.textContent = `${prazoTotal} dias úteis excedidos. Abrir um caso de vermelha comercial e anexar as evidências se já os tiver`;
     } else {
         const diasRestantes = prazoTotal - diffBusinessDays;
         const verbo = diasRestantes === 1 ? "resta" : "restam";

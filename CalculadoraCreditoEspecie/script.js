@@ -1,11 +1,10 @@
 // --- Seleção dos Elementos do DOM ---
 const dataInputEl = document.getElementById('data');
-const diasInputEl = document.getElementById('dias');
 const calcularBtnEl = document.getElementById('calcular-btn');
 const resetBtnEl = document.getElementById('reset-btn');
 const resultadoDivEl = document.getElementById('resultado');
 const mensagemErroDivEl = document.getElementById('mensagem-erro');
-
+const infoLegalDiv = document.getElementById('info-legal'); // Novo elemento
 
 // --- Funções ---
 
@@ -27,19 +26,19 @@ function formatarData(input) {
 }
 
 /**
- * Calcula a data final com base na data inicial e na quantidade de dias.
- * Exibe o resultado ou uma mensagem de erro na página.
+ * Calcula a data final (180 dias) com base na data da contemplação.
  */
 function calcularData() {
     mensagemErroDivEl.textContent = '';
     resultadoDivEl.textContent = '';
     resultadoDivEl.classList.add('opacity-0');
+    infoLegalDiv.classList.add('hidden'); // Esconde a info ao calcular novamente
 
     const dataValor = dataInputEl.value;
-    const diasValor = parseInt(diasInputEl.value, 10);
 
-    if (!dataValor || isNaN(diasValor)) {
-        mensagemErroDivEl.textContent = 'Por favor, preencha todos os campos corretamente.';
+    // Validação simplificada, pois não há mais campo de dias
+    if (!dataValor || dataValor.length < 10) {
+        mensagemErroDivEl.textContent = 'Por favor, insira a data da contemplação.';
         return;
     }
 
@@ -58,16 +57,13 @@ function calcularData() {
     }
 
     const dataFinal = new Date(dataInicial);
-    dataFinal.setDate(dataInicial.getDate() + diasValor);
+    // Lógica agora usa o valor fixo de 180 dias
+    dataFinal.setDate(dataInicial.getDate() + 180);
     
     const dataAtual = new Date();
     dataAtual.setHours(0, 0, 0, 0);
 
-    const dataFinalFormatada = dataFinal.toLocaleDateString('pt-BR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-    });
+    const dataFinalFormatada = dataFinal.toLocaleDateString('pt-BR');
 
     if (dataFinal < dataAtual) {
         resultadoDivEl.textContent = `A cota está apta para receber em espécie desde ${dataFinalFormatada}.`;
@@ -76,6 +72,7 @@ function calcularData() {
     }
     
     resultadoDivEl.classList.remove('opacity-0');
+    infoLegalDiv.classList.remove('hidden'); // Mostra a info legal após o cálculo
 }
 
 /**
@@ -83,10 +80,10 @@ function calcularData() {
  */
 function resetCalculadora() {
     dataInputEl.value = '';
-    diasInputEl.value = '';
     resultadoDivEl.textContent = '';
     mensagemErroDivEl.textContent = '';
     resultadoDivEl.classList.add('opacity-0');
+    infoLegalDiv.classList.add('hidden'); // Garante que a info legal seja escondida ao zerar
 }
 
 
