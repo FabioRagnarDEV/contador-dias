@@ -124,7 +124,7 @@ async function processPVD() {
         resultadoPVDDiv.classList.remove('text-green-800');
         resultadoPVDDiv.classList.add('text-red-800');
     } else {
-        resultadoPVDDiv.textContent = "Dentro do prazo de 48h úteis. Direcione para o pós-vendas.";
+        resultadoPVDDiv.textContent = "Dentro do prazo de 48h úteis. Direcione ou chame alguém do pós vendas imediatamente para fazer contato com o consorciado.";
         resultadoPVDDiv.classList.remove('text-red-800');
         resultadoPVDDiv.classList.add('text-green-800');
     }
