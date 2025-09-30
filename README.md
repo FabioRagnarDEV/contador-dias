@@ -39,7 +39,7 @@ Ferramenta que calcula o prazo para que um consorciado contemplado possa receber
 * **Grupo Ativo**: adiciona 180 dias à data da contemplação e informa a data de recebimento.
 * **Grupo Encerrado**: se a data atual for posterior ao encerramento, o recebimento é imediato.
 
-**Informação Legal:** Exibe uma secção informativa com a Cláusula 32 e a RN 0134.
+**Informação Legal:** Exibe uma secção informativa com a Cláusula 32 e a demais informações sobre esse processo
 
 ---
 
