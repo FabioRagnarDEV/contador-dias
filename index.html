@@ -4,10 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Painel calculadora de prazos</title>
-
-<link rel="icon" type="image/png" href="favicon/calendario.png">
-
-<script src="https://cdn.tailwindcss.com"></script>
+  <link rel="icon" type="image/png" href="favicon/calendario.png">
+  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -26,9 +24,9 @@
   <main class="container mx-auto px-4 py-8 sm:py-16">
     <div class="text-center">
       <div class="flex justify-center mb-4">
-          <svg class="h-20 w-20 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 15.75V18m-7.5-6.75h.008v.008H8.25v-.008Zm0 3h.008v.008H8.25v-.008Zm0 3h.008v.008H8.25v-.008Zm3-6h.008v.008H11.25v-.008Zm0 3h.008v.008H11.25v-.008Zm0 3h.008v.008H11.25v-.008Zm3-6h.008v.008H14.25v-.008Zm0 3h.008v.008H14.25v-.008ZM5.25 6H18.75a2.25 2.25 0 0 1 2.25 2.25v11.25a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 21.75V8.25A2.25 2.25 0 0 1 5.25 6ZM3.75 10.5h16.5" />
-          </svg>
+          
+          <img src="assets/calendario.png" alt="Ícone de Calendário" class="h-20 w-20">
+          
       </div>
       <h2 id="saudacao" class="text-4xl sm:text-5xl font-extrabold text-slate-900 drop-shadow-sm">Carregando...</h2>
       <p class="text-slate-500 mt-2 text-lg">Escolha uma das opções abaixo para começar.</p>
@@ -39,7 +37,7 @@
       <a href="CalculadoraCreditoEspecie/creditoEmEspecie.html" class="group block bg-white p-8 rounded-xl shadow-lg border border-transparent hover:border-blue-500 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
         <div class="flex items-center gap-4">
           <div class="bg-blue-100 p-3 rounded-full">
-            <svg class="h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>
+            <img src="assets/crédito_especie.png" alt="Ícone de Crédito em Espécie" class="h-12 w-12">
           </div>
           <div>
             <h3 class="text-xl font-bold text-slate-800 group-hover:text-blue-600 transition-colors">Prazo Crédito em Espécie</h3>
@@ -51,7 +49,7 @@
       <a href="CalculadoraPosVendas/posVendas.html" class="group block bg-white p-8 rounded-xl shadow-lg border border-transparent hover:border-blue-500 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
         <div class="flex items-center gap-4">
           <div class="bg-blue-100 p-3 rounded-full">
-              <svg class="h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 12c0 2.104.859 4.023 2.273 5.482l.227.227.227.227a3.375 3.375 0 0 0 4.243 4.243l.227.227.227.227a3.375 3.375 0 0 0 5.482-2.273Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9c-1.356-1.356-3.137-2.25-5.25-2.25S6.606 7.644 5.25 9" /></svg>
+            <img src="assets/pos_vendas.png" alt="Ícone de Pós Vendas" class="h-12 w-12">
           </div>
           <div>
             <h3 class="text-xl font-bold text-slate-800 group-hover:text-blue-600 transition-colors">Pós Vendas</h3>
@@ -63,9 +61,7 @@
       <a href="LeiArrependimento/leiArrependimento.html" class="group block bg-white p-8 rounded-xl shadow-lg border border-transparent hover:border-blue-500 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
         <div class="flex items-center gap-4">
           <div class="bg-blue-100 p-3 rounded-full">
-              <svg class="h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
-              </svg>
+            <img src="assets/arrependimento.png" alt="Ícone de Direito de Arrependimento" class="h-12 w-12">
           </div>
           <div>
             <h3 class="text-xl font-bold text-slate-800 group-hover:text-blue-600 transition-colors">Direito de Arrependimento</h3>
