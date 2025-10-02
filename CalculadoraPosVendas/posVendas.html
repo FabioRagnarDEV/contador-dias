@@ -2,108 +2,209 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Pós Vendas </title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pós Vendas - Calculadora de Prazos</title>
 
-<link rel="icon" type="image/png" href="../favicon/calendario.png">
-
+  <link rel="icon" type="image/png" href="../favicon/calendario.png" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap"
+    rel="stylesheet"
+  />
   <style>
-    body {
-      font-family: 'Inter', sans-serif;
+    body { font-family: 'Inter', sans-serif; }
+
+    /* Estilos 3D para os botões */
+    .btn-3d {
+      box-shadow: 4px 6px 0px rgba(0,0,0,0.2);
+      transition: all 0.2s ease;
+    }
+    .btn-3d:hover {
+      transform: translateY(-2px);
+      box-shadow: 6px 8px 0px rgba(0,0,0,0.2);
+    }
+    .btn-3d:active {
+      transform: translateY(1px);
+      box-shadow: 2px 3px 0px rgba(0,0,0,0.2);
+    }
+
+    /* Animação suave para a saudação */
+    #saudacao-usuario {
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.6s ease;
+    }
+    #saudacao-usuario.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    /* Estilo para o botão de toggle ativo */
+    .toggle-btn.active {
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 6px 8px 0px rgba(0,0,0,0.2);
+        filter: brightness(1.1);
     }
   </style>
 </head>
-<body class="bg-slate-100 text-slate-800">
+<body class="bg-slate-50 text-slate-800">
 
-   <header class="bg-blue-600 shadow-md">
+  <header id="header" class="shadow-md transition-colors duration-500">
     <nav class="container mx-auto px-4 py-3 flex items-center justify-between">
-      <h1 class="text-2xl font-bold text-white">Prazo pós vendas</h1>
-      
+      <h1 class="text-xl sm:text-2xl font-bold text-white drop-shadow-sm">Prazo Pós Vendas</h1>
       <a href="../index.html" class="flex items-center gap-2 text-white bg-white/20 hover:bg-white/30 font-semibold py-2 px-4 rounded-lg transition-colors">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
         </svg>
-        Voltar
+        <span class="hidden sm:inline">Voltar</span>
       </a>
     </nav>
   </header>
 
-  <main class="flex flex-col items-center w-full px-4 py-8 sm:py-12">
-
-    <div class="bg-white p-6 sm:p-8 rounded-xl shadow-lg w-full max-w-2xl space-y-6">
+  <main class="container mx-auto px-4 py-8 sm:py-12">
+    <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-xl w-full max-w-2xl mx-auto space-y-6">
       
       <div class="text-center">
-        <h2 class="text-3xl font-bold text-slate-900">Pós Vendas</h2>
-        <p class="text-slate-500 mt-2">Acompanhe os prazos de atendimento de forma simples e eficiente.</p>
+        <div class="flex justify-center mb-4">
+            <div id="icon-bg" class="p-3 rounded-full bg-opacity-20">
+                <img src="../assets/pos_vendas.png" alt="Ícone de Pós Vendas" class="h-12 w-12">
+            </div>
+        </div>
+        <h2 class="text-3xl font-extrabold text-slate-900">Pós Vendas</h2>
+        <p id="saudacao-usuario" class="text-slate-500 mt-2 text-lg">Carregando...</p>
       </div>
 
-      <div class="flex flex-col sm:flex-row gap-4 justify-center border-t border-b border-slate-200 py-4">
-        <button id="btn-show-pvd" class="bg-blue-500 text-white py-2 px-6 rounded-lg shadow-md hover:bg-blue-600 hover:scale-105 transition-transform duration-200 font-semibold">
+      <div class="flex flex-col sm:flex-row gap-4 justify-center border-t border-b border-slate-200 py-6">
+        <button id="btn-show-pvd" class="text-white py-3 px-6 rounded-lg shadow-md font-semibold text-lg btn-3d toggle-btn">
           Pós Vendas Digital
         </button>
-        <button id="btn-show-cpv" class="bg-blue-500 text-white py-2 px-6 rounded-lg shadow-md hover:bg-blue-600 hover:scale-105 transition-transform duration-200 font-semibold">
+        <button id="btn-show-cpv" class="text-white py-3 px-6 rounded-lg shadow-md font-semibold text-lg btn-3d toggle-btn">
           Caso Pós Vendas
         </button>
       </div>
 
       <div id="pvd" class="hidden space-y-4">
-        <h3 class="text-xl font-bold text-center text-blue-700">Pós Vendas Digital</h3>
+        <h3 class="text-2xl font-bold text-center">Pós Vendas Digital</h3>
         <div>
           <label for="dataEfetivacao" class="block mb-1 font-medium text-slate-700">Data da Efetivação:</label>
-          <input type="date" id="dataEfetivacao"
-                 class="w-full border border-slate-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <input type="date" id="dataEfetivacao" class="w-full border border-slate-300 rounded-lg p-3 focus:outline-none focus:ring-2" />
         </div>
         <div class="flex justify-center gap-4 pt-2">
-          <button id="btn-process-pvd" class="bg-blue-600 text-white py-2 px-5 rounded-lg hover:bg-blue-700 transition font-semibold">
-            Verificar
-          </button>
-          <button id="btn-reset-pvd" class="bg-slate-400 text-white py-2 px-5 rounded-lg hover:bg-slate-500 transition font-semibold">
-            Zerar
-          </button>
+          <button id="btn-process-pvd" class="text-white py-2 px-5 rounded-lg font-semibold btn-3d">Verificar</button>
+          <button id="btn-reset-pvd" class="bg-slate-500 text-white py-2 px-5 rounded-lg hover:bg-slate-600 font-semibold transition btn-3d">Zerar</button>
         </div>
         <div id="erroPVD" class="text-center pt-2 text-sm font-bold text-amber-600 min-h-[20px]"></div>
-        <div id="resultadoPVD" class="text-center mt-2 text-lg font-bold text-blue-800 p-4 bg-blue-50 rounded-lg"></div>
+        <div id="resultadoPVD" class="text-center mt-2 text-lg font-bold p-4 rounded-lg resultado-box"></div>
       </div>
 
       <div id="cpv" class="hidden space-y-4">
-        <h3 class="text-xl font-bold text-center text-blue-700">Caso Pós Vendas</h3>
+        <h3 class="text-2xl font-bold text-center">Caso Pós Vendas</h3>
         <div>
           <label for="dataAbertura" class="block mb-1 font-medium text-slate-700">Data de Abertura:</label>
-          <input type="date" id="dataAbertura"
-                 class="w-full border border-slate-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <input type="date" id="dataAbertura" class="w-full border border-slate-300 rounded-lg p-3 focus:outline-none focus:ring-2" />
         </div>
         <div>
           <label for="numeroCaso" class="block mb-1 font-medium text-slate-700">Número do Caso:</label>
-          <input type="number" id="numeroCaso"
-                 class="w-full border border-slate-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                 placeholder="Somente números" />
+          <input type="number" id="numeroCaso" class="w-full border border-slate-300 rounded-lg p-3 focus:outline-none focus:ring-2" placeholder="Somente números" />
         </div>
         <div class="flex justify-center gap-4 pt-2">
-          <button id="btn-process-cpv" class="bg-blue-600 text-white py-2 px-5 rounded-lg hover:bg-blue-700 transition font-semibold">
-            Verificar
-          </button>
-          <button id="btn-reset-cpv" class="bg-slate-400 text-white py-2 px-5 rounded-lg hover:bg-slate-500 transition font-semibold">
-            Zerar
-          </button>
+          <button id="btn-process-cpv" class="text-white py-2 px-5 rounded-lg font-semibold btn-3d">Verificar</button>
+          <button id="btn-reset-cpv" class="bg-slate-500 text-white py-2 px-5 rounded-lg hover:bg-slate-600 font-semibold transition btn-3d">Zerar</button>
         </div>
         <div id="erroCPV" class="text-center pt-2 text-sm font-bold text-amber-600 min-h-[20px]"></div>
-        <div id="resultadoCPV" class="text-center mt-2 text-lg font-bold text-blue-800 p-4 bg-blue-50 rounded-lg"></div>
+        <div id="resultadoCPV" class="text-center mt-2 text-lg font-bold p-4 rounded-lg resultado-box"></div>
       </div>
     </div>
 
-    <a href="../index.html" class="mt-8 text-slate-600 hover:text-blue-600 font-semibold transition">
-      &larr; Voltar ao Menu Principal
-    </a>
+    <div class="text-center">
+      <a href="../index.html" class="mt-8 inline-block text-slate-600 font-semibold transition hover:underline">
+        &larr; Voltar ao Menu Principal
+      </a>
+    </div>
   </main>
 
-  <footer class="w-full text-center py-4">
+  <footer class="w-full text-center py-4 mt-8">
     <p class="text-sm text-slate-500">&copy; Todos os direitos reservados.</p>
   </footer>
 
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Objeto de temas
+        const coresSemana = {
+          0: { header: ["from-pink-700", "to-pink-500"], btn: ["from-pink-600", "to-pink-800"], focus: "focus:ring-pink-500", text: "text-pink-600", border: "border-pink-500", bg: "bg-pink-50" },
+          1: { header: ["from-blue-700", "to-blue-500"], btn: ["from-blue-600", "to-blue-800"], focus: "focus:ring-blue-500", text: "text-blue-600", border: "border-blue-500", bg: "bg-blue-50" },
+          2: { header: ["from-green-700", "to-green-500"], btn: ["from-green-600", "to-green-800"], focus: "focus:ring-green-500", text: "text-green-600", border: "border-green-500", bg: "bg-green-50" },
+          3: { header: ["from-purple-700", "to-purple-500"], btn: ["from-purple-600", "to-purple-800"], focus: "focus:ring-purple-500", text: "text-purple-600", border: "border-purple-500", bg: "bg-purple-50" },
+          4: { header: ["from-orange-700", "to-orange-500"], btn: ["from-orange-600", "to-orange-800"], focus: "focus:ring-orange-500", text: "text-orange-600", border: "border-orange-500", bg: "bg-orange-50" },
+          5: { header: ["from-red-700", "to-red-500"], btn: ["from-red-600", "to-red-800"], focus: "focus:ring-red-500", text: "text-red-600", border: "border-red-500", bg: "bg-red-50" },
+          6: { header: ["from-yellow-600", "to-yellow-400"], btn: ["from-yellow-500", "to-yellow-700"], focus: "focus:ring-yellow-500", text: "text-yellow-600", border: "border-yellow-500", bg: "bg-yellow-50" },
+        };
+        const hoje = new Date().getDay();
+        const tema = coresSemana[hoje];
+
+        // Aplicação do tema
+        document.getElementById("header").classList.add("bg-gradient-to-r", ...tema.header);
+        document.getElementById("icon-bg").classList.add(tema.bg.replace('-50', '-100'));
+        
+        // Botões de toggle
+        ['btn-show-pvd', 'btn-show-cpv'].forEach(id => {
+            document.getElementById(id).classList.add("bg-gradient-to-br", ...tema.btn);
+        });
+
+        // Botões de "Verificar"
+        ['btn-process-pvd', 'btn-process-cpv'].forEach(id => {
+            document.getElementById(id).classList.add("bg-gradient-to-br", ...tema.btn);
+        });
+
+        // Títulos das seções
+        document.querySelectorAll('#pvd h3, #cpv h3').forEach(el => el.classList.add(tema.text));
+
+        // Inputs
+        document.querySelectorAll('input').forEach(el => el.classList.add(tema.focus));
+
+        // Caixas de resultado
+        document.querySelectorAll('.resultado-box').forEach(el => {
+            el.classList.remove('text-blue-800', 'bg-blue-50');
+            el.classList.add(tema.text.replace('600', '800'), tema.bg);
+        });
+        
+        // Saudação personalizada
+        const nomeUsuario = localStorage.getItem('nomeUsuario');
+        const generoUsuario = localStorage.getItem('generoUsuario');
+        const saudacaoEl = document.getElementById('saudacao-usuario');
+        if (nomeUsuario) {
+            let boasVindas = generoUsuario === 'M' ? 'Bem-vindo de volta.' : (generoUsuario === 'F' ? 'Bem-vinda de volta.' : 'Bem-vindo(a) de volta.');
+            saudacaoEl.innerHTML = `Olá, <span class="font-bold ${tema.text}">${nomeUsuario}</span>! ${boasVindas}`;
+        } else {
+            saudacaoEl.textContent = 'Acompanhe os prazos de atendimento de forma simples e eficiente.';
+        }
+        setTimeout(() => saudacaoEl.classList.add('show'), 100);
+
+        // Lógica para alternar as seções (toggle)
+        const btnPvd = document.getElementById('btn-show-pvd');
+        const btnCpv = document.getElementById('btn-show-cpv');
+        const divPvd = document.getElementById('pvd');
+        const divCpv = document.getElementById('cpv');
+
+        btnPvd.addEventListener('click', () => {
+            divPvd.classList.remove('hidden');
+            divCpv.classList.add('hidden');
+            btnPvd.classList.add('active');
+            btnCpv.classList.remove('active');
+        });
+
+        btnCpv.addEventListener('click', () => {
+            divCpv.classList.remove('hidden');
+            divPvd.classList.add('hidden');
+            btnCpv.classList.add('active');
+            btnPvd.classList.remove('active');
+        });
+    });
+  </script>
+
   <script src="script.js"></script>
+
 </body>
 </html>

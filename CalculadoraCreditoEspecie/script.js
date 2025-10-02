@@ -26,7 +26,10 @@ function formatarData(input) {
 }
 
 /**
- * Converte uma string DD/MM/AAAA para um objeto Date. Retorna null se for inválida.
+ * Converte uma string de data no formato "DD/MM/AAAA" para um objeto Date.
+ * Realiza validações para garantir que a data é real (ex: não aceita 31/02).
+ * @param {string} dateString - A string de data a ser convertida.
+ * @returns {Date|null} Um objeto Date se a string for uma data válida, ou null caso contrário.
  */
 function parseDate(dateString) {
     const regexData = /^\d{2}\/\d{2}\/\d{4}$/;
