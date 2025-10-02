@@ -47,6 +47,56 @@
         box-shadow: 6px 8px 0px rgba(0,0,0,0.2);
         filter: brightness(1.1);
     }
+
+    /* --- CSS DA ANIMAÇÃO DO ÍCONE (BALÕES DE DIÁLOGO) --- */
+    @keyframes rise-and-fade {
+      0% {
+        transform: translateY(0) scale(0.5);
+        opacity: 0;
+      }
+      50% {
+        transform: translateY(-25px) scale(1);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-50px) scale(0.5);
+        opacity: 0;
+      }
+    }
+    #icon-bg {
+      position: relative;
+    }
+    #icon-bg::before, #icon-bg::after, #dialog-bubble {
+      content: '...';
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: currentColor;
+      color: white;
+      font-size: 10px;
+      line-height: 10px;
+      font-weight: bold;
+      padding: 3px 6px;
+      border-radius: 50px;
+      opacity: 0;
+    }
+    .icon-container:hover #icon-bg::before,
+    .icon-container:hover #icon-bg::after,
+    .icon-container:hover #dialog-bubble {
+      animation: rise-and-fade 1.5s ease-in-out infinite;
+    }
+    .icon-container:hover #icon-bg::before {
+      animation-delay: 0s;
+    }
+    .icon-container:hover #dialog-bubble {
+      animation-delay: 0.5s;
+    }
+    .icon-container:hover #icon-bg::after {
+      animation-delay: 1s;
+    }
+    /* --- FIM DO CSS DA ANIMAÇÃO --- */
+
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800">
@@ -67,13 +117,18 @@
     <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-xl w-full max-w-2xl mx-auto space-y-6">
       
       <div class="text-center">
-        <div class="flex justify-center mb-4">
+        <div class="icon-container flex justify-center mb-4">
             <div id="icon-bg" class="p-3 rounded-full bg-opacity-20">
                 <img src="../assets/pos_vendas.png" alt="Ícone de Pós Vendas" class="h-12 w-12">
+                <span id="dialog-bubble"></span>
             </div>
         </div>
         <h2 class="text-3xl font-extrabold text-slate-900">Pós Vendas</h2>
         <p id="saudacao-usuario" class="text-slate-500 mt-2 text-lg">Carregando...</p>
+      </div>
+
+      <div id="aviso-box" class="border-l-4 p-4 rounded-r-md transition-colors duration-500">
+        <p class="font-medium">Utilize essa ferramenta para saber se o caso de pós vendas digital ou manual ainda podem ser tratados pelo setor.</p>
       </div>
 
       <div class="flex flex-col sm:flex-row gap-4 justify-center border-t border-b border-slate-200 py-6">
@@ -131,7 +186,6 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // Objeto de temas
         const coresSemana = {
           0: { header: ["from-pink-700", "to-pink-500"], btn: ["from-pink-600", "to-pink-800"], focus: "focus:ring-pink-500", text: "text-pink-600", border: "border-pink-500", bg: "bg-pink-50" },
           1: { header: ["from-blue-700", "to-blue-500"], btn: ["from-blue-600", "to-blue-800"], focus: "focus:ring-blue-500", text: "text-blue-600", border: "border-blue-500", bg: "bg-blue-50" },
@@ -146,31 +200,25 @@
 
         // Aplicação do tema
         document.getElementById("header").classList.add("bg-gradient-to-r", ...tema.header);
-        document.getElementById("icon-bg").classList.add(tema.bg.replace('-50', '-100'));
+        const iconBg = document.getElementById("icon-bg");
+        iconBg.classList.add(tema.bg.replace('-50', '-100'));
+        iconBg.style.color = tema.btn[1].replace('to-','').replace('-800','-600').replace('yellow-700','yellow-500'); // Define a cor dos balões
         
-        // Botões de toggle
+        const avisoBox = document.getElementById('aviso-box');
+        avisoBox.classList.add(tema.text.replace('600', '800'), tema.border, tema.bg);
+        
         ['btn-show-pvd', 'btn-show-cpv'].forEach(id => {
             document.getElementById(id).classList.add("bg-gradient-to-br", ...tema.btn);
         });
-
-        // Botões de "Verificar"
         ['btn-process-pvd', 'btn-process-cpv'].forEach(id => {
             document.getElementById(id).classList.add("bg-gradient-to-br", ...tema.btn);
         });
-
-        // Títulos das seções
         document.querySelectorAll('#pvd h3, #cpv h3').forEach(el => el.classList.add(tema.text));
-
-        // Inputs
         document.querySelectorAll('input').forEach(el => el.classList.add(tema.focus));
-
-        // Caixas de resultado
         document.querySelectorAll('.resultado-box').forEach(el => {
-            el.classList.remove('text-blue-800', 'bg-blue-50');
             el.classList.add(tema.text.replace('600', '800'), tema.bg);
         });
         
-        // Saudação personalizada
         const nomeUsuario = localStorage.getItem('nomeUsuario');
         const generoUsuario = localStorage.getItem('generoUsuario');
         const saudacaoEl = document.getElementById('saudacao-usuario');
@@ -182,7 +230,6 @@
         }
         setTimeout(() => saudacaoEl.classList.add('show'), 100);
 
-        // Lógica para alternar as seções (toggle)
         const btnPvd = document.getElementById('btn-show-pvd');
         const btnCpv = document.getElementById('btn-show-cpv');
         const divPvd = document.getElementById('pvd');

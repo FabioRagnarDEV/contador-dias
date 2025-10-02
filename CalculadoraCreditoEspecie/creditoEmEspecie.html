@@ -43,6 +43,25 @@
       opacity: 1;
       transform: translateY(0);
     }
+
+    /* --- CSS DA ANIMAÇÃO CONTÍNUA DO ÍCONE --- */
+    @keyframes float-and-sway {
+      0% {
+        transform: translateY(0) rotate(-3deg);
+      }
+      50% {
+        transform: translateY(-8px) rotate(3deg);
+      }
+      100% {
+        transform: translateY(0) rotate(-3deg);
+      }
+    }
+
+    .icon-animated {
+      animation: float-and-sway 3s ease-in-out infinite;
+    }
+    /* --- FIM DO CSS DA ANIMAÇÃO --- */
+
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800">
@@ -67,7 +86,7 @@
       <div class="text-center">
         <div class="flex justify-center mb-4">
             <div id="icon-bg" class="p-3 rounded-full bg-opacity-20">
-                <img src="../assets/crédito_especie.png" alt="Ícone de Crédito em Espécie" class="h-12 w-12">
+                <img src="../assets/crédito_especie.png" alt="Ícone de Crédito em Espécie" class="h-12 w-12 icon-animated">
             </div>
         </div>
         <h2 class="text-3xl font-extrabold text-slate-900">Crédito em Espécie</h2>
@@ -170,12 +189,8 @@
   </footer>
 
   <script>
-    // Este evento garante que o script só vai rodar depois que a página carregar completamente.
     document.addEventListener('DOMContentLoaded', () => {
         
-        // --- 1. LÓGICA DE PERSONALIZAÇÃO E TEMA ---
-
-        // Objeto com as paletas de cores (sem alterações aqui)
         const coresSemana = {
           0: { header: ["from-pink-700", "to-pink-500"], btn: ["from-pink-600", "to-pink-800"], focus: "focus:ring-pink-500", text: "text-pink-600", border: "border-pink-500", bg: "bg-pink-50", hover: "hover:text-pink-800" },
           1: { header: ["from-blue-700", "to-blue-500"], btn: ["from-blue-600", "to-blue-800"], focus: "focus:ring-blue-500", text: "text-blue-600", border: "border-blue-500", bg: "bg-blue-50", hover: "hover:text-blue-800" },
@@ -189,7 +204,6 @@
         const hoje = new Date().getDay();
         const tema = coresSemana[hoje];
 
-        // Aplicação do tema aos elementos (sem alterações aqui)
         const header = document.getElementById("header");
         header.classList.add("bg-gradient-to-r", ...tema.header);
 
@@ -203,7 +217,6 @@
         checkbox.classList.add(tema.text, tema.focus);
         
         const avisoBox = document.getElementById('aviso-box');
-        avisoBox.classList.remove('text-blue-800', 'border-blue-500', 'bg-blue-50');
         avisoBox.classList.add(tema.text.replace('600', '800'), tema.border, tema.bg);
         
         const iconBg = document.getElementById('icon-bg');
@@ -214,33 +227,17 @@
             link.classList.add(tema.text, tema.hover);
         });
         
-        // --- 2. LÓGICA DE SAUDAÇÃO PERSONALIZADA (ATUALIZADA) ---
-
-        // 1. Ler também o gênero guardado no localStorage
         const nomeUsuario = localStorage.getItem('nomeUsuario');
-        const generoUsuario = localStorage.getItem('generoUsuario'); // NOVO
+        const generoUsuario = localStorage.getItem('generoUsuario');
         const saudacaoEl = document.getElementById('saudacao-usuario');
         
         if (nomeUsuario) {
-            // 2. Criar a mensagem de boas-vindas com base no gênero
-            let boasVindas;
-            if (generoUsuario === 'M') {
-                boasVindas = 'Bem-vindo de volta.';
-            } else if (generoUsuario === 'F') {
-                boasVindas = 'Bem-vinda de volta.';
-            } else { // Caso o gênero não seja 'M' ou 'F', ou não exista
-                boasVindas = 'Bem-vindo(a) de volta.';
-            }
-
-            // 3. Montar a saudação completa e personalizada
+            let boasVindas = generoUsuario === 'M' ? 'Bem-vindo de volta.' : (generoUsuario === 'F' ? 'Bem-vinda de volta.' : 'Bem-vindo(a) de volta.');
             saudacaoEl.innerHTML = `Olá, <span class="font-bold ${tema.text}">${nomeUsuario}</span>! ${boasVindas}`;
-
         } else {
-            // Mensagem padrão se o usuário não se identificou no início
             saudacaoEl.textContent = 'Calcule o prazo para o recebimento do crédito.';
         }
 
-        // Adiciona a classe 'show' para a animação de fade-in
         setTimeout(() => saudacaoEl.classList.add('show'), 100);
 
     });

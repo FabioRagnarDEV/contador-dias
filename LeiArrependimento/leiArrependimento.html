@@ -42,6 +42,25 @@
       opacity: 1;
       transform: translateY(0);
     }
+
+    /* --- CSS DA ANIMAÇÃO 'ASSINATURA' DO ÍCONE --- */
+    @keyframes signing-motion {
+      0% {
+        transform: rotate(-2deg) translateX(-2px);
+      }
+      50% {
+        transform: rotate(2deg) translateX(2px);
+      }
+      100% {
+        transform: rotate(-2deg) translateX(-2px);
+      }
+    }
+
+    .icon-signing {
+      animation: signing-motion 0.7s ease-in-out infinite;
+    }
+    /* --- FIM DO CSS DA ANIMAÇÃO --- */
+
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800">
@@ -64,7 +83,7 @@
       <div class="text-center">
         <div class="flex justify-center mb-4">
             <div id="icon-bg" class="p-3 rounded-full bg-opacity-20">
-                <img src="../assets/arrependimento.png" alt="Ícone de Direito de Arrependimento" class="h-12 w-12">
+                <img src="../assets/arrependimento.png" alt="Ícone de Direito de Arrependimento" class="h-12 w-12 icon-signing">
             </div>
         </div>
         <h2 class="text-3xl font-extrabold text-slate-900">Direito de Arrependimento</h2>
@@ -146,7 +165,6 @@
         document.getElementById("data-pagamento").classList.add(tema.focus);
         
         const avisoBox = document.getElementById('aviso-box');
-        avisoBox.classList.remove('text-blue-800', 'border-blue-500', 'bg-blue-50');
         avisoBox.classList.add(tema.text.replace('600', '800'), tema.border, tema.bg);
         
         const summaryLink = document.querySelector('#info-legal summary');
