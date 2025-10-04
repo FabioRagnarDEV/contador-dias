@@ -5,6 +5,9 @@ const zerarBtn = document.getElementById('zerar-btn');
 const resultadoDiv = document.getElementById('resultado');
 const mensagemErroDiv = document.getElementById('mensagem-erro');
 const infoLegalDiv = document.getElementById('info-legal');
+// --- NOVOS ELEMENTOS ---
+const contagemBtn = document.getElementById('contagem-btn');
+const contagemResultadoDiv = document.getElementById('contagem-resultado');
 
 
 // --- Funções Auxiliares ---
@@ -35,6 +38,8 @@ function zerarCalculadora() {
     mensagemErroDiv.textContent = '';
     resultadoDiv.classList.add('opacity-0');
     infoLegalDiv.classList.add('hidden');
+    // --- NOVO: Esconde a contagem ao zerar ---
+    contagemResultadoDiv.classList.add('hidden');
     resultadoDiv.classList.remove('bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800');
 }
 
@@ -46,6 +51,7 @@ function calcularPrazo() {
     resultadoDiv.textContent = '';
     resultadoDiv.classList.add('opacity-0');
     infoLegalDiv.classList.add('hidden');
+    contagemResultadoDiv.classList.add('hidden'); // Esconde contagem antiga
     resultadoDiv.classList.remove('bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800');
 
     const dataPagamentoValor = dataPagamentoInput.value;
@@ -68,7 +74,6 @@ function calcularPrazo() {
     const dataAtual = new Date();
     dataAtual.setHours(0, 0, 0, 0);
     
-    // CORREÇÃO: Formata a data e adiciona o horário manualmente para clareza.
     const prazoFinalFormatado = prazoFinal.toLocaleDateString('pt-BR') + ' às 23:59';
 
     if (dataAtual <= prazoFinal) {
@@ -83,8 +88,50 @@ function calcularPrazo() {
     infoLegalDiv.classList.remove('hidden');
 }
 
+/**
+ * --- NOVA FUNÇÃO ---
+ * Mostra a contagem detalhada dos 7 dias.
+ */
+function mostrarContagem() {
+    const dataPagamentoValor = dataPagamentoInput.value;
+    if (!dataPagamentoValor || dataPagamentoValor.length < 10) {
+        mensagemErroDiv.textContent = 'Insira uma data válida primeiro para ver a contagem.';
+        return;
+    }
+    
+    const [dia, mes, ano] = dataPagamentoValor.split('/');
+    const dataPagamento = new Date(ano, mes - 1, dia);
+
+    if (isNaN(dataPagamento.getTime()) || dataPagamento.getDate() != dia) {
+        mensagemErroDiv.textContent = 'Data inválida. Verifique o dia e o mês.';
+        return;
+    }
+
+    let contagemHTML = '<h4 class="font-bold mb-2">Contagem do Prazo:</h4><ul class="space-y-1 text-sm">';
+    
+    for (let i = 0; i < 7; i++) {
+        const dataDia = new Date(dataPagamento);
+        dataDia.setDate(dataPagamento.getDate() + i);
+        const diaFormatado = dataDia.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit' });
+
+        if (i < 6) {
+            contagemHTML += `<li><strong>Dia ${i + 1}:</strong> ${diaFormatado}</li>`;
+        } else {
+            // Destaque para o último dia
+            contagemHTML += `<li class="font-bold text-base mt-2"><strong>Dia ${i + 1} (Prazo Final):</strong> ${diaFormatado}</li>`;
+        }
+    }
+    
+    contagemHTML += '</ul>';
+    
+    contagemResultadoDiv.innerHTML = contagemHTML;
+    contagemResultadoDiv.classList.remove('hidden');
+}
+
 
 // --- "Escutadores" de Eventos ---
 calcularBtn.addEventListener('click', calcularPrazo);
 zerarBtn.addEventListener('click', zerarCalculadora);
 dataPagamentoInput.addEventListener('input', () => formatarData(dataPagamentoInput));
+
+contagemBtn.addEventListener('click', mostrarContagem);

@@ -8,7 +8,7 @@
   <link rel="icon" type="image/png" href="../favicon/calendario.png" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.gstatic" crossorigin />
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap"
     rel="stylesheet"
@@ -50,52 +50,38 @@
 
     /* --- CSS DA ANIMAÇÃO DO ÍCONE (BALÕES DE DIÁLOGO) --- */
     @keyframes rise-and-fade {
-      0% {
-        transform: translateY(0) scale(0.5);
-        opacity: 0;
-      }
-      50% {
-        transform: translateY(-25px) scale(1);
-        opacity: 1;
-      }
-      100% {
-        transform: translateY(-50px) scale(0.5);
-        opacity: 0;
-      }
+      0% { transform: translateY(0) scale(0.5); opacity: 0; }
+      50% { transform: translateY(-25px) scale(1); opacity: 1; }
+      100% { transform: translateY(-50px) scale(0.5); opacity: 0; }
     }
-    #icon-bg {
-      position: relative;
-    }
+    #icon-bg { position: relative; }
     #icon-bg::before, #icon-bg::after, #dialog-bubble {
-      content: '...';
-      position: absolute;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      background-color: currentColor;
-      color: white;
-      font-size: 10px;
-      line-height: 10px;
-      font-weight: bold;
-      padding: 3px 6px;
-      border-radius: 50px;
-      opacity: 0;
+      content: '...'; position: absolute; top: 10px; left: 50%;
+      transform: translateX(-50%); background-color: currentColor;
+      color: white; font-size: 10px; line-height: 10px;
+      font-weight: bold; padding: 3px 6px; border-radius: 50px; opacity: 0;
     }
     .icon-container:hover #icon-bg::before,
     .icon-container:hover #icon-bg::after,
     .icon-container:hover #dialog-bubble {
       animation: rise-and-fade 1.5s ease-in-out infinite;
     }
-    .icon-container:hover #icon-bg::before {
-      animation-delay: 0s;
-    }
-    .icon-container:hover #dialog-bubble {
-      animation-delay: 0.5s;
-    }
-    .icon-container:hover #icon-bg::after {
-      animation-delay: 1s;
-    }
+    .icon-container:hover #icon-bg::before { animation-delay: 0s; }
+    .icon-container:hover #dialog-bubble { animation-delay: 0.5s; }
+    .icon-container:hover #icon-bg::after { animation-delay: 1s; }
     /* --- FIM DO CSS DA ANIMAÇÃO --- */
+
+    /* --- NOVOS ESTILOS PARA O MODAL DE INSTRUÇÕES --- */
+    #modal-instrucoes-box {
+      transform: scale(0.95);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    #modal-instrucoes.active #modal-instrucoes-box {
+      transform: scale(1);
+      opacity: 1;
+    }
+    /* --- FIM DOS ESTILOS DO MODAL --- */
 
   </style>
 </head>
@@ -114,7 +100,9 @@
   </header>
 
   <main class="container mx-auto px-4 py-8 sm:py-12">
-    <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-xl w-full max-w-2xl mx-auto space-y-6">
+    <div class="relative bg-white p-6 sm:p-8 rounded-2xl shadow-xl w-full max-w-2xl mx-auto space-y-6">
+      
+      <button id="abrir-instrucoes-btn" class="absolute top-6 right-6 text-white rounded-full h-8 w-8 flex items-center justify-center font-bold text-lg btn-3d transition z-10">?</button>
       
       <div class="text-center">
         <div class="icon-container flex justify-center mb-4">
@@ -184,6 +172,66 @@
     <p class="text-sm text-slate-500">&copy; Todos os direitos reservados.</p>
   </footer>
 
+  <div id="modal-instrucoes" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 transition-opacity duration-300 hidden">
+    <div id="modal-instrucoes-box" class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-2xl relative h-full max-h-[90vh] overflow-y-auto">
+      <button id="fechar-instrucoes-btn" class="sticky top-0 right-0 float-right text-slate-400 hover:text-slate-600 transition bg-white/50 backdrop-blur-sm rounded-full p-1">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+        </svg>
+      </button>
+      
+      <h3 class="text-2xl font-bold text-slate-900 mb-6 text-center">Manual da Calculadora Pós-Vendas</h3>
+      
+      <div class="space-y-6 text-slate-600">
+        
+        <div>
+          <h4 class="text-xl font-bold text-slate-800 border-b pb-2 mb-3">Como Usar a Ferramenta</h4>
+          <div class="space-y-3">
+              <p><strong class="text-slate-800">1. Pós Vendas Digital:</strong> Use esta opção para verificar o prazo de contato inicial com o cliente (campanha de boas-vindas). O prazo é de <strong class="text-slate-800">48 horas úteis</strong> (2 dias úteis) após a efetivação.</p>
+              <p><strong class="text-slate-800">2. Caso Pós Vendas:</strong> Use esta opção para casos de <strong class="text-slate-800">desvio na venda</strong>. O prazo para tratar e encerrar o caso é de até <strong class="text-slate-800">50 dias úteis</strong> a partir da data de abertura.</p>
+              <p class="text-sm text-slate-500">A calculadora já desconta fins de semana e feriados nacionais automaticamente.</p>
+          </div>
+        </div>
+
+        <div>
+          <h4 class="text-xl font-bold text-slate-800 border-b pb-2 mb-3">Guia Rápido do Setor</h4>
+            <p class="mb-2"><strong class="text-slate-800">Objetivo:</strong> Garantir a satisfação dos clientes após a venda, confirmando dados, resolvendo dúvidas e oferecendo suporte para um relacionamento duradouro.</p>
+            <p><strong class="text-slate-800">Horário de Atendimento:</strong> Segunda a sexta-feira, das 8h às 19h.</p>
+        </div>
+
+        <div>
+          <h4 class="text-xl font-bold text-slate-800 border-b pb-2 mb-3">Prazos Chave do Processo</h4>
+          <ul class="list-disc list-inside space-y-2">
+            <li><strong>Até 20 dias úteis:</strong> Período para esforço ativo de contato na campanha de boas-vindas.</li>
+            <li><strong>Até 50 dias úteis:</strong> Prazo final para encerrar um caso de "Desvio na Venda".</li>
+            <li><strong>Até 90 dias corridos:</strong> Prazo para o SAC acionar o Pós-Vendas em casos de desvio na venda se o contato inicial não teve sucesso.</li>
+          </ul>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-green-50 text-green-800 p-4 rounded-lg">
+                <h5 class="font-bold mb-2">✅ Quando o Pós-Vendas Atende</h5>
+                <ul class="list-disc list-inside text-sm space-y-1">
+                    <li>Casos de Pós Vendas Digital encerrados em até 48h úteis.</li>
+                    <li>Cancelamento por desvio na venda em até 7 dias da adesão.</li>
+                    <li>Divergência na venda (cota ativa e não contemplada) com caso aberto há menos de 50 dias úteis.</li>
+                </ul>
+            </div>
+            <div class="bg-red-50 text-red-800 p-4 rounded-lg">
+                <h5 class="font-bold mb-2">❌ Quando o Pós-Vendas NÃO Atende</h5>
+                <ul class="list-disc list-inside text-sm space-y-1">
+                    <li>Caso de desvio na venda com mais de 50 dias úteis.</li>
+                    <li>Processo com mais de 90 dias corridos.</li>
+                    <li>Cotas de Motocicleta (exceto CE), Cooperativas, Contempladas, Canceladas ou de Colaboradores.</li>
+                </ul>
+            </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
   <script>
     document.addEventListener('DOMContentLoaded', () => {
         const coresSemana = {
@@ -202,7 +250,7 @@
         document.getElementById("header").classList.add("bg-gradient-to-r", ...tema.header);
         const iconBg = document.getElementById("icon-bg");
         iconBg.classList.add(tema.bg.replace('-50', '-100'));
-        iconBg.style.color = tema.btn[1].replace('to-','').replace('-800','-600').replace('yellow-700','yellow-500'); // Define a cor dos balões
+        iconBg.style.color = tema.btn[1].replace('to-','').replace('-800','-600').replace('yellow-700','yellow-500');
         
         const avisoBox = document.getElementById('aviso-box');
         avisoBox.classList.add(tema.text.replace('600', '800'), tema.border, tema.bg);
@@ -248,6 +296,33 @@
             btnCpv.classList.add('active');
             btnPvd.classList.remove('active');
         });
+        
+        const modal = document.getElementById('modal-instrucoes');
+        const abrirBtn = document.getElementById('abrir-instrucoes-btn');
+        const fecharBtn = document.getElementById('fechar-instrucoes-btn');
+
+        if (abrirBtn) {
+            abrirBtn.classList.add("bg-gradient-to-br", ...tema.btn);
+        }
+
+        if (modal && abrirBtn && fecharBtn) {
+            abrirBtn.addEventListener('click', () => {
+              modal.classList.remove('hidden');
+              setTimeout(() => modal.classList.add('active'), 10);
+            });
+
+            const fecharModal = () => {
+              modal.classList.remove('active');
+              setTimeout(() => modal.classList.add('hidden'), 300);
+            };
+
+            fecharBtn.addEventListener('click', fecharModal);
+            modal.addEventListener('click', (e) => {
+              if (e.target === modal) {
+                fecharModal();
+              }
+            });
+        }
     });
   </script>
 

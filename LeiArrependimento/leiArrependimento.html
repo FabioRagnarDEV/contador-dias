@@ -8,7 +8,7 @@
   <link rel="icon" type="image/png" href="../favicon/calendario.png" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.gstatic" crossorigin />
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap"
     rel="stylesheet"
@@ -45,21 +45,26 @@
 
     /* --- CSS DA ANIMAÇÃO 'ASSINATURA' DO ÍCONE --- */
     @keyframes signing-motion {
-      0% {
-        transform: rotate(-2deg) translateX(-2px);
-      }
-      50% {
-        transform: rotate(2deg) translateX(2px);
-      }
-      100% {
-        transform: rotate(-2deg) translateX(-2px);
-      }
+      0% { transform: rotate(-2deg) translateX(-2px); }
+      50% { transform: rotate(2deg) translateX(2px); }
+      100% { transform: rotate(-2deg) translateX(-2px); }
     }
 
     .icon-signing {
       animation: signing-motion 0.7s ease-in-out infinite;
     }
     /* --- FIM DO CSS DA ANIMAÇÃO --- */
+
+    /* --- ESTILOS PARA O MODAL --- */
+    .modal-box {
+      transform: scale(0.95);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    .modal.active .modal-box {
+      transform: scale(1);
+      opacity: 1;
+    }
 
   </style>
 </head>
@@ -78,8 +83,10 @@
   </header>
 
   <main class="container mx-auto px-4 py-8 sm:py-12">
-    <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-xl w-full max-w-2xl mx-auto space-y-6">
+    <div class="relative bg-white p-6 sm:p-8 rounded-2xl shadow-xl w-full max-w-2xl mx-auto space-y-6">
       
+      <button id="abrir-instrucoes-btn" class="absolute top-6 right-6 text-white rounded-full h-8 w-8 flex items-center justify-center font-bold text-lg btn-3d transition z-10">?</button>
+
       <div class="text-center">
         <div class="flex justify-center mb-4">
             <div id="icon-bg" class="p-3 rounded-full bg-opacity-20">
@@ -109,6 +116,13 @@
           Zerar
         </button>
       </div>
+      
+      <div class="text-center pt-2">
+          <button id="contagem-btn" class="text-white py-2 px-6 rounded-lg font-semibold shadow-md btn-3d text-sm">
+            Entenda a contagem
+          </button>
+      </div>
+      <div id="contagem-resultado" class="hidden mt-4 p-4 rounded-lg text-center"></div>
       
       <div id="mensagem-erro" class="text-center pt-2 text-sm font-bold text-amber-600 min-h-[20px]"></div>
       <div id="resultado" class="text-center text-lg font-bold p-4 rounded-lg transition-all duration-500 opacity-0 transform scale-95"></div>
@@ -144,6 +158,33 @@
     <p class="text-sm text-slate-500">&copy; Todos os direitos reservados.</p>
   </footer>
 
+  <div id="modal-instrucoes" class="modal fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 transition-opacity duration-300 hidden">
+    <div class="modal-box bg-white p-8 rounded-xl shadow-2xl w-full max-w-lg relative">
+      <button id="fechar-instrucoes-btn" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+        </svg>
+      </button>
+      
+      <h3 class="text-2xl font-bold text-slate-900 mb-4">Como Usar a Calculadora</h3>
+      
+      <div class="space-y-4 text-slate-600">
+        <p>Esta ferramenta calcula o prazo final do <strong class="text-slate-800">Direito de Arrependimento</strong> de 7 dias, conforme o Código de Defesa do Consumidor.</p>
+        
+        <div>
+          <h4 class="font-semibold text-slate-800">Passo a Passo:</h4>
+          <ul class="list-decimal list-inside mt-2 space-y-1">
+            <li>No campo <strong class="text-slate-800">"Data do Pagamento da 1ª Parcela"</strong>, insira a data em que o primeiro pagamento foi efetuado. Esta data conta como o <strong>Dia 1</strong>.</li>
+            <li>Clique em <strong class="text-slate-800">"Verificar Prazo"</strong>. O sistema mostrará se o cliente ainda está dentro do período de 7 dias e qual é a data limite.</li>
+            <li>Para ver o detalhamento da contagem, dia a dia, clique em <strong class="text-slate-800">"Entenda a contagem"</strong>.</li>
+          </ul>
+        </div>
+        <p class="text-sm text-slate-500 pt-2 border-t"><strong>Importante:</strong> A contagem é feita em dias corridos, incluindo fins de semana e feriados.</p>
+      </div>
+    </div>
+  </div>
+
+
   <script>
     document.addEventListener('DOMContentLoaded', () => {
         const coresSemana = {
@@ -163,18 +204,18 @@
         document.getElementById("icon-bg").classList.add(tema.bg.replace('-50', '-100'));
         document.getElementById("calcular-btn").classList.add("bg-gradient-to-br", ...tema.btn);
         document.getElementById("data-pagamento").classList.add(tema.focus);
-        
-        const avisoBox = document.getElementById('aviso-box');
-        avisoBox.classList.add(tema.text.replace('600', '800'), tema.border, tema.bg);
+        document.getElementById("aviso-box").classList.add(tema.text.replace('600', '800'), tema.border, tema.bg);
+        document.getElementById('resultado').classList.add(tema.bg);
         
         const summaryLink = document.querySelector('#info-legal summary');
-        summaryLink.classList.remove('text-blue-600', 'hover:text-blue-800');
-        summaryLink.classList.add(tema.text, tema.hover);
+        if (summaryLink) {
+          summaryLink.classList.add(tema.text, tema.hover);
+        }
         
-        const resultadoBox = document.getElementById('resultado');
-        resultadoBox.classList.add(tema.bg);
+        document.getElementById("abrir-instrucoes-btn").classList.add("bg-gradient-to-br", ...tema.btn);
+        document.getElementById("contagem-btn").classList.add("bg-gradient-to-br", ...tema.btn);
+        document.getElementById('contagem-resultado').classList.add(tema.bg.replace('-50', '-100'), tema.text.replace('600', '800'));
         
-        // Saudação personalizada
         const nomeUsuario = localStorage.getItem('nomeUsuario');
         const generoUsuario = localStorage.getItem('generoUsuario');
         const saudacaoEl = document.getElementById('saudacao-usuario');
@@ -185,6 +226,27 @@
             saudacaoEl.textContent = 'Calcule o prazo legal de 7 dias para desistência.';
         }
         setTimeout(() => saudacaoEl.classList.add('show'), 100);
+
+        const modal = document.getElementById('modal-instrucoes');
+        const abrirBtn = document.getElementById('abrir-instrucoes-btn');
+        const fecharBtn = document.getElementById('fechar-instrucoes-btn');
+        
+        if (modal && abrirBtn && fecharBtn) {
+            abrirBtn.addEventListener('click', () => {
+              modal.classList.remove('hidden');
+              setTimeout(() => modal.classList.add('active'), 10);
+            });
+            const fecharModal = () => {
+              modal.classList.remove('active');
+              setTimeout(() => modal.classList.add('hidden'), 300);
+            };
+            fecharBtn.addEventListener('click', fecharModal);
+            modal.addEventListener('click', (e) => {
+              if (e.target === modal) {
+                fecharModal();
+              }
+            });
+        }
     });
   </script>
 
