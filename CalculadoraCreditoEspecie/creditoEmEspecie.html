@@ -8,7 +8,7 @@
   <link rel="icon" type="image/png" href="../favicon/calendario.png" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.gstatic" crossorigin />
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap"
     rel="stylesheet"
@@ -62,6 +62,16 @@
     }
     /* --- FIM DO CSS DA ANIMAÇÃO --- */
 
+    /* --- ESTILOS PARA O MODAL DE INSTRUÇÕES --- */
+    #modal-instrucoes-box {
+      transform: scale(0.95);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    #modal-instrucoes.active #modal-instrucoes-box {
+      transform: scale(1);
+      opacity: 1;
+    }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800">
@@ -81,14 +91,17 @@
   </header>
 
   <main class="container mx-auto px-4 py-8 sm:py-12">
-    <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-xl w-full max-w-2xl mx-auto space-y-6">
+    <div class="relative bg-white p-6 sm:p-8 rounded-2xl shadow-xl w-full max-w-2xl mx-auto space-y-6">
       
+      <button id="abrir-instrucoes-btn" class="absolute top-6 right-6 text-white rounded-full h-8 w-8 flex items-center justify-center font-bold text-lg btn-3d transition z-10">?</button>
+
       <div class="text-center">
         <div class="flex justify-center mb-4">
             <div id="icon-bg" class="p-3 rounded-full bg-opacity-20">
                 <img src="../assets/crédito_especie.png" alt="Ícone de Crédito em Espécie" class="h-12 w-12 icon-animated">
             </div>
         </div>
+        
         <h2 class="text-3xl font-extrabold text-slate-900">Crédito em Espécie</h2>
         <p id="saudacao-usuario" class="text-slate-500 mt-2 text-lg">Carregando...</p>
       </div>
@@ -188,9 +201,45 @@
     <p class="text-sm text-slate-500">&copy; Todos os direitos reservados.</p>
   </footer>
 
+  <div id="modal-instrucoes" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 transition-opacity duration-300 hidden">
+    <div id="modal-instrucoes-box" class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-lg relative">
+      <button id="fechar-instrucoes-btn" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+        </svg>
+      </button>
+      
+      <h3 class="text-2xl font-bold text-slate-900 mb-4">Como Usar?</h3>
+      
+      <div class="space-y-4 text-slate-600">
+        <p>Esta ferramenta ajuda a verificar quando um consorciado pode receber o valor do crédito em dinheiro. Siga os cenários abaixo:</p>
+        
+        <div>
+          <h4 class="font-semibold text-slate-800">Cenário 1: Grupo Ativo (Regra Geral)</h4>
+          <ul class="list-decimal list-inside mt-2 space-y-1">
+            <li>No campo <strong class="text-slate-800">"Data da contemplação"</strong>, insira quando a cota foi contemplada.</li>
+            <li>Deixe a opção "O grupo já encerrou?" desmarcada.</li>
+            <li>Clique em <strong class="text-slate-800">"Calcular"</strong>. O sistema irá adicionar 180 dias à data informada e mostrar o resultado.</li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="font-semibold text-slate-800">Cenário 2: Grupo Já Encerrado</h4>
+           <ul class="list-decimal list-inside mt-2 space-y-1">
+            <li>Marque a opção <strong class="text-slate-800">"O grupo já encerrou?"</strong>.</li>
+            <li>Um novo campo aparecerá. Insira a <strong class="text-slate-800">"Data de encerramento do grupo"</strong>.</li>
+            <li>A data da contemplação ainda é necessária para registro, mas o prazo de 180 dias não será aplicado.</li>
+            <li>Clique em <strong class="text-slate-800">"Calcular"</strong>. O sistema verificará se a data atual é posterior à data de encerramento.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <audio id="som-dinheiro" src="../assets/som-caixa.mp3" preload="auto"></audio>
+
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-        
         const coresSemana = {
           0: { header: ["from-pink-700", "to-pink-500"], btn: ["from-pink-600", "to-pink-800"], focus: "focus:ring-pink-500", text: "text-pink-600", border: "border-pink-500", bg: "bg-pink-50", hover: "hover:text-pink-800" },
           1: { header: ["from-blue-700", "to-blue-500"], btn: ["from-blue-600", "to-blue-800"], focus: "focus:ring-blue-500", text: "text-blue-600", border: "border-blue-500", bg: "bg-blue-50", hover: "hover:text-blue-800" },
@@ -200,46 +249,48 @@
           5: { header: ["from-red-700", "to-red-500"], btn: ["from-red-600", "to-red-800"], focus: "focus:ring-red-500", text: "text-red-600", border: "border-red-500", bg: "bg-red-50", hover: "hover:text-red-800" },
           6: { header: ["from-yellow-600", "to-yellow-400"], btn: ["from-yellow-500", "to-yellow-700"], focus: "focus:ring-yellow-500", text: "text-yellow-600", border: "border-yellow-500", bg: "bg-yellow-50", hover: "hover:text-yellow-800" },
         };
-        
         const hoje = new Date().getDay();
         const tema = coresSemana[hoje];
-
-        const header = document.getElementById("header");
-        header.classList.add("bg-gradient-to-r", ...tema.header);
-
-        const calcularBtn = document.getElementById("calcular-btn");
-        calcularBtn.classList.add("bg-gradient-to-br", ...tema.btn);
         
-        const inputs = document.querySelectorAll('input[type="text"]');
-        inputs.forEach(input => input.classList.add(tema.focus));
+        document.getElementById("header").classList.add("bg-gradient-to-r", ...tema.header);
+        document.getElementById("calcular-btn").classList.add("bg-gradient-to-br", ...tema.btn);
+        document.querySelectorAll('input[type="text"]').forEach(input => input.classList.add(tema.focus));
+        document.getElementById('grupo-encerrado-check').classList.add(tema.text, tema.focus);
+        document.getElementById('aviso-box').classList.add(tema.text.replace('600', '800'), tema.border, tema.bg);
+        document.getElementById('icon-bg').classList.add(tema.bg.replace('-50', '-100'));
+        document.querySelectorAll('#info-legal summary').forEach(link => { link.classList.add(tema.text, tema.hover); });
         
-        const checkbox = document.getElementById('grupo-encerrado-check');
-        checkbox.classList.add(tema.text, tema.focus);
-        
-        const avisoBox = document.getElementById('aviso-box');
-        avisoBox.classList.add(tema.text.replace('600', '800'), tema.border, tema.bg);
-        
-        const iconBg = document.getElementById('icon-bg');
-        iconBg.classList.add(tema.bg.replace('-50', '-100'));
-
-        const summaryLinks = document.querySelectorAll('#info-legal summary');
-        summaryLinks.forEach(link => {
-            link.classList.add(tema.text, tema.hover);
-        });
+        const abrirInstrucoesBtn = document.getElementById('abrir-instrucoes-btn');
+        abrirInstrucoesBtn.classList.add("bg-gradient-to-br", ...tema.btn);
         
         const nomeUsuario = localStorage.getItem('nomeUsuario');
         const generoUsuario = localStorage.getItem('generoUsuario');
         const saudacaoEl = document.getElementById('saudacao-usuario');
-        
         if (nomeUsuario) {
             let boasVindas = generoUsuario === 'M' ? 'Bem-vindo de volta.' : (generoUsuario === 'F' ? 'Bem-vinda de volta.' : 'Bem-vindo(a) de volta.');
             saudacaoEl.innerHTML = `Olá, <span class="font-bold ${tema.text}">${nomeUsuario}</span>! ${boasVindas}`;
         } else {
             saudacaoEl.textContent = 'Calcule o prazo para o recebimento do crédito.';
         }
-
         setTimeout(() => saudacaoEl.classList.add('show'), 100);
 
+        const modal = document.getElementById('modal-instrucoes');
+        const abrirBtn = document.getElementById('abrir-instrucoes-btn');
+        const fecharBtn = document.getElementById('fechar-instrucoes-btn');
+        abrirBtn.addEventListener('click', () => {
+          modal.classList.remove('hidden');
+          setTimeout(() => modal.classList.add('active'), 10);
+        });
+        const fecharModal = () => {
+          modal.classList.remove('active');
+          setTimeout(() => modal.classList.add('hidden'), 300);
+        };
+        fecharBtn.addEventListener('click', fecharModal);
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) {
+            fecharModal();
+          }
+        });
     });
   </script>
   

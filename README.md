@@ -107,11 +107,11 @@ Ferramenta dupla para gerir prazos no setor de pós-vendas:
 │   │-- credito-especie.png
 │   │-- pos-vendas.png
 │   │-- arrependimento.png
-│
+
 │-- /CalculadoraCreditoEspecie
 │   │-- creditoEmEspecie.html
 │   │-- script.js
-│
+
 │-- /CalculadoraPosVendas
 │   │-- posVendas.html
 │   │-- script.js
