@@ -83,34 +83,36 @@ Avalia o risco de cancelamento de cotas com parcelas em atraso.
 
 ---
 
-## 📂 Estrutura do Projeto
-/PAINEL_CALCULADORAS
+## 📁 Estrutura do Projeto
+
+```text
+PAINEL_CALCULADORAS/
 │
-├── /assets
-│ ├── calendario.png
-│ ├── credito_especie.png
-│ ├── pos_vendas.png
-│ ├── arrependimento.png
-│ └── pagamento-atrasado.png
+├── assets/
+│   ├── calendario.png
+│   ├── credito_especie.png
+│   ├── pos_vendas.png
+│   ├── arrependimento.png
+│   └── pagamento-atrasado.png
 │
-├── /CalculadoraAtraso
-│ ├── analiseAtraso.html
-│ └── script.js
+├── CalculadoraAtraso/
+│   ├── analiseAtraso.html
+│   └── script.js
 │
-├── /CalculadoraCreditoEspecie
-│ ├── creditoEmEspecie.html
-│ └── script.js
+├── CalculadoraCreditoEspecie/
+│   ├── creditoEmEspecie.html
+│   └── script.js
 │
-├── /CalculadoraPosVendas
-│ ├── posVendas.html
-│ └── script.js
+├── CalculadoraPosVendas/
+│   ├── posVendas.html
+│   └── script.js
 │
-├── /LeiArrependimento
-│ ├── leiArrependimento.html
-│ └── leiArrependimento.js
+├── LeiArrependimento/
+│   ├── leiArrependimento.html
+│   └── leiArrependimento.js
 │
-├── /favicon
-│ └── calendario.png
+├── favicon/
+│   └── calendario.png
 │
 ├── index.html
 └── README.md
