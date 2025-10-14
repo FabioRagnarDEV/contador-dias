@@ -118,7 +118,6 @@ PAINEL_CALCULADORAS/
 └── README.md
 
 
----
 
 ## 🚀 Como Executar
 
@@ -128,4 +127,3 @@ PAINEL_CALCULADORAS/
 
 A aplicação será executada **localmente**, sem necessidade de um servidor web.
 
----
