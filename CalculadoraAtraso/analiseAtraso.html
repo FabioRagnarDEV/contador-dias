@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Análise de Atraso - Calculadora de Prazos</title>
+  <link rel="icon" type="image/png" href="../favicon/calendario.png" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css">
+  <style>
+      .btn-3d { box-shadow: 4px 6px 0px rgba(0,0,0,0.2); transition: all 0.2s ease; }
+      .btn-3d:hover { transform: translateY(-2px); box-shadow: 6px 8px 0px rgba(0,0,0,0.2); }
+      .btn-3d:active { transform: translateY(1px); box-shadow: 2px 3px 0px rgba(0,0,0,0.2); }
+      #saudacao-usuario { opacity: 0; transform: translateY(10px); transition: all 0.6s ease; }
+      #saudacao-usuario.show { opacity: 1; transform: translateY(0); }
+      .modal-box { transform: scale(0.95); opacity: 0; transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1); }
+      .modal.active .modal-box { transform: scale(1); opacity: 1; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+  <header id="header" class="shadow-md">
+    <nav class="container mx-auto px-4 py-3 flex items-center justify-between">
+      <h1 class="text-xl sm:text-2xl font-bold text-white drop-shadow-sm">Análise de Atraso de Parcela</h1>
+      <a href="../index.html" class="flex items-center gap-2 text-white bg-white/20 hover:bg-white/30 font-semibold py-2 px-4 rounded-lg">
+        <span>&larr; Voltar</span>
+      </a>
+    </nav>
+  </header>
+
+  <main class="container mx-auto px-4 py-8 sm:py-12">
+    <div class="relative bg-white p-6 sm:p-8 rounded-2xl shadow-xl w-full max-w-2xl mx-auto space-y-6">
+      
+      <button id="abrir-instrucoes-btn" class="absolute top-6 right-6 text-white rounded-full h-8 w-8 flex items-center justify-center font-bold text-lg btn-3d transition z-10">?</button>
+
+      <div class="text-center">
+        <div class="icon-wrapper relative inline-block">
+          <div id="icon-bg" class="inline-block p-3 rounded-full bg-opacity-20">
+            <img src="../assets/pagamento-atrasado.png" alt="Ícone de Pagamento Atrasado" class="h-12 w-12">
+          </div>
+        </div>
+        <h2 class="text-3xl font-extrabold text-slate-900">Análise de Atraso</h2>
+        <p id="saudacao-usuario" class="text-slate-500 mt-2 text-lg">Carregando...</p>
+      </div>
+
+      <div id="aviso-box" class="border-l-4 p-4 rounded-r-md">
+        <p class="font-medium">Selecione o status do consorciado e preencha os dados para uma análise precisa do risco.</p>
+      </div>
+
+      <div class="space-y-4 pt-2">
+        <fieldset>
+          <legend class="block mb-2 font-medium text-slate-700">Status do Consorciado:</legend>
+          <div class="flex flex-col sm:flex-row gap-x-6 gap-y-2">
+            <div class="flex items-center gap-x-2">
+              <input type="radio" id="status-nao-contemplado" name="status-consorciado" value="nao-contemplado" class="h-4 w-4" checked>
+              <label for="status-nao-contemplado">Não Contemplado / Crédito Pendente</label>
+            </div>
+            <div class="flex items-center gap-x-2">
+              <input type="radio" id="status-contemplado" name="status-consorciado" value="contemplado" class="h-4 w-4">
+              <label for="status-contemplado">Contemplado (Bem Entregue)</label>
+            </div>
+          </div>
+        </fieldset>
+
+        <div id="detalhes-nao-contemplado" class="space-y-4 pt-4 border-t">
+            <fieldset>
+              <legend class="block mb-2 font-medium text-slate-700">Tipo de Grupo:</legend>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
+                  <div class="flex items-center gap-x-2">
+                      <input type="radio" id="grupo-embracon" name="tipo-grupo" value="embracon-renault" class="h-4 w-4" checked>
+                      <label for="grupo-embracon">Embracon / Renault</label>
+                  </div>
+                  <div class="flex items-center gap-x-2">
+                      <input type="radio" id="grupo-cnvw" name="tipo-grupo" value="cnvw" class="h-4 w-4">
+                      <label for="grupo-cnvw">CNVW</label>
+                  </div>
+                  <div class="flex items-center gap-x-2">
+                      <input type="radio" id="grupo-stara" name="tipo-grupo" value="stara-cresol" class="h-4 w-4">
+                      <label for="grupo-stara">Stara / Unicred / Cresol</label>
+                  </div>
+              </div>
+            </fieldset>
+            <fieldset>
+              <legend class="block mb-2 font-medium text-slate-700">Data de Inauguração do Grupo:</legend>
+              <div class="flex flex-col sm:flex-row gap-x-6 gap-y-2">
+                  <div class="flex items-center gap-x-2">
+                      <input type="radio" id="data-ate-jun24" name="data-inauguracao" value="ate-jun24" class="h-4 w-4" checked>
+                      <label for="data-ate-jun24">Até 30/06/2024</label>
+                  </div>
+                  <div class="flex items-center gap-x-2">
+                      <input type="radio" id="data-apos-jul24" name="data-inauguracao" value="apos-jul24" class="h-4 w-4">
+                      <label for="data-apos-jul24">Após 01/07/2024</label>
+                  </div>
+              </div>
+            </fieldset>
+        </div>
+
+        <div class="pt-4 border-t">
+          <label for="data-vencimento" class="block mb-1 font-medium text-slate-700">Vencimento da Parcela Mais Antiga:</label>
+          <input type="text" id="data-vencimento" class="w-full border border-slate-300 rounded-lg p-3" placeholder="DD/MM/AAAA" maxlength="10">
+        </div>
+        
+        <div>
+          <label for="numero-parcelas" class="block mb-1 font-medium text-slate-700">Nº de Parcelas em Aberto:</label>
+          <input type="number" id="numero-parcelas" class="w-full border border-slate-300 rounded-lg p-3" placeholder="Ex: 2" min="1">
+        </div>
+      </div>
+      
+      <div class="flex justify-center gap-4 pt-2">
+        <button id="calcular-btn" class="w-auto text-white py-3 px-8 rounded-lg font-semibold shadow-md btn-3d">Analisar</button>
+        <button id="reset-btn" class="w-auto bg-slate-500 text-white py-3 px-8 rounded-lg hover:bg-slate-600 font-semibold shadow-md btn-3d">Zerar</button>
+      </div>
+      
+      <div id="mensagem-erro" class="text-center pt-2 text-sm font-bold text-amber-600 min-h-[20px]"></div>
+      <div id="resultado" class="text-center text-lg p-4 rounded-lg transition-opacity duration-300 opacity-0"></div>
+      
+      <div id="info-legal" class="hidden mt-6 pt-4 border-t border-slate-200 text-sm text-slate-600">
+        <details class="bg-slate-50 p-4 rounded-lg">
+          <summary class="font-semibold cursor-pointer">Entendendo as Regras de Atraso e Cancelamento ▼</summary>
+          <div id="regras-conteudo" class="mt-4 space-y-4">
+          </div>
+        </details>
+      </div>
+
+    </div>
+
+    <div class="text-center">
+      <a href="../index.html" class="mt-8 inline-block text-slate-600 font-semibold transition hover:underline">
+        &larr; Voltar ao Menu Principal
+      </a>
+    </div>
+  </main>
+
+  <div id="modal-instrucoes" class="modal fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 transition-opacity duration-300 hidden p-4">
+    <div id="modal-instrucoes-box" class="modal-box bg-white p-8 rounded-xl shadow-2xl w-full max-w-2xl relative">
+      <button id="fechar-instrucoes-btn" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+        </svg>
+      </button>
+      <h3 class="text-2xl font-bold text-slate-900 mb-6 text-center">Manual da Calculadora de Análise de Atraso</h3>
+      <div id="manual-conteudo" class="space-y-6 text-slate-600">
+      </div>
+    </div>
+  </div>
+  
+  <script src="script.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const paletaDeTemas = [
+        { name: "Oceanic Teal", header: ["from-cyan-500", "to-teal-500"], btn: ["from-cyan-600", "to-teal-600"], text: "text-cyan-600", part: "rgba(6, 182, 212, 0.3)", focus: "focus:ring-cyan-500", border: "border-cyan-500", bg: "bg-cyan-50", hover: "hover:text-cyan-800" },
+        { name: "Sunset Orange", header: ["from-amber-500", "to-orange-600"], btn: ["from-amber-600", "to-orange-700"], text: "text-amber-600", part: "rgba(245, 158, 11, 0.3)", focus: "focus:ring-amber-500", border: "border-amber-500", bg: "bg-amber-50", hover: "hover:text-amber-800" },
+        { name: "Grape Soda", header: ["from-fuchsia-500", "to-purple-600"], btn: ["from-fuchsia-600", "to-purple-700"], text: "text-fuchsia-600", part: "rgba(192, 38, 211, 0.3)", focus: "focus:ring-fuchsia-500", border: "border-fuchsia-500", bg: "bg-fuchsia-50", hover: "hover:text-fuchsia-800" },
+        { name: "Jungle Lime", header: ["from-lime-400", "to-emerald-600"], btn: ["from-lime-500", "to-emerald-700"], text: "text-lime-500", part: "rgba(132, 204, 22, 0.3)", focus: "focus:ring-lime-500", border: "border-lime-500", bg: "bg-lime-50", hover: "hover:text-lime-800" },
+        { name: "Hot Pink", header: ["from-pink-500", "to-rose-500"], btn: ["from-pink-600", "to-rose-600"], text: "text-pink-600", part: "rgba(236, 72, 153, 0.3)", focus: "focus:ring-pink-500", border: "border-pink-500", bg: "bg-pink-50", hover: "hover:text-pink-800" },
+        { name: "Deep Sky", header: ["from-sky-500", "to-indigo-600"], btn: ["from-sky-600", "to-indigo-700"], text: "text-sky-600", part: "rgba(14, 165, 233, 0.3)", focus: "focus:ring-sky-500", border: "border-sky-500", bg: "bg-sky-50", hover: "hover:text-sky-800" },
+        { name: "Burning Sunset", header: ["from-red-500", "to-orange-500"], btn: ["from-red-600", "to-orange-600"], text: "text-red-600", part: "rgba(239, 68, 68, 0.3)", focus: "focus:ring-red-500", border: "border-red-500", bg: "bg-red-50", hover: "hover:text-red-800" },
+        { name: "Minty Fresh", header: ["from-green-300", "to-cyan-400"], btn: ["from-green-400", "to-cyan-500"], text: "text-green-500", part: "rgba(16, 185, 129, 0.3)", focus: "focus:ring-green-500", border: "border-green-500", bg: "bg-green-50", hover: "hover:text-green-800" },
+        { name: "Cyberpunk Night", header: ["from-indigo-500", "to-fuchsia-500"], btn: ["from-indigo-600", "to-fuchsia-600"], text: "text-indigo-500", part: "rgba(99, 102, 241, 0.3)", focus: "focus:ring-indigo-500", border: "border-indigo-500", bg: "bg-indigo-50", hover: "hover:text-indigo-800" },
+        { name: "Golden Hour", header: ["from-yellow-400", "to-amber-500"], btn: ["from-yellow-500", "to-amber-600"], text: "text-yellow-500", part: "rgba(234, 179, 8, 0.3)", focus: "focus:ring-yellow-500", border: "border-yellow-500", bg: "bg-yellow-50", hover: "hover:text-yellow-800" },
+        { name: "Royal Blue", header: ["from-blue-500", "to-blue-700"], btn: ["from-blue-600", "to-blue-800"], text: "text-blue-600", part: "rgba(59, 130, 246, 0.3)", focus: "focus:ring-blue-500", border: "border-blue-500", bg: "bg-blue-50", hover: "hover:text-blue-800" },
+        { name: "Emerald Sea", header: ["from-emerald-400", "to-teal-600"], btn: ["from-emerald-500", "to-teal-700"], text: "text-emerald-500", part: "rgba(16, 185, 129, 0.3)", focus: "focus:ring-emerald-500", border: "border-emerald-500", bg: "bg-emerald-50", hover: "hover:text-emerald-800" },
+        { name: "Sweet Plum", header: ["from-violet-500", "to-purple-500"], btn: ["from-violet-600", "to-purple-600"], text: "text-violet-600", part: "rgba(139, 92, 246, 0.3)", focus: "focus:ring-violet-500", border: "border-violet-500", bg: "bg-violet-50", hover: "hover:text-violet-800" },
+        { name: "Ruby Red", header: ["from-rose-600", "to-red-700"], btn: ["from-rose-700", "to-red-800"], text: "text-rose-600", part: "rgba(225, 29, 72, 0.3)", focus: "focus:ring-rose-500", border: "border-rose-500", bg: "bg-rose-50", hover: "hover:text-rose-800" },
+        { name: "Forest Green", header: ["from-green-600", "to-green-800"], btn: ["from-green-700", "to-green-900"], text: "text-green-600", part: "rgba(22, 163, 74, 0.3)", focus: "focus:ring-green-500", border: "border-green-500", bg: "bg-green-50", hover: "hover:text-green-800" },
+        { name: "Electric Blue", header: ["from-cyan-400", "to-sky-500"], btn: ["from-cyan-500", "to-sky-600"], text: "text-cyan-500", part: "rgba(34, 211, 238, 0.3)", focus: "focus:ring-cyan-500", border: "border-cyan-500", bg: "bg-cyan-50", hover: "hover:text-cyan-800" },
+        { name: "Mango Tango", header: ["from-orange-400", "to-yellow-500"], btn: ["from-orange-500", "to-yellow-600"], text: "text-orange-500", part: "rgba(249, 115, 22, 0.3)", focus: "focus:ring-orange-500", border: "border-orange-500", bg: "bg-orange-50", hover: "hover:text-orange-800" },
+        { name: "Lavender Dream", header: ["from-purple-400", "to-violet-500"], btn: ["from-purple-500", "to-violet-600"], text: "text-purple-500", part: "rgba(168, 85, 247, 0.3)", focus: "focus:ring-purple-500", border: "border-purple-500", bg: "bg-purple-50", hover: "hover:text-purple-800" },
+        { name: "Crimson Tide", header: ["from-red-600", "to-rose-800"], btn: ["from-red-700", "to-rose-900"], text: "text-red-600", part: "rgba(220, 38, 38, 0.3)", focus: "focus:ring-red-500", border: "border-red-500", bg: "bg-red-50", hover: "hover:text-red-800" },
+        { name: "Cool Slate", header: ["from-slate-500", "to-gray-600"], btn: ["from-slate-600", "to-gray-700"], text: "text-slate-600", part: "rgba(100, 116, 139, 0.3)", focus: "focus:ring-slate-500", border: "border-slate-500", bg: "bg-slate-50", hover: "hover:text-slate-800" }
+      ];
+
+      let tema;
+      const temaSalvo = localStorage.getItem('temaAtivo');
+
+      if (temaSalvo) {
+        tema = JSON.parse(temaSalvo);
+      } else {
+        tema = paletaDeTemas[0];
+      }
+      
+      document.getElementById("header").classList.add("bg-gradient-to-r", ...tema.header);
+      document.getElementById("calcular-btn").classList.add("bg-gradient-to-br", ...tema.btn);
+      document.getElementById("abrir-instrucoes-btn").classList.add("bg-gradient-to-br", ...tema.btn);
+      document.getElementById("icon-bg").classList.add(tema.bg.replace('-50', '-100'));
+      document.getElementById("aviso-box").classList.add(tema.text.replace('600', '800'), tema.border, tema.bg);
+      document.querySelector("#info-legal summary").classList.add(tema.text, tema.hover);
+      document.querySelectorAll('input[type="text"], input[type="number"]').forEach(input => input.classList.add(tema.focus));
+      document.querySelectorAll('input[type="radio"]').forEach(radio => radio.classList.add(tema.text, tema.focus));
+
+      const nomeUsuario = localStorage.getItem('nomeUsuario');
+      const generoUsuario = localStorage.getItem('generoUsuario');
+      const saudacaoEl = document.getElementById('saudacao-usuario');
+      if (nomeUsuario) {
+          let boasVindas = generoUsuario === 'M' ? 'Bem-vindo de volta.' : (generoUsuario === 'F' ? 'Bem-vinda de volta.' : 'Bem-vindo(a) de volta.');
+          saudacaoEl.innerHTML = `Olá, <span class="font-bold ${tema.text}">${nomeUsuario}</span>! ${boasVindas}`;
+      } else {
+          saudacaoEl.textContent = 'Vamos analisar a situação da cota.';
+      }
+      setTimeout(() => saudacaoEl.classList.add('show'), 100);
+
+      const modal = document.getElementById('modal-instrucoes');
+      const abrirBtn = document.getElementById('abrir-instrucoes-btn');
+      const fecharBtn = document.getElementById('fechar-instrucoes-btn');
+      
+      abrirBtn.addEventListener('click', () => {
+        modal.classList.remove('hidden');
+        setTimeout(() => modal.classList.add('active'), 10);
+      });
+
+      const fecharModal = () => {
+        modal.classList.remove('active');
+        setTimeout(() => modal.classList.add('hidden'), 300);
+      };
+
+      fecharBtn.addEventListener('click', fecharModal);
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) fecharModal();
+      });
+    });
+  </script>
+</body>
+</html>

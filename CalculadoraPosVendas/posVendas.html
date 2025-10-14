@@ -4,89 +4,31 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pós Vendas - Calculadora de Prazos</title>
-
   <link rel="icon" type="image/png" href="../favicon/calendario.png" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap"
-    rel="stylesheet"
-  />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet" />
   <style>
     body { font-family: 'Inter', sans-serif; }
-
-    /* Estilos 3D para os botões */
-    .btn-3d {
-      box-shadow: 4px 6px 0px rgba(0,0,0,0.2);
-      transition: all 0.2s ease;
-    }
-    .btn-3d:hover {
-      transform: translateY(-2px);
-      box-shadow: 6px 8px 0px rgba(0,0,0,0.2);
-    }
-    .btn-3d:active {
-      transform: translateY(1px);
-      box-shadow: 2px 3px 0px rgba(0,0,0,0.2);
-    }
-
-    /* Animação suave para a saudação */
-    #saudacao-usuario {
-      opacity: 0;
-      transform: translateY(10px);
-      transition: all 0.6s ease;
-    }
-    #saudacao-usuario.show {
-      opacity: 1;
-      transform: translateY(0);
-    }
-    
-    /* Estilo para o botão de toggle ativo */
-    .toggle-btn.active {
-        transform: translateY(-2px) scale(1.02);
-        box-shadow: 6px 8px 0px rgba(0,0,0,0.2);
-        filter: brightness(1.1);
-    }
-
-    /* --- CSS DA ANIMAÇÃO DO ÍCONE (BALÕES DE DIÁLOGO) --- */
-    @keyframes rise-and-fade {
-      0% { transform: translateY(0) scale(0.5); opacity: 0; }
-      50% { transform: translateY(-25px) scale(1); opacity: 1; }
-      100% { transform: translateY(-50px) scale(0.5); opacity: 0; }
-    }
+    .btn-3d { box-shadow: 4px 6px 0px rgba(0,0,0,0.2); transition: all 0.2s ease; }
+    .btn-3d:hover { transform: translateY(-2px); box-shadow: 6px 8px 0px rgba(0,0,0,0.2); }
+    .btn-3d:active { transform: translateY(1px); box-shadow: 2px 3px 0px rgba(0,0,0,0.2); }
+    #saudacao-usuario { opacity: 0; transform: translateY(10px); transition: all 0.6s ease; }
+    #saudacao-usuario.show { opacity: 1; transform: translateY(0); }
+    .toggle-btn.active { transform: translateY(-2px) scale(1.02); box-shadow: 6px 8px 0px rgba(0,0,0,0.2); filter: brightness(1.1); }
+    @keyframes rise-and-fade { 0% { transform: translateY(0) scale(0.5); opacity: 0; } 50% { transform: translateY(-25px) scale(1); opacity: 1; } 100% { transform: translateY(-50px) scale(0.5); opacity: 0; } }
     #icon-bg { position: relative; }
-    #icon-bg::before, #icon-bg::after, #dialog-bubble {
-      content: '...'; position: absolute; top: 10px; left: 50%;
-      transform: translateX(-50%); background-color: currentColor;
-      color: white; font-size: 10px; line-height: 10px;
-      font-weight: bold; padding: 3px 6px; border-radius: 50px; opacity: 0;
-    }
-    .icon-container:hover #icon-bg::before,
-    .icon-container:hover #icon-bg::after,
-    .icon-container:hover #dialog-bubble {
-      animation: rise-and-fade 1.5s ease-in-out infinite;
-    }
+    #icon-bg::before, #icon-bg::after, #dialog-bubble { content: '...'; position: absolute; top: 10px; left: 50%; transform: translateX(-50%); background-color: currentColor; color: white; font-size: 10px; line-height: 10px; font-weight: bold; padding: 3px 6px; border-radius: 50px; opacity: 0; }
+    .icon-container:hover #icon-bg::before, .icon-container:hover #icon-bg::after, .icon-container:hover #dialog-bubble { animation: rise-and-fade 1.5s ease-in-out infinite; }
     .icon-container:hover #icon-bg::before { animation-delay: 0s; }
     .icon-container:hover #dialog-bubble { animation-delay: 0.5s; }
     .icon-container:hover #icon-bg::after { animation-delay: 1s; }
-    /* --- FIM DO CSS DA ANIMAÇÃO --- */
-
-    /* --- NOVOS ESTILOS PARA O MODAL DE INSTRUÇÕES --- */
-    #modal-instrucoes-box {
-      transform: scale(0.95);
-      opacity: 0;
-      transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-    }
-    #modal-instrucoes.active #modal-instrucoes-box {
-      transform: scale(1);
-      opacity: 1;
-    }
-    /* --- FIM DOS ESTILOS DO MODAL --- */
-
+    #modal-instrucoes-box { transform: scale(0.95); opacity: 0; transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1); }
+    #modal-instrucoes.active #modal-instrucoes-box { transform: scale(1); opacity: 1; }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800">
-
   <header id="header" class="shadow-md transition-colors duration-500">
     <nav class="container mx-auto px-4 py-3 flex items-center justify-between">
       <h1 class="text-xl sm:text-2xl font-bold text-white drop-shadow-sm">Prazo Pós Vendas</h1>
@@ -98,27 +40,22 @@
       </a>
     </nav>
   </header>
-
   <main class="container mx-auto px-4 py-8 sm:py-12">
     <div class="relative bg-white p-6 sm:p-8 rounded-2xl shadow-xl w-full max-w-2xl mx-auto space-y-6">
-      
       <button id="abrir-instrucoes-btn" class="absolute top-6 right-6 text-white rounded-full h-8 w-8 flex items-center justify-center font-bold text-lg btn-3d transition z-10">?</button>
-      
       <div class="text-center">
         <div class="icon-container flex justify-center mb-4">
-            <div id="icon-bg" class="p-3 rounded-full bg-opacity-20">
-                <img src="../assets/pos_vendas.png" alt="Ícone de Pós Vendas" class="h-12 w-12">
-                <span id="dialog-bubble"></span>
-            </div>
+          <div id="icon-bg" class="p-3 rounded-full bg-opacity-20">
+            <img src="../assets/pos_vendas.png" alt="Ícone de Pós Vendas" class="h-12 w-12">
+            <span id="dialog-bubble"></span>
+          </div>
         </div>
         <h2 class="text-3xl font-extrabold text-slate-900">Pós Vendas</h2>
         <p id="saudacao-usuario" class="text-slate-500 mt-2 text-lg">Carregando...</p>
       </div>
-
       <div id="aviso-box" class="border-l-4 p-4 rounded-r-md transition-colors duration-500">
         <p class="font-medium">Utilize essa ferramenta para saber se o caso de pós vendas digital ou manual ainda podem ser tratados pelo setor.</p>
       </div>
-
       <div class="flex flex-col sm:flex-row gap-4 justify-center border-t border-b border-slate-200 py-6">
         <button id="btn-show-pvd" class="text-white py-3 px-6 rounded-lg shadow-md font-semibold text-lg btn-3d toggle-btn">
           Pós Vendas Digital
@@ -127,7 +64,6 @@
           Caso Pós Vendas
         </button>
       </div>
-
       <div id="pvd" class="hidden space-y-4">
         <h3 class="text-2xl font-bold text-center">Pós Vendas Digital</h3>
         <div>
@@ -141,7 +77,6 @@
         <div id="erroPVD" class="text-center pt-2 text-sm font-bold text-amber-600 min-h-[20px]"></div>
         <div id="resultadoPVD" class="text-center mt-2 text-lg font-bold p-4 rounded-lg resultado-box"></div>
       </div>
-
       <div id="cpv" class="hidden space-y-4">
         <h3 class="text-2xl font-bold text-center">Caso Pós Vendas</h3>
         <div>
@@ -160,18 +95,15 @@
         <div id="resultadoCPV" class="text-center mt-2 text-lg font-bold p-4 rounded-lg resultado-box"></div>
       </div>
     </div>
-
     <div class="text-center">
       <a href="../index.html" class="mt-8 inline-block text-slate-600 font-semibold transition hover:underline">
         &larr; Voltar ao Menu Principal
       </a>
     </div>
   </main>
-
   <footer class="w-full text-center py-4 mt-8">
     <p class="text-sm text-slate-500">&copy; Todos os direitos reservados.</p>
   </footer>
-
   <div id="modal-instrucoes" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 transition-opacity duration-300 hidden">
     <div id="modal-instrucoes-box" class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-2xl relative h-full max-h-[90vh] overflow-y-auto">
       <button id="fechar-instrucoes-btn" class="sticky top-0 right-0 float-right text-slate-400 hover:text-slate-600 transition bg-white/50 backdrop-blur-sm rounded-full p-1">
@@ -179,26 +111,21 @@
           <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
         </svg>
       </button>
-      
       <h3 class="text-2xl font-bold text-slate-900 mb-6 text-center">Manual da Calculadora Pós-Vendas</h3>
-      
       <div class="space-y-6 text-slate-600">
-        
         <div>
           <h4 class="text-xl font-bold text-slate-800 border-b pb-2 mb-3">Como Usar a Ferramenta</h4>
           <div class="space-y-3">
-              <p><strong class="text-slate-800">1. Pós Vendas Digital:</strong> Use esta opção para verificar o prazo de contato inicial com o cliente (campanha de boas-vindas). O prazo é de <strong class="text-slate-800">48 horas úteis</strong> (2 dias úteis) após a efetivação.</p>
-              <p><strong class="text-slate-800">2. Caso Pós Vendas:</strong> Use esta opção para casos de <strong class="text-slate-800">desvio na venda</strong>. O prazo para tratar e encerrar o caso é de até <strong class="text-slate-800">50 dias úteis</strong> a partir da data de abertura.</p>
-              <p class="text-sm text-slate-500">A calculadora já desconta fins de semana e feriados nacionais automaticamente.</p>
+            <p><strong class="text-slate-800">1. Pós Vendas Digital:</strong> Use esta opção para verificar o prazo de contato inicial com o cliente (campanha de boas-vindas). O prazo é de <strong class="text-slate-800">48 horas úteis</strong> (2 dias úteis) após a efetivação.</p>
+            <p><strong class="text-slate-800">2. Caso Pós Vendas:</strong> Use esta opção para casos de <strong class="text-slate-800">desvio na venda</strong>. O prazo para tratar e encerrar o caso é de até <strong class="text-slate-800">50 dias úteis</strong> a partir da data de abertura.</p>
+            <p class="text-sm text-slate-500">A calculadora já desconta fins de semana e feriados nacionais automaticamente.</p>
           </div>
         </div>
-
         <div>
           <h4 class="text-xl font-bold text-slate-800 border-b pb-2 mb-3">Guia Rápido do Setor</h4>
-            <p class="mb-2"><strong class="text-slate-800">Objetivo:</strong> Garantir a satisfação dos clientes após a venda, confirmando dados, resolvendo dúvidas e oferecendo suporte para um relacionamento duradouro.</p>
-            <p><strong class="text-slate-800">Horário de Atendimento:</strong> Segunda a sexta-feira, das 8h às 19h.</p>
+          <p class="mb-2"><strong class="text-slate-800">Objetivo:</strong> Garantir a satisfação dos clientes após a venda, confirmando dados, resolvendo dúvidas e oferecendo suporte para um relacionamento duradouro.</p>
+          <p><strong class="text-slate-800">Horário de Atendimento:</strong> Segunda a sexta-feira, das 8h às 19h.</p>
         </div>
-
         <div>
           <h4 class="text-xl font-bold text-slate-800 border-b pb-2 mb-3">Prazos Chave do Processo</h4>
           <ul class="list-disc list-inside space-y-2">
@@ -207,126 +134,128 @@
             <li><strong>Até 90 dias corridos:</strong> Prazo para o SAC acionar o Pós-Vendas em casos de desvio na venda se o contato inicial não teve sucesso.</li>
           </ul>
         </div>
-        
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="bg-green-50 text-green-800 p-4 rounded-lg">
-                <h5 class="font-bold mb-2">✅ Quando o Pós-Vendas Atende</h5>
-                <ul class="list-disc list-inside text-sm space-y-1">
-                    <li>Casos de Pós Vendas Digital encerrados em até 48h úteis.</li>
-                    <li>Cancelamento por desvio na venda em até 7 dias da adesão.</li>
-                    <li>Divergência na venda (cota ativa e não contemplada) com caso aberto há menos de 50 dias úteis.</li>
-                </ul>
-            </div>
-            <div class="bg-red-50 text-red-800 p-4 rounded-lg">
-                <h5 class="font-bold mb-2">❌ Quando o Pós-Vendas NÃO Atende</h5>
-                <ul class="list-disc list-inside text-sm space-y-1">
-                    <li>Caso de desvio na venda com mais de 50 dias úteis.</li>
-                    <li>Processo com mais de 90 dias corridos.</li>
-                    <li>Cotas de Motocicleta (exceto CE), Cooperativas, Contempladas, Canceladas ou de Colaboradores.</li>
-                </ul>
-            </div>
+          <div class="bg-green-50 text-green-800 p-4 rounded-lg">
+            <h5 class="font-bold mb-2">✅ Quando o Pós-Vendas Atende</h5>
+            <ul class="list-disc list-inside text-sm space-y-1">
+              <li>Casos de Pós Vendas Digital encerrados em até 48h úteis.</li>
+              <li>Cancelamento por desvio na venda em até 7 dias da adesão.</li>
+              <li>Divergência na venda (cota ativa e não contemplada) com caso aberto há menos de 50 dias úteis.</li>
+            </ul>
+          </div>
+          <div class="bg-red-50 text-red-800 p-4 rounded-lg">
+            <h5 class="font-bold mb-2">❌ Quando o Pós-Vendas NÃO Atende</h5>
+            <ul class="list-disc list-inside text-sm space-y-1">
+              <li>Caso de desvio na venda com mais de 50 dias úteis.</li>
+              <li>Processo com mais de 90 dias corridos.</li>
+              <li>Cotas de Motocicleta (exceto CE), Cooperativas, Contempladas, Canceladas ou de Colaboradores.</li>
+            </ul>
+          </div>
         </div>
-
       </div>
     </div>
   </div>
-
-
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const coresSemana = {
-          0: { header: ["from-pink-700", "to-pink-500"], btn: ["from-pink-600", "to-pink-800"], focus: "focus:ring-pink-500", text: "text-pink-600", border: "border-pink-500", bg: "bg-pink-50" },
-          1: { header: ["from-blue-700", "to-blue-500"], btn: ["from-blue-600", "to-blue-800"], focus: "focus:ring-blue-500", text: "text-blue-600", border: "border-blue-500", bg: "bg-blue-50" },
-          2: { header: ["from-green-700", "to-green-500"], btn: ["from-green-600", "to-green-800"], focus: "focus:ring-green-500", text: "text-green-600", border: "border-green-500", bg: "bg-green-50" },
-          3: { header: ["from-purple-700", "to-purple-500"], btn: ["from-purple-600", "to-purple-800"], focus: "focus:ring-purple-500", text: "text-purple-600", border: "border-purple-500", bg: "bg-purple-50" },
-          4: { header: ["from-orange-700", "to-orange-500"], btn: ["from-orange-600", "to-orange-800"], focus: "focus:ring-orange-500", text: "text-orange-600", border: "border-orange-500", bg: "bg-orange-50" },
-          5: { header: ["from-red-700", "to-red-500"], btn: ["from-red-600", "to-red-800"], focus: "focus:ring-red-500", text: "text-red-600", border: "border-red-500", bg: "bg-red-50" },
-          6: { header: ["from-yellow-600", "to-yellow-400"], btn: ["from-yellow-500", "to-yellow-700"], focus: "focus:ring-yellow-500", text: "text-yellow-600", border: "border-yellow-500", bg: "bg-yellow-50" },
+      const paletaDeTemas = [
+        { name: "Oceanic Teal", header: ["from-cyan-500", "to-teal-500"], btn: ["from-cyan-600", "to-teal-600"], text: "text-cyan-600", part: "rgba(6, 182, 212, 0.3)", focus: "focus:ring-cyan-500", border: "border-cyan-500", bg: "bg-cyan-50", hover: "hover:text-cyan-800" },
+        { name: "Sunset Orange", header: ["from-amber-500", "to-orange-600"], btn: ["from-amber-600", "to-orange-700"], text: "text-amber-600", part: "rgba(245, 158, 11, 0.3)", focus: "focus:ring-amber-500", border: "border-amber-500", bg: "bg-amber-50", hover: "hover:text-amber-800" },
+        { name: "Grape Soda", header: ["from-fuchsia-500", "to-purple-600"], btn: ["from-fuchsia-600", "to-purple-700"], text: "text-fuchsia-600", part: "rgba(192, 38, 211, 0.3)", focus: "focus:ring-fuchsia-500", border: "border-fuchsia-500", bg: "bg-fuchsia-50", hover: "hover:text-fuchsia-800" },
+        { name: "Jungle Lime", header: ["from-lime-400", "to-emerald-600"], btn: ["from-lime-500", "to-emerald-700"], text: "text-lime-500", part: "rgba(132, 204, 22, 0.3)", focus: "focus:ring-lime-500", border: "border-lime-500", bg: "bg-lime-50", hover: "hover:text-lime-800" },
+        { name: "Hot Pink", header: ["from-pink-500", "to-rose-500"], btn: ["from-pink-600", "to-rose-600"], text: "text-pink-600", part: "rgba(236, 72, 153, 0.3)", focus: "focus:ring-pink-500", border: "border-pink-500", bg: "bg-pink-50", hover: "hover:text-pink-800" },
+        { name: "Deep Sky", header: ["from-sky-500", "to-indigo-600"], btn: ["from-sky-600", "to-indigo-700"], text: "text-sky-600", part: "rgba(14, 165, 233, 0.3)", focus: "focus:ring-sky-500", border: "border-sky-500", bg: "bg-sky-50", hover: "hover:text-sky-800" },
+        { name: "Burning Sunset", header: ["from-red-500", "to-orange-500"], btn: ["from-red-600", "to-orange-600"], text: "text-red-600", part: "rgba(239, 68, 68, 0.3)", focus: "focus:ring-red-500", border: "border-red-500", bg: "bg-red-50", hover: "hover:text-red-800" },
+        { name: "Minty Fresh", header: ["from-green-300", "to-cyan-400"], btn: ["from-green-400", "to-cyan-500"], text: "text-green-500", part: "rgba(16, 185, 129, 0.3)", focus: "focus:ring-green-500", border: "border-green-500", bg: "bg-green-50", hover: "hover:text-green-800" },
+        { name: "Cyberpunk Night", header: ["from-indigo-500", "to-fuchsia-500"], btn: ["from-indigo-600", "to-fuchsia-600"], text: "text-indigo-500", part: "rgba(99, 102, 241, 0.3)", focus: "focus:ring-indigo-500", border: "border-indigo-500", bg: "bg-indigo-50", hover: "hover:text-indigo-800" },
+        { name: "Golden Hour", header: ["from-yellow-400", "to-amber-500"], btn: ["from-yellow-500", "to-amber-600"], text: "text-yellow-500", part: "rgba(234, 179, 8, 0.3)", focus: "focus:ring-yellow-500", border: "border-yellow-500", bg: "bg-yellow-50", hover: "hover:text-yellow-800" },
+        { name: "Royal Blue", header: ["from-blue-500", "to-blue-700"], btn: ["from-blue-600", "to-blue-800"], text: "text-blue-600", part: "rgba(59, 130, 246, 0.3)", focus: "focus:ring-blue-500", border: "border-blue-500", bg: "bg-blue-50", hover: "hover:text-blue-800" },
+        { name: "Emerald Sea", header: ["from-emerald-400", "to-teal-600"], btn: ["from-emerald-500", "to-teal-700"], text: "text-emerald-500", part: "rgba(16, 185, 129, 0.3)", focus: "focus:ring-emerald-500", border: "border-emerald-500", bg: "bg-emerald-50", hover: "hover:text-emerald-800" },
+        { name: "Sweet Plum", header: ["from-violet-500", "to-purple-500"], btn: ["from-violet-600", "to-purple-600"], text: "text-violet-600", part: "rgba(139, 92, 246, 0.3)", focus: "focus:ring-violet-500", border: "border-violet-500", bg: "bg-violet-50", hover: "hover:text-violet-800" },
+        { name: "Ruby Red", header: ["from-rose-600", "to-red-700"], btn: ["from-rose-700", "to-red-800"], text: "text-rose-600", part: "rgba(225, 29, 72, 0.3)", focus: "focus:ring-rose-500", border: "border-rose-500", bg: "bg-rose-50", hover: "hover:text-rose-800" },
+        { name: "Forest Green", header: ["from-green-600", "to-green-800"], btn: ["from-green-700", "to-green-900"], text: "text-green-600", part: "rgba(22, 163, 74, 0.3)", focus: "focus:ring-green-500", border: "border-green-500", bg: "bg-green-50", hover: "hover:text-green-800" },
+        { name: "Electric Blue", header: ["from-cyan-400", "to-sky-500"], btn: ["from-cyan-500", "to-sky-600"], text: "text-cyan-500", part: "rgba(34, 211, 238, 0.3)", focus: "focus:ring-cyan-500", border: "border-cyan-500", bg: "bg-cyan-50", hover: "hover:text-cyan-800" },
+        { name: "Mango Tango", header: ["from-orange-400", "to-yellow-500"], btn: ["from-orange-500", "to-yellow-600"], text: "text-orange-500", part: "rgba(249, 115, 22, 0.3)", focus: "focus:ring-orange-500", border: "border-orange-500", bg: "bg-orange-50", hover: "hover:text-orange-800" },
+        { name: "Lavender Dream", header: ["from-purple-400", "to-violet-500"], btn: ["from-purple-500", "to-violet-600"], text: "text-purple-500", part: "rgba(168, 85, 247, 0.3)", focus: "focus:ring-purple-500", border: "border-purple-500", bg: "bg-purple-50", hover: "hover:text-purple-800" },
+        { name: "Crimson Tide", header: ["from-red-600", "to-rose-800"], btn: ["from-red-700", "to-rose-900"], text: "text-red-600", part: "rgba(220, 38, 38, 0.3)", focus: "focus:ring-red-500", border: "border-red-500", bg: "bg-red-50", hover: "hover:text-red-800" },
+        { name: "Cool Slate", header: ["from-slate-500", "to-gray-600"], btn: ["from-slate-600", "to-gray-700"], text: "text-slate-600", part: "rgba(100, 116, 139, 0.3)", focus: "focus:ring-slate-500", border: "border-slate-500", bg: "bg-slate-50", hover: "hover:text-slate-800" }
+      ];
+
+      let tema;
+      const temaSalvo = localStorage.getItem('temaAtivo');
+
+      if (temaSalvo) {
+        tema = JSON.parse(temaSalvo);
+      } else {
+        tema = paletaDeTemas[0];
+      }
+
+      document.getElementById("header").classList.add("bg-gradient-to-r", ...tema.header);
+      const iconBg = document.getElementById("icon-bg");
+      iconBg.classList.add(tema.bg.replace('-50', '-100'), tema.text);
+      const avisoBox = document.getElementById('aviso-box');
+      avisoBox.classList.add(tema.text.replace('600', '800'), tema.border, tema.bg);
+      ['btn-show-pvd', 'btn-show-cpv', 'btn-process-pvd', 'btn-process-cpv', 'abrir-instrucoes-btn'].forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) btn.classList.add("bg-gradient-to-br", ...tema.btn);
+      });
+      document.querySelectorAll('#pvd h3, #cpv h3').forEach(el => el.classList.add(tema.text));
+      document.querySelectorAll('input').forEach(el => el.classList.add(tema.focus));
+      document.querySelectorAll('.resultado-box').forEach(el => {
+        el.classList.add(tema.text.replace('600', '800'), tema.bg);
+      });
+      
+      const nomeUsuario = localStorage.getItem('nomeUsuario');
+      const generoUsuario = localStorage.getItem('generoUsuario');
+      const saudacaoEl = document.getElementById('saudacao-usuario');
+      if (nomeUsuario) {
+        let boasVindas = generoUsuario === 'M' ? 'Bem-vindo de volta.' : (generoUsuario === 'F' ? 'Bem-vinda de volta.' : 'Bem-vindo(a) de volta.');
+        saudacaoEl.innerHTML = `Olá, <span class="font-bold ${tema.text}">${nomeUsuario}</span>! ${boasVindas}`;
+      } else {
+        saudacaoEl.textContent = 'Acompanhe os prazos de atendimento de forma simples e eficiente.';
+      }
+      setTimeout(() => saudacaoEl.classList.add('show'), 100);
+
+      const btnPvd = document.getElementById('btn-show-pvd');
+      const btnCpv = document.getElementById('btn-show-cpv');
+      const divPvd = document.getElementById('pvd');
+      const divCpv = document.getElementById('cpv');
+
+      btnPvd.addEventListener('click', () => {
+        divPvd.classList.remove('hidden');
+        divCpv.classList.add('hidden');
+        btnPvd.classList.add('active');
+        btnCpv.classList.remove('active');
+      });
+
+      btnCpv.addEventListener('click', () => {
+        divCpv.classList.remove('hidden');
+        divPvd.classList.add('hidden');
+        btnCpv.classList.add('active');
+        btnPvd.classList.remove('active');
+      });
+      
+      const modal = document.getElementById('modal-instrucoes');
+      const abrirBtn = document.getElementById('abrir-instrucoes-btn');
+      const fecharBtn = document.getElementById('fechar-instrucoes-btn');
+
+      if (modal && abrirBtn && fecharBtn) {
+        abrirBtn.addEventListener('click', () => {
+          modal.classList.remove('hidden');
+          setTimeout(() => modal.classList.add('active'), 10);
+        });
+        const fecharModal = () => {
+          modal.classList.remove('active');
+          setTimeout(() => modal.classList.add('hidden'), 300);
         };
-        const hoje = new Date().getDay();
-        const tema = coresSemana[hoje];
-
-        // Aplicação do tema
-        document.getElementById("header").classList.add("bg-gradient-to-r", ...tema.header);
-        const iconBg = document.getElementById("icon-bg");
-        iconBg.classList.add(tema.bg.replace('-50', '-100'));
-        iconBg.style.color = tema.btn[1].replace('to-','').replace('-800','-600').replace('yellow-700','yellow-500');
-        
-        const avisoBox = document.getElementById('aviso-box');
-        avisoBox.classList.add(tema.text.replace('600', '800'), tema.border, tema.bg);
-        
-        ['btn-show-pvd', 'btn-show-cpv'].forEach(id => {
-            document.getElementById(id).classList.add("bg-gradient-to-br", ...tema.btn);
+        fecharBtn.addEventListener('click', fecharModal);
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) {
+            fecharModal();
+          }
         });
-        ['btn-process-pvd', 'btn-process-cpv'].forEach(id => {
-            document.getElementById(id).classList.add("bg-gradient-to-br", ...tema.btn);
-        });
-        document.querySelectorAll('#pvd h3, #cpv h3').forEach(el => el.classList.add(tema.text));
-        document.querySelectorAll('input').forEach(el => el.classList.add(tema.focus));
-        document.querySelectorAll('.resultado-box').forEach(el => {
-            el.classList.add(tema.text.replace('600', '800'), tema.bg);
-        });
-        
-        const nomeUsuario = localStorage.getItem('nomeUsuario');
-        const generoUsuario = localStorage.getItem('generoUsuario');
-        const saudacaoEl = document.getElementById('saudacao-usuario');
-        if (nomeUsuario) {
-            let boasVindas = generoUsuario === 'M' ? 'Bem-vindo de volta.' : (generoUsuario === 'F' ? 'Bem-vinda de volta.' : 'Bem-vindo(a) de volta.');
-            saudacaoEl.innerHTML = `Olá, <span class="font-bold ${tema.text}">${nomeUsuario}</span>! ${boasVindas}`;
-        } else {
-            saudacaoEl.textContent = 'Acompanhe os prazos de atendimento de forma simples e eficiente.';
-        }
-        setTimeout(() => saudacaoEl.classList.add('show'), 100);
-
-        const btnPvd = document.getElementById('btn-show-pvd');
-        const btnCpv = document.getElementById('btn-show-cpv');
-        const divPvd = document.getElementById('pvd');
-        const divCpv = document.getElementById('cpv');
-
-        btnPvd.addEventListener('click', () => {
-            divPvd.classList.remove('hidden');
-            divCpv.classList.add('hidden');
-            btnPvd.classList.add('active');
-            btnCpv.classList.remove('active');
-        });
-
-        btnCpv.addEventListener('click', () => {
-            divCpv.classList.remove('hidden');
-            divPvd.classList.add('hidden');
-            btnCpv.classList.add('active');
-            btnPvd.classList.remove('active');
-        });
-        
-        const modal = document.getElementById('modal-instrucoes');
-        const abrirBtn = document.getElementById('abrir-instrucoes-btn');
-        const fecharBtn = document.getElementById('fechar-instrucoes-btn');
-
-        if (abrirBtn) {
-            abrirBtn.classList.add("bg-gradient-to-br", ...tema.btn);
-        }
-
-        if (modal && abrirBtn && fecharBtn) {
-            abrirBtn.addEventListener('click', () => {
-              modal.classList.remove('hidden');
-              setTimeout(() => modal.classList.add('active'), 10);
-            });
-
-            const fecharModal = () => {
-              modal.classList.remove('active');
-              setTimeout(() => modal.classList.add('hidden'), 300);
-            };
-
-            fecharBtn.addEventListener('click', fecharModal);
-            modal.addEventListener('click', (e) => {
-              if (e.target === modal) {
-                fecharModal();
-              }
-            });
-        }
+      }
     });
   </script>
-
   <script src="script.js"></script>
-
 </body>
 </html>

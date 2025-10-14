@@ -9,90 +9,42 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
-
   <style>
     body { font-family: 'Inter', sans-serif; }
-
-    .card-3d {
-      transform-style: preserve-3d;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .card-3d:hover {
-      transform: rotateX(6deg) rotateY(-6deg) scale(1.02);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
-    }
-
-    .icon-3d {
-      filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.25));
-      transition: transform 0.4s ease;
-    }
-    .group:hover .icon-3d {
-      transform: translateY(-5px) rotateZ(-3deg) scale(1.05);
-    }
-
-    .btn-3d {
-      box-shadow: 4px 6px 0px rgba(0,0,0,0.25);
-      transition: all 0.2s ease;
-    }
-    .btn-3d:hover {
-      transform: translateY(-2px);
-      box-shadow: 6px 8px 0px rgba(0,0,0,0.25);
-    }
-
-    #saudacao {
-      opacity: 0;
-      transform: translateY(10px);
-      transition: all 0.6s ease;
-    }
-    #saudacao.show {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    #modal-box {
-      transform: perspective(1000px) rotateX(-10deg) scale(0.9);
-      opacity: 0;
-    }
-    #modal-overlay.active #modal-box {
-      transform: perspective(1000px) rotateX(0) scale(1);
-      opacity: 1;
-      transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
-    }
-
-    #particles {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: -1;
-    }
+    .card-3d { transform-style: preserve-3d; transition: transform 0.3s ease, box-shadow 0.3s ease; }
+    .card-3d:hover { transform: rotateX(6deg) rotateY(-6deg) scale(1.02); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25); }
+    .icon-3d { filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.25)); transition: transform 0.4s ease; }
+    .group:hover .icon-3d { transform: translateY(-5px) rotateZ(-3deg) scale(1.05); }
+    .btn-3d { box-shadow: 4px 6px 0px rgba(0,0,0,0.25); transition: all 0.2s ease; }
+    .btn-3d:hover { transform: translateY(-2px); box-shadow: 6px 8px 0px rgba(0,0,0,0.25); }
+    #saudacao { opacity: 0; transform: translateY(10px); transition: all 0.6s ease; }
+    #saudacao.show { opacity: 1; transform: translateY(0); }
+    #modal-box { transform: perspective(1000px) rotateX(-10deg) scale(0.9); opacity: 0; }
+    #modal-overlay.active #modal-box { transform: perspective(1000px) rotateX(0) scale(1); opacity: 1; transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1); }
+    #particles { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
   </style>
 </head>
-
-<body class="relative overflow-hidden text-slate-800">
+<body class="relative overflow-x-hidden bg-slate-50 text-slate-800">
   <canvas id="particles"></canvas>
-
   <header id="header" class="shadow-md relative z-10">
-    <nav class="container mx-auto px-4 py-3 flex items-center justify-center gap-2">
+    <nav class="container mx-auto px-6 py-4 flex items-center justify-center gap-3">
       <span class="text-3xl">📅</span>
-      <h1 id="titulo" class="text-xl sm:text-2xl md:text-3xl font-extrabold text-white drop-shadow-md text-center">
+      <h1 id="titulo" class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white drop-shadow-md text-center">
         Painel Interativo de Prazos
       </h1>
     </nav>
   </header>
-
-  <main class="container mx-auto px-4 py-8 sm:py-12 relative z-10">
+  <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 relative z-10">
     <div class="text-center">
       <div class="flex justify-center mb-4">
         <img src="assets/calendario.png" alt="Ícone de Calendário" class="h-16 w-16 sm:h-20 sm:w-20 icon-3d">
       </div>
-      <h2 id="saudacao" class="text-3xl sm:text-4xl lg:text-5xl font-extrabold drop-shadow-sm">Carregando...</h2>
-      <p class="text-slate-600 mt-2 text-base sm:text-lg">Escolha uma das opções abaixo para começar.</p>
+      <h2 id="saudacao" class="text-3xl sm:text-4xl md:text-5xl font-extrabold drop-shadow-sm">Carregando...</h2>
+      <p class="text-slate-600 mt-2 text-base sm:text-lg max-w-2xl mx-auto">Escolha uma das opções abaixo para começar.</p>
     </div>
-
     <div class="mt-10 sm:mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-7xl mx-auto">
-      <a href="CalculadoraCreditoEspecie/creditoEmEspecie.html" class="group block bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-transparent card-3d">
-        <div class="flex items-center gap-4">
+      <a href="CalculadoraCreditoEspecie/creditoEmEspecie.html" class="group block bg-white p-6 rounded-2xl shadow-lg border border-transparent card-3d">
+        <div class="flex flex-col sm:flex-row items-center text-center sm:text-left gap-5">
           <div class="p-3 rounded-full bg-opacity-20" id="icon-bg-1">
             <img src="assets/crédito_especie.png" alt="Ícone de Crédito em Espécie" class="h-12 w-12 icon-3d">
           </div>
@@ -102,9 +54,8 @@
           </div>
         </div>
       </a>
-
-      <a href="CalculadoraPosVendas/posVendas.html" class="group block bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-transparent card-3d">
-        <div class="flex items-center gap-4">
+      <a href="CalculadoraPosVendas/posVendas.html" class="group block bg-white p-6 rounded-2xl shadow-lg border border-transparent card-3d">
+        <div class="flex flex-col sm:flex-row items-center text-center sm:text-left gap-5">
           <div class="p-3 rounded-full bg-opacity-20" id="icon-bg-2">
             <img src="assets/pos_vendas.png" alt="Ícone de Pós Vendas" class="h-12 w-12 icon-3d">
           </div>
@@ -114,9 +65,8 @@
           </div>
         </div>
       </a>
-
-      <a href="LeiArrependimento/leiArrependimento.html" class="group block bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-transparent card-3d">
-        <div class="flex items-center gap-4">
+      <a href="LeiArrependimento/leiArrependimento.html" class="group block bg-white p-6 rounded-2xl shadow-lg border border-transparent card-3d">
+        <div class="flex flex-col sm:flex-row items-center text-center sm:text-left gap-5">
           <div class="p-3 rounded-full bg-opacity-20" id="icon-bg-3">
             <img src="assets/arrependimento.png" alt="Ícone de Direito de Arrependimento" class="h-12 w-12 icon-3d">
           </div>
@@ -126,13 +76,22 @@
           </div>
         </div>
       </a>
+      <a href="CalculadoraAtraso/analiseAtraso.html" class="group block bg-white p-6 rounded-2xl shadow-lg border border-transparent card-3d">
+        <div class="flex flex-col sm:flex-row items-center text-center sm:text-left gap-5">
+          <div class="p-3 rounded-full bg-opacity-20" id="icon-bg-4">
+            <img src="assets/pagamento-atrasado.png" alt="Ícone de Pagamento Atrasado" class="h-12 w-12 icon-3d">
+          </div>
+          <div>
+            <h3 class="text-lg sm:text-xl font-bold text-slate-800 group-hover:transition-colors" id="link-text-4">Análise de Atraso</h3>
+            <p class="text-slate-500 mt-1 text-sm sm:text-base">Verifique o status e os riscos de cotas em atraso.</p>
+          </div>
+        </div>
+      </a>
     </div>
   </main>
-
   <footer class="w-full text-center py-6 mt-4 sm:mt-8 relative z-10">
     <p class="text-sm text-slate-500">&copy; Todos os direitos reservados.</p>
   </footer>
-
   <div id="modal-overlay" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 transition-opacity duration-300 hidden p-4">
     <div id="modal-box" class="bg-white p-6 sm:p-8 rounded-xl shadow-2xl w-full max-w-sm">
       <h3 class="text-2xl font-bold text-slate-900 text-center">Bem-vinda(o) ao Painel!</h3>
@@ -144,7 +103,6 @@
       </button>
     </div>
   </div>
-
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const saudacaoEl = document.getElementById('saudacao');
@@ -153,34 +111,45 @@
       const nameSubmitBtn = document.getElementById('name-submit-btn');
       const nameError = document.getElementById('name-error');
 
-      // Paletas de cores por dia da semana
-      const coresSemana = {
-        0: { header: ["from-pink-700","to-pink-500"], text:"text-pink-600", btn:["from-pink-600","to-pink-800"], part:"rgba(236,72,153,0.25)" },
-        1: { header: ["from-blue-700","to-blue-500"], text:"text-blue-600", btn:["from-blue-600","to-blue-800"], part:"rgba(37,99,235,0.25)" },
-        2: { header: ["from-green-700","to-green-500"], text:"text-green-600", btn:["from-green-600","to-green-800"], part:"rgba(34,197,94,0.25)" },
-        3: { header: ["from-purple-700","to-purple-500"], text:"text-purple-600", btn:["from-purple-600","to-purple-800"], part:"rgba(168,85,247,0.25)" },
-        4: { header: ["from-orange-700","to-orange-500"], text:"text-orange-600", btn:["from-orange-600","to-orange-800"], part:"rgba(249,115,22,0.25)" },
-        5: { header: ["from-red-700","to-red-500"], text:"text-red-600", btn:["from-red-600","to-red-800"], part:"rgba(220,38,38,0.25)" },
-        6: { header: ["from-yellow-600","to-yellow-400"], text:"text-yellow-600", btn:["from-yellow-500","to-yellow-700"], part:"rgba(202,138,4,0.25)" },
-      };
+      const paletaDeTemas = [
+        { name: "Oceanic Teal", header: ["from-cyan-500", "to-teal-500"], btn: ["from-cyan-600", "to-teal-600"], text: "text-cyan-600", part: "rgba(6, 182, 212, 0.3)", focus: "focus:ring-cyan-500", border: "border-cyan-500", bg: "bg-cyan-50", hover: "hover:text-cyan-800" },
+        { name: "Sunset Orange", header: ["from-amber-500", "to-orange-600"], btn: ["from-amber-600", "to-orange-700"], text: "text-amber-600", part: "rgba(245, 158, 11, 0.3)", focus: "focus:ring-amber-500", border: "border-amber-500", bg: "bg-amber-50", hover: "hover:text-amber-800" },
+        { name: "Grape Soda", header: ["from-fuchsia-500", "to-purple-600"], btn: ["from-fuchsia-600", "to-purple-700"], text: "text-fuchsia-600", part: "rgba(192, 38, 211, 0.3)", focus: "focus:ring-fuchsia-500", border: "border-fuchsia-500", bg: "bg-fuchsia-50", hover: "hover:text-fuchsia-800" },
+        { name: "Jungle Lime", header: ["from-lime-400", "to-emerald-600"], btn: ["from-lime-500", "to-emerald-700"], text: "text-lime-500", part: "rgba(132, 204, 22, 0.3)", focus: "focus:ring-lime-500", border: "border-lime-500", bg: "bg-lime-50", hover: "hover:text-lime-800" },
+        { name: "Hot Pink", header: ["from-pink-500", "to-rose-500"], btn: ["from-pink-600", "to-rose-600"], text: "text-pink-600", part: "rgba(236, 72, 153, 0.3)", focus: "focus:ring-pink-500", border: "border-pink-500", bg: "bg-pink-50", hover: "hover:text-pink-800" },
+        { name: "Deep Sky", header: ["from-sky-500", "to-indigo-600"], btn: ["from-sky-600", "to-indigo-700"], text: "text-sky-600", part: "rgba(14, 165, 233, 0.3)", focus: "focus:ring-sky-500", border: "border-sky-500", bg: "bg-sky-50", hover: "hover:text-sky-800" },
+        { name: "Burning Sunset", header: ["from-red-500", "to-orange-500"], btn: ["from-red-600", "to-orange-600"], text: "text-red-600", part: "rgba(239, 68, 68, 0.3)", focus: "focus:ring-red-500", border: "border-red-500", bg: "bg-red-50", hover: "hover:text-red-800" },
+        { name: "Minty Fresh", header: ["from-green-300", "to-cyan-400"], btn: ["from-green-400", "to-cyan-500"], text: "text-green-500", part: "rgba(16, 185, 129, 0.3)", focus: "focus:ring-green-500", border: "border-green-500", bg: "bg-green-50", hover: "hover:text-green-800" },
+        { name: "Cyberpunk Night", header: ["from-indigo-500", "to-fuchsia-500"], btn: ["from-indigo-600", "to-fuchsia-600"], text: "text-indigo-500", part: "rgba(99, 102, 241, 0.3)", focus: "focus:ring-indigo-500", border: "border-indigo-500", bg: "bg-indigo-50", hover: "hover:text-indigo-800" },
+        { name: "Golden Hour", header: ["from-yellow-400", "to-amber-500"], btn: ["from-yellow-500", "to-amber-600"], text: "text-yellow-500", part: "rgba(234, 179, 8, 0.3)", focus: "focus:ring-yellow-500", border: "border-yellow-500", bg: "bg-yellow-50", hover: "hover:text-yellow-800" },
+        { name: "Royal Blue", header: ["from-blue-500", "to-blue-700"], btn: ["from-blue-600", "to-blue-800"], text: "text-blue-600", part: "rgba(59, 130, 246, 0.3)", focus: "focus:ring-blue-500", border: "border-blue-500", bg: "bg-blue-50", hover: "hover:text-blue-800" },
+        { name: "Emerald Sea", header: ["from-emerald-400", "to-teal-600"], btn: ["from-emerald-500", "to-teal-700"], text: "text-emerald-500", part: "rgba(16, 185, 129, 0.3)", focus: "focus:ring-emerald-500", border: "border-emerald-500", bg: "bg-emerald-50", hover: "hover:text-emerald-800" },
+        { name: "Sweet Plum", header: ["from-violet-500", "to-purple-500"], btn: ["from-violet-600", "to-purple-600"], text: "text-violet-600", part: "rgba(139, 92, 246, 0.3)", focus: "focus:ring-violet-500", border: "border-violet-500", bg: "bg-violet-50", hover: "hover:text-violet-800" },
+        { name: "Ruby Red", header: ["from-rose-600", "to-red-700"], btn: ["from-rose-700", "to-red-800"], text: "text-rose-600", part: "rgba(225, 29, 72, 0.3)", focus: "focus:ring-rose-500", border: "border-rose-500", bg: "bg-rose-50", hover: "hover:text-rose-800" },
+        { name: "Forest Green", header: ["from-green-600", "to-green-800"], btn: ["from-green-700", "to-green-900"], text: "text-green-600", part: "rgba(22, 163, 74, 0.3)", focus: "focus:ring-green-500", border: "border-green-500", bg: "bg-green-50", hover: "hover:text-green-800" },
+        { name: "Electric Blue", header: ["from-cyan-400", "to-sky-500"], btn: ["from-cyan-500", "to-sky-600"], text: "text-cyan-500", part: "rgba(34, 211, 238, 0.3)", focus: "focus:ring-cyan-500", border: "border-cyan-500", bg: "bg-cyan-50", hover: "hover:text-cyan-800" },
+        { name: "Mango Tango", header: ["from-orange-400", "to-yellow-500"], btn: ["from-orange-500", "to-yellow-600"], text: "text-orange-500", part: "rgba(249, 115, 22, 0.3)", focus: "focus:ring-orange-500", border: "border-orange-500", bg: "bg-orange-50", hover: "hover:text-orange-800" },
+        { name: "Lavender Dream", header: ["from-purple-400", "to-violet-500"], btn: ["from-purple-500", "to-violet-600"], text: "text-purple-500", part: "rgba(168, 85, 247, 0.3)", focus: "focus:ring-purple-500", border: "border-purple-500", bg: "bg-purple-50", hover: "hover:text-purple-800" },
+        { name: "Crimson Tide", header: ["from-red-600", "to-rose-800"], btn: ["from-red-700", "to-rose-900"], text: "text-red-600", part: "rgba(220, 38, 38, 0.3)", focus: "focus:ring-red-500", border: "border-red-500", bg: "bg-red-50", hover: "hover:text-red-800" },
+        { name: "Cool Slate", header: ["from-slate-500", "to-gray-600"], btn: ["from-slate-600", "to-gray-700"], text: "text-slate-600", part: "rgba(100, 116, 139, 0.3)", focus: "focus:ring-slate-500", border: "border-slate-500", bg: "bg-slate-50", hover: "hover:text-slate-800" }
+      ];
 
-      const hoje = new Date().getDay();
-      const tema = coresSemana[hoje];
+      const totalTemas = paletaDeTemas.length;
+      const indiceAleatorio = Math.floor(Math.random() * totalTemas);
+      const tema = paletaDeTemas[indiceAleatorio];
 
-      // Header
+      localStorage.setItem('temaAtivo', JSON.stringify(tema));
+
       const header = document.getElementById("header");
       header.classList.add("bg-gradient-to-r", ...tema.header);
 
-      // Saudação cor dinâmica
       saudacaoEl.classList.add(tema.text);
 
-      // Botão
       nameSubmitBtn.classList.add("bg-gradient-to-br", ...tema.btn);
 
-      // Ícones circulares
-      for (let i=1;i<=3;i++) {
-        document.getElementById(`icon-bg-${i}`).classList.add(tema.text.replace("text-","bg-")+"-100");
-        document.getElementById(`link-text-${i}`).classList.add(tema.text.replace("text-","group-hover:text-"));
+      for (let i = 1; i <= 4; i++) {
+        document.getElementById(`icon-bg-${i}`).classList.add(tema.text.replace("text-", "bg-") + "-100");
+        document.getElementById(`link-text-${i}`).classList.add(tema.text.replace("text-", "group-hover:text-"));
       }
 
       async function getGender(name) {
@@ -216,7 +185,6 @@
         if (gender === 'M') boasVindas = 'Seja bem-vindo.';
         else if (gender === 'F') boasVindas = 'Seja bem-vinda.';
         else boasVindas = 'Seja bem-vinda(o).';
-
 
         saudacaoEl.innerHTML = `${saudacaoDoDia}, <span class="${tema.text}">${name}</span>! ${boasVindas}`;
         saudacaoEl.classList.add("show");
@@ -260,7 +228,6 @@
       nameInput.addEventListener('keydown', (e) => e.key === 'Enter' && handleNameSubmit());
       main();
 
-      // --- Partículas dinâmicas ---
       const canvas = document.getElementById("particles");
       const ctx = canvas.getContext("2d");
       let particles = [];
@@ -274,7 +241,7 @@
 
       function createParticles() {
         particles = [];
-        const particleCount = window.innerWidth < 768 ? 30 : 60; // Menos partículas em telas pequenas
+        const particleCount = window.innerWidth < 768 ? 30 : 60;
         for (let i = 0; i < particleCount; i++) {
           particles.push({
             x: Math.random() * canvas.width,
