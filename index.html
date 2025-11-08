@@ -119,6 +119,17 @@
       </button>
     </div>
   </div>
+
+  <a id="chatbot-btn" 
+  href="https://www.embracon.com.br/" 
+  target="_blank" 
+  rel="noopener noreferrer" 
+  class="fixed bottom-6 right-6 z-50 w-16 h-16 flex items-center justify-center rounded-full text-white shadow-xl transition-transform hover:scale-110 btn-3d"
+  title="Falar com nossa EmbraAssist">
+  
+  <img src="assets/avatar.png" alt="Assistente Virtual" class="w-12 h-12 rounded-full object-cover">
+
+</a>
   
   <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -171,7 +182,7 @@
       saudacaoEl.classList.add(tema.text);
 
       nameSubmitBtn.classList.add("bg-gradient-to-br", ...tema.btn);
-
+      document.getElementById("chatbot-btn").classList.add("bg-gradient-to-br", ...tema.btn);
       for (let i = 1; i <= 4; i++) {
         document.getElementById(`icon-bg-${i}`).classList.add(tema.text.replace("text-", "bg-") + "-100");
         document.getElementById(`link-text-${i}`).classList.add(tema.text.replace("text-", "group-hover:text-"));
