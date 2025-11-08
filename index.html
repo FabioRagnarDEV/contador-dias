@@ -26,22 +26,38 @@
 </head>
 <body class="relative overflow-x-hidden bg-slate-50 text-slate-800">
   <canvas id="particles"></canvas>
+  
   <header id="header" class="shadow-md relative z-10">
-    <nav class="container mx-auto px-6 py-4 flex items-center justify-center gap-3">
+  <nav class="container mx-auto px-6 py-4 flex items-center justify-center relative">
+    
+    <div id="relogio-container" 
+        class="absolute left-6 top-1/2 -translate-y-1/2 
+                text-sm sm:text-base font-medium text-white drop-shadow-sm 
+                opacity-0 transition-opacity duration-500 z-20">
+      <span id="data-atual"></span>
+      <span class="mx-1">|</span>
+      <span id="hora-atual"></span>
+    </div>
+
+    <div class="flex items-center justify-center gap-3">
       <span class="text-3xl">📅</span>
       <h1 id="titulo" class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white drop-shadow-md text-center">
         Painel Interativo de Prazos
       </h1>
-    </nav>
-  </header>
+    </div>
+
+  </nav>
+</header>
   <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 relative z-10">
     <div class="text-center">
+      
       <div class="flex justify-center mb-4">
         <img src="assets/calendario.png" alt="Ícone de Calendário" class="h-16 w-16 sm:h-20 sm:w-20 icon-3d">
       </div>
       <h2 id="saudacao" class="text-3xl sm:text-4xl md:text-5xl font-extrabold drop-shadow-sm">Carregando...</h2>
       <p class="text-slate-600 mt-2 text-base sm:text-lg max-w-2xl mx-auto">Escolha uma das opções abaixo para começar.</p>
     </div>
+    
     <div class="mt-10 sm:mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-7xl mx-auto">
       <a href="CalculadoraCreditoEspecie/creditoEmEspecie.html" class="group block bg-white p-6 rounded-2xl shadow-lg border border-transparent card-3d">
         <div class="flex flex-col sm:flex-row items-center text-center sm:text-left gap-5">
@@ -103,14 +119,22 @@
       </button>
     </div>
   </div>
+  
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+      // Elementos do DOM existentes
       const saudacaoEl = document.getElementById('saudacao');
       const modalOverlay = document.getElementById('modal-overlay');
       const nameInput = document.getElementById('name-input');
       const nameSubmitBtn = document.getElementById('name-submit-btn');
       const nameError = document.getElementById('name-error');
 
+      // Elementos do DOM para o Relógio
+      const relogioContainer = document.getElementById('relogio-container');
+      const dataAtualEl = document.getElementById('data-atual');
+      const horaAtualEl = document.getElementById('hora-atual');
+
+      // Paleta de temas
       const paletaDeTemas = [
         { name: "Oceanic Teal", header: ["from-cyan-500", "to-teal-500"], btn: ["from-cyan-600", "to-teal-600"], text: "text-cyan-600", part: "rgba(6, 182, 212, 0.3)", focus: "focus:ring-cyan-500", border: "border-cyan-500", bg: "bg-cyan-50", hover: "hover:text-cyan-800" },
         { name: "Sunset Orange", header: ["from-amber-500", "to-orange-600"], btn: ["from-amber-600", "to-orange-700"], text: "text-amber-600", part: "rgba(245, 158, 11, 0.3)", focus: "focus:ring-amber-500", border: "border-amber-500", bg: "bg-amber-50", hover: "hover:text-amber-800" },
@@ -134,6 +158,7 @@
         { name: "Cool Slate", header: ["from-slate-500", "to-gray-600"], btn: ["from-slate-600", "to-gray-700"], text: "text-slate-600", part: "rgba(100, 116, 139, 0.3)", focus: "focus:ring-slate-500", border: "border-slate-500", bg: "bg-slate-50", hover: "hover:text-slate-800" }
       ];
 
+      // Lógica de tema
       const totalTemas = paletaDeTemas.length;
       const indiceAleatorio = Math.floor(Math.random() * totalTemas);
       const tema = paletaDeTemas[indiceAleatorio];
@@ -152,6 +177,25 @@
         document.getElementById(`link-text-${i}`).classList.add(tema.text.replace("text-", "group-hover:text-"));
       }
 
+      // FUNÇÃO PARA ATUALIZAR O RELÓGIO
+      function atualizarRelogio() {
+        const agora = new Date();
+
+        const dia = String(agora.getDate()).padStart(2, '0');
+        const mes = String(agora.getMonth() + 1).padStart(2, '0');
+        const ano = agora.getFullYear();
+        const dataFormatada = `${dia}/${mes}/${ano}`;
+
+        const horas = String(agora.getHours()).padStart(2, '0');
+        const minutos = String(agora.getMinutes()).padStart(2, '0');
+        const segundos = String(agora.getSeconds()).padStart(2, '0');
+        const horaFormatada = `${horas}:${minutos}:${segundos}`;
+
+        dataAtualEl.textContent = dataFormatada;
+        horaAtualEl.textContent = horaFormatada;
+      }
+
+      // Lógica de gênero
       async function getGender(name) {
         try {
           const [resM, resF] = await Promise.all([
@@ -173,6 +217,7 @@
         }
       }
 
+      // Função de saudação
       function displayGreeting(name, gender) {
         const horaAtual = new Date().getHours();
         let saudacaoDoDia;
@@ -188,8 +233,12 @@
 
         saudacaoEl.innerHTML = `${saudacaoDoDia}, <span class="${tema.text}">${name}</span>! ${boasVindas}`;
         saudacaoEl.classList.add("show");
+
+        // Torna o relógio visível
+        relogioContainer.style.opacity = '1';
       }
 
+      // Função principal
       async function main() {
         const nome = localStorage.getItem('nomeUsuario');
         const genero = localStorage.getItem('generoUsuario');
@@ -202,6 +251,7 @@
         }
       }
 
+      // Manipulador do formulário
       async function handleNameSubmit() {
         const nome = nameInput.value.trim().split(' ')[0];
         if (!nome) {
@@ -224,10 +274,13 @@
         }, 500);
       }
 
+      // Event Listeners
       nameSubmitBtn.addEventListener('click', handleNameSubmit);
       nameInput.addEventListener('keydown', (e) => e.key === 'Enter' && handleNameSubmit());
+      
       main();
 
+      // Lógica das partículas
       const canvas = document.getElementById("particles");
       const ctx = canvas.getContext("2d");
       let particles = [];
@@ -280,6 +333,11 @@
 
       createParticles();
       animate();
+
+      // INICIA O RELÓGIO
+      atualizarRelogio();
+      setInterval(atualizarRelogio, 1000);
+
     });
   </script>
 </body>
