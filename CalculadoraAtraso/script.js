@@ -25,7 +25,7 @@ const manualDeUso = `
                 <h5 class="font-semibold text-slate-800">Cenário 1: Não Contemplado / Crédito Pendente</h5>
                 <ul class="list-decimal list-inside mt-2 space-y-1 text-sm">
                     <li>Marque a opção <strong>"Não Contemplado / Crédito Pendente"</strong>.</li>
-                    <li>Selecione o <strong>"Tipo de Grupo"</strong> (Ex: Embracon, CNVW).</li>
+                    <li>Selecione <strong>"Administradora"</strong> (Ex: Embracon, CNVW).</li>
                     <li>Informe a <strong>"Data de Inauguração do Grupo"</strong> (antes ou depois de Jul/2024).</li>
                     <li>Preencha o <strong>"Vencimento da Parcela Mais Antiga"</strong> e o <strong>"Nº de Parcelas em Aberto"</strong>.</li>
                     <li>Clique em <strong>"Analisar"</strong>. O sistema verificará se a cota atingiu os critérios para risco de cancelamento automático.</li>
@@ -148,11 +148,11 @@ function analisarAtraso() {
         const infoCota = `(${diasAtraso} dias | ${parcelasAbertas} parcelas)`;
         
         if (parcelasAbertas >= parcelasParaCancelar || diasAtraso >= diasParaCancelar) {
-            statusFinal = `<strong>ALERTA DE CANCELAMENTO ${infoCota}:</strong> A cota atingiu o critério de ${parcelasParaCancelar} parcelas ou ${diasParaCancelar} dias e poderá ser cancelada automaticamente.`;
+            statusFinal = `<strong>ALERTA DE CANCELAMENTO ${infoCota}:</strong> A cota atingiu o critério de ${parcelasParaCancelar} parcelas ou ${diasParaCancelar} dias e poderá ser cancelada automaticamente a qualquer momento.`;
             corFundo = 'bg-red-100';
             corTexto = 'text-red-800';
         } else {
-            statusFinal = `<strong>Status ${infoCota}:</strong> A cota está em atraso, mas ainda não atingiu o critério (${parcelasParaCancelar} parcelas ou ${diasParaCancelar} dias) para o alerta de cancelamento. Monitorar.`;
+            statusFinal = `<strong>Status ${infoCota}:</strong> A cota está em atraso, mas ainda não atingiu o critério (${parcelasParaCancelar} parcelas ou ${diasParaCancelar} dias) para o alerta de cancelamento. Estando dentro das regras, sugerir diluição.`;
             corFundo = 'bg-yellow-100';
             corTexto = 'text-yellow-800';
         }
