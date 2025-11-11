@@ -25,7 +25,7 @@ const manualDeUso = `
                 <h5 class="font-semibold text-slate-800">Cenário 1: Não Contemplado / Crédito Pendente</h5>
                 <ul class="list-decimal list-inside mt-2 space-y-1 text-sm">
                     <li>Marque a opção <strong>"Não Contemplado / Crédito Pendente"</strong>.</li>
-                    <li>Selecione <strong>"Administradora"</strong> (Ex: Embracon, CNVW).</li>
+                    <li>Selecione <strong>"Unidade de negócio"</strong> (Ex: Embracon, CNVW).</li>
                     <li>Informe a <strong>"Data de Inauguração do Grupo"</strong> (antes ou depois de Jul/2024).</li>
                     <li>Preencha o <strong>"Vencimento da Parcela Mais Antiga"</strong> e o <strong>"Nº de Parcelas em Aberto"</strong>.</li>
                     <li>Clique em <strong>"Analisar"</strong>. O sistema verificará se a cota atingiu os critérios para risco de cancelamento automático.</li>
