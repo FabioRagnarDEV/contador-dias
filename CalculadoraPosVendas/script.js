@@ -2,37 +2,45 @@
 let feriadosPorAno = {}; // Armazena os feriados para evitar chamadas repetidas à API
 
 // --- Elementos do DOM ---
+// Seções
 const pvdSection = document.getElementById('pvd');
 const cpvSection = document.getElementById('cpv');
-// PVD
+const dvSection = document.getElementById('dv'); // NOVO
+
+// PVD (Pós Vendas Digital)
 const dataEfetivacaoInput = document.getElementById('dataEfetivacao');
 const resultadoPVDDiv = document.getElementById('resultadoPVD');
 const erroPVDDiv = document.getElementById('erroPVD');
-// CPV
+
+// CPV (Caso Pós Vendas)
 const dataAberturaInput = document.getElementById('dataAbertura');
 const numeroCasoInput = document.getElementById('numeroCaso');
 const resultadoCPVDiv = document.getElementById('resultadoCPV');
 const erroCPVDiv = document.getElementById('erroCPV');
+
+// DV (Divergência na Venda) - NOVO
+const dataAberturaDVInput = document.getElementById('dataAberturaDV');
+const numeroCasoDVInput = document.getElementById('numeroCasoDV');
+const resultadoDVDiv = document.getElementById('resultadoDV');
+const erroDVDiv = document.getElementById('erroDV');
 
 
 // --- Funções de Ajuda (Helpers) ---
 
 /**
  * Carrega e armazena os feriados de um ano específico via BrasilAPI.
- * @param {number} ano O ano para carregar os feriados.
  */
 async function carregarFeriados(ano) {
     if (feriadosPorAno[ano]) {
-        return; // Feriados para este ano já foram carregados
+        return; 
     }
     try {
         const response = await fetch(`https://brasilapi.com.br/api/feriados/v1/${ano}`);
         if (!response.ok) throw new Error('Falha na resposta da API');
         const data = await response.json();
-        feriadosPorAno[ano] = data.map(f => f.date); // Armazena "YYYY-MM-DD"
+        feriadosPorAno[ano] = data.map(f => f.date); 
     } catch (error) {
         console.error("Erro ao carregar feriados:", error);
-        // Exibe o erro em ambas as seções, pois não sabemos qual está ativa
         erroPVDDiv.textContent = "Erro ao carregar feriados. Verifique a conexão.";
         erroCPVDiv.textContent = "Erro ao carregar feriados. Verifique a conexão.";
     }
@@ -40,20 +48,16 @@ async function carregarFeriados(ano) {
 
 /**
  * Verifica se uma data é um feriado.
- * @param {Date} date O objeto Date a ser verificado.
- * @returns {boolean}
  */
 function isFeriado(date) {
     const ano = date.getFullYear();
-    if (!feriadosPorAno[ano]) return false; // Feriados do ano não carregados
-    const dataFormatada = date.toISOString().split('T')[0]; // "YYYY-MM-DD"
+    if (!feriadosPorAno[ano]) return false;
+    const dataFormatada = date.toISOString().split('T')[0];
     return feriadosPorAno[ano].includes(dataFormatada);
 }
 
 /**
- * Verifica se uma data cai em um fim de semana (Sábado ou Domingo).
- * @param {Date} date O objeto Date a ser verificado.
- * @returns {boolean}
+ * Verifica se uma data cai em um fim de semana.
  */
 function isWeekend(date) {
     const day = date.getDay();
@@ -61,10 +65,7 @@ function isWeekend(date) {
 }
 
 /**
- * Adiciona um número específico de dias úteis a uma data, pulando fins de semana e feriados.
- * @param {Date} startDate A data inicial.
- * @param {number} days O número de dias úteis a adicionar.
- * @returns {Date} A nova data após adicionar os dias úteis.
+ * Adiciona dias úteis.
  */
 function addBusinessDays(startDate, days) {
     let currentDate = new Date(startDate);
@@ -79,10 +80,7 @@ function addBusinessDays(startDate, days) {
 }
 
 /**
- * Conta os dias úteis entre duas datas.
- * @param {Date} startDate Data de início.
- * @param {Date} endDate Data de fim.
- * @returns {number} O número de dias úteis.
+ * Conta dias úteis.
  */
 function countBusinessDays(startDate, endDate) {
     let count = 0;
@@ -105,6 +103,7 @@ function countBusinessDays(startDate, endDate) {
 async function processPVD() {
     erroPVDDiv.textContent = '';
     resultadoPVDDiv.textContent = '';
+    resultadoPVDDiv.classList.add('hidden'); // Esconde ao iniciar
 
     const efetivacaoValue = dataEfetivacaoInput.value;
     if (!efetivacaoValue) {
@@ -115,18 +114,23 @@ async function processPVD() {
     const dataEfetivacao = new Date(efetivacaoValue);
     await carregarFeriados(dataEfetivacao.getFullYear());
 
-    // O prazo é de 48h úteis, o que equivale a 2 dias úteis.
     const prazoFinal = addBusinessDays(dataEfetivacao, 2);
     const dataAtual = new Date();
+    
+    // Zera horas para comparação justa de datas
+    dataAtual.setHours(0,0,0,0);
+    prazoFinal.setHours(0,0,0,0);
+
+    resultadoPVDDiv.classList.remove('hidden'); // Mostra resultado
 
     if (dataAtual > prazoFinal) {
         resultadoPVDDiv.textContent = "Prazo de 48h úteis excedido. Abrir vermelha comercial para a ouvidoria.";
-        resultadoPVDDiv.classList.remove('text-green-800');
-        resultadoPVDDiv.classList.add('text-red-800');
+        resultadoPVDDiv.classList.remove('text-green-800', 'bg-green-100');
+        resultadoPVDDiv.classList.add('text-red-800', 'bg-red-100');
     } else {
         resultadoPVDDiv.textContent = "Dentro do prazo de 48h úteis. Direcione ou chame alguém do pós vendas imediatamente para fazer contato com o consorciado.";
-        resultadoPVDDiv.classList.remove('text-red-800');
-        resultadoPVDDiv.classList.add('text-green-800');
+        resultadoPVDDiv.classList.remove('text-red-800', 'bg-red-100');
+        resultadoPVDDiv.classList.add('text-green-800', 'bg-green-100');
     }
 }
 
@@ -136,7 +140,8 @@ async function processPVD() {
 async function processCPV() {
     erroCPVDiv.textContent = '';
     resultadoCPVDiv.textContent = '';
-    
+    resultadoCPVDiv.classList.add('hidden');
+
     const dataAberturaValue = dataAberturaInput.value;
     const numeroCasoValue = numeroCasoInput.value;
 
@@ -147,34 +152,107 @@ async function processCPV() {
     
     const dataAbertura = new Date(dataAberturaValue);
     const dataAtual = new Date();
+    dataAtual.setHours(0,0,0,0); // Zera horas para evitar erros de fuso/hora
     
-    // Carrega feriados para ambos os anos, caso o período atravesse a virada do ano
     await carregarFeriados(dataAbertura.getFullYear());
     await carregarFeriados(dataAtual.getFullYear());
 
     const diffBusinessDays = countBusinessDays(dataAbertura, dataAtual);
     const prazoTotal = 50;
 
+    resultadoCPVDiv.classList.remove('hidden');
+
     if (diffBusinessDays > prazoTotal) {
         resultadoCPVDiv.textContent = `${prazoTotal} dias úteis excedidos. Abrir um caso de vermelha comercial e anexar as evidências se já os tiver`;
+        resultadoCPVDiv.classList.add('text-red-800', 'bg-red-100');
     } else {
         const diasRestantes = prazoTotal - diffBusinessDays;
         const verbo = diasRestantes === 1 ? "resta" : "restam";
         const plural = diasRestantes === 1 ? "dia útil" : "dias úteis";
         resultadoCPVDiv.textContent = `Para o caso ${numeroCasoValue}, ${verbo} ${diasRestantes} ${plural} para tratativa. Abrir caso de dúvida para a fila do setor 'Pós-Vendas'.`;
+        resultadoCPVDiv.classList.remove('text-red-800', 'bg-red-100');
+    }
+}
+
+/**
+ * Processa a verificação de Divergência na Venda (NOVO).
+ * Lógica: 90 dias CORRIDOS (conta sábado, domingo e feriado).
+ */
+function processDV() {
+    erroDVDiv.textContent = '';
+    resultadoDVDiv.textContent = '';
+    resultadoDVDiv.classList.add('hidden');
+
+    const dataAberturaValue = dataAberturaDVInput.value;
+    const numeroCasoValue = numeroCasoDVInput.value;
+
+    if (!dataAberturaValue || !numeroCasoValue) {
+        erroDVDiv.textContent = "Por favor, preencha todos os campos.";
+        return;
+    }
+
+    const dataAbertura = new Date(dataAberturaValue);
+    const dataAtual = new Date();
+    
+    // Zera as horas para comparar apenas datas
+    dataAbertura.setHours(0,0,0,0);
+    dataAtual.setHours(0,0,0,0);
+
+    if (dataAbertura > dataAtual) {
+        erroDVDiv.textContent = "A data de abertura não pode ser no futuro.";
+        return;
+    }
+
+    // Calcula prazo de 90 dias corridos
+    const dataLimite = new Date(dataAbertura);
+    dataLimite.setDate(dataLimite.getDate() + 90);
+
+    // Diferença em milissegundos convertida para dias
+    const diferencaTempo = dataLimite - dataAtual;
+    const diasRestantes = Math.ceil(diferencaTempo / (1000 * 60 * 60 * 24));
+
+    resultadoDVDiv.classList.remove('hidden');
+
+    if (diasRestantes >= 0) {
+        // DENTRO DO PRAZO
+        resultadoDVDiv.innerHTML = `Para o caso ${numeroCasoValue} ainda restam ${diasRestantes} dias para tratativa.<br><br>Por favor, acionar o pós vendas imediatamente para tratativa, pois está dentro do prazo de tratativa`;
+        // Remove cores de erro caso existam
+        resultadoDVDiv.classList.remove('text-red-800', 'bg-red-100');
+    } else {
+        // FORA DO PRAZO (EXPIRADO)
+        const diasExpirados = Math.abs(diasRestantes);
+        resultadoDVDiv.textContent = `Para o caso ${numeroCasoValue}, o prazo de 90 dias corridos expirou há ${diasExpirados} dias.`;
+        resultadoDVDiv.classList.add('text-red-800', 'bg-red-100');
     }
 }
 
 
+// --- Funções de UI ---
+
 function showSection(sectionId) {
+    // Esconde todas as seções
     pvdSection.classList.add('hidden');
     cpvSection.classList.add('hidden');
+    dvSection.classList.add('hidden'); // NOVO
+
+    // Mostra a escolhida
     document.getElementById(sectionId).classList.remove('hidden');
+    
+    // Opcional: Limpar erros ao trocar de aba
+    erroPVDDiv.textContent = '';
+    erroCPVDiv.textContent = '';
+    erroDVDiv.textContent = '';
+    
+    // Esconder resultados antigos
+    resultadoPVDDiv.classList.add('hidden');
+    resultadoCPVDiv.classList.add('hidden');
+    resultadoDVDiv.classList.add('hidden');
 }
 
 function resetPVD() {
     dataEfetivacaoInput.value = '';
     resultadoPVDDiv.textContent = '';
+    resultadoPVDDiv.classList.add('hidden');
     erroPVDDiv.textContent = '';
 }
 
@@ -182,22 +260,40 @@ function resetCPV() {
     dataAberturaInput.value = '';
     numeroCasoInput.value = '';
     resultadoCPVDiv.textContent = '';
+    resultadoCPVDiv.classList.add('hidden');
     erroCPVDiv.textContent = '';
+}
+
+// NOVO Reset para Divergência
+function resetDV() {
+    dataAberturaDVInput.value = '';
+    numeroCasoDVInput.value = '';
+    resultadoDVDiv.textContent = '';
+    resultadoDVDiv.classList.add('hidden');
+    erroDVDiv.textContent = '';
 }
 
 
 // --- "Escutadores" de Eventos (Event Listeners) ---
 
+// Botões de Navegação (Abas)
 document.getElementById('btn-show-pvd').addEventListener('click', () => showSection('pvd'));
 document.getElementById('btn-show-cpv').addEventListener('click', () => showSection('cpv'));
+document.getElementById('btn-show-dv').addEventListener('click', () => showSection('dv')); // NOVO
 
+// Ações PVD
 document.getElementById('btn-process-pvd').addEventListener('click', processPVD);
 document.getElementById('btn-reset-pvd').addEventListener('click', resetPVD);
 
+// Ações CPV
 document.getElementById('btn-process-cpv').addEventListener('click', processCPV);
 document.getElementById('btn-reset-cpv').addEventListener('click', resetCPV);
 
-// Carrega os feriados do ano corrente ao iniciar a página, para uma resposta mais rápida no primeiro uso.
+// Ações DV (NOVO)
+document.getElementById('btn-process-dv').addEventListener('click', processDV);
+document.getElementById('btn-reset-dv').addEventListener('click', resetDV);
+
+// Inicialização
 window.addEventListener('DOMContentLoaded', () => {
     const anoAtual = new Date().getFullYear();
     carregarFeriados(anoAtual);
