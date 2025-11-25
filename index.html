@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Inter', sans-serif; }
+    body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
     .card-3d { transform-style: preserve-3d; transition: transform 0.3s ease, box-shadow 0.3s ease; }
     .card-3d:hover { transform: rotateX(6deg) rotateY(-6deg) scale(1.02); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25); }
     .icon-3d { filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.25)); transition: transform 0.4s ease; }
@@ -21,22 +21,57 @@
     #saudacao.show { opacity: 1; transform: translateY(0); }
     #modal-box { transform: perspective(1000px) rotateX(-10deg) scale(0.9); opacity: 0; }
     #modal-overlay.active #modal-box { transform: perspective(1000px) rotateX(0) scale(1); opacity: 1; transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1); }
-    #particles { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+    
+    /* Canvas de Partículas (Fundo) */
+    #particles { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+    
+    /* Canvas de Fogos (Frente - Celebração) */
+    #fireworks-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 100; pointer-events: none; display: none; }
+    
+    /* Overlay de Celebração */
+    #celebration-overlay { 
+      position: fixed; inset: 0; z-index: 90; 
+      background: rgba(0,0,0,0.9); /* Fundo mais escuro para contraste */
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 1s ease;
+    }
+    #celebration-overlay.active { opacity: 1; pointer-events: auto; }
+    
+    @keyframes pulse-festivo {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    .badge-festivo { animation: pulse-festivo 2s infinite; }
+    
+    /* Animação do Texto de Celebração */
+    @keyframes text-pop {
+      0% { transform: scale(0.5); opacity: 0; }
+      50% { transform: scale(1.2); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .celebration-text { animation: text-pop 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
   </style>
 </head>
-<body class="relative overflow-x-hidden bg-slate-50 text-slate-800">
+<body class="relative bg-slate-50 text-slate-800">
   <canvas id="particles"></canvas>
+  <canvas id="fireworks-canvas"></canvas>
   
-  <header id="header" class="shadow-md relative z-10">
-  <nav class="container mx-auto px-6 py-4 flex items-center justify-center relative">
+  <div id="celebration-overlay">
+    <h1 id="celebration-message" class="text-5xl md:text-7xl font-extrabold text-yellow-400 text-center drop-shadow-[0_0_15px_rgba(250,204,21,0.6)] p-4 leading-tight">
+      </h1>
+  </div>
+
+  <header id="header" class="shadow-md relative z-10 transition-colors duration-700">
+    <nav class="container mx-auto px-6 py-4 flex items-center justify-center relative flex-col sm:flex-row">
     
-    <div id="relogio-container" 
-        class="absolute left-6 top-1/2 -translate-y-1/2 
-                text-sm sm:text-base font-medium text-white drop-shadow-sm 
-                opacity-0 transition-opacity duration-500 z-20">
-      <span id="data-atual"></span>
-      <span class="mx-1">|</span>
-      <span id="hora-atual"></span>
+    <div id="relogio-wrapper" class="absolute left-6 top-1/2 -translate-y-1/2 hidden lg:flex flex-col items-start gap-1 z-20">
+        <div id="relogio-container" 
+             class="text-sm sm:text-base font-medium text-white drop-shadow-sm opacity-0 transition-opacity duration-500">
+          <span id="data-atual"></span>
+          <span class="mx-1">|</span>
+          <span id="hora-atual"></span>
+        </div>
+        <div id="countdown-badge" class="hidden text-xs font-bold text-white bg-white/20 px-2 py-1 rounded-full backdrop-blur-sm border border-white/30 badge-festivo"></div>
     </div>
 
     <div class="flex items-center justify-center gap-3">
@@ -126,77 +161,266 @@
   rel="noopener noreferrer" 
   class="fixed bottom-6 right-6 z-50 w-16 h-16 flex items-center justify-center rounded-full text-white shadow-xl transition-transform hover:scale-110 btn-3d"
   title="Falar com nossa EmbraAssist">
-  
   <img src="assets/avatar.png" alt="Assistente Virtual" class="w-12 h-12 rounded-full object-cover">
-
 </a>
   
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // Elementos do DOM existentes
+      // Elementos do DOM
       const saudacaoEl = document.getElementById('saudacao');
       const modalOverlay = document.getElementById('modal-overlay');
       const nameInput = document.getElementById('name-input');
       const nameSubmitBtn = document.getElementById('name-submit-btn');
       const nameError = document.getElementById('name-error');
-
-      // Elementos do DOM para o Relógio
       const relogioContainer = document.getElementById('relogio-container');
       const dataAtualEl = document.getElementById('data-atual');
       const horaAtualEl = document.getElementById('hora-atual');
+      const countdownBadge = document.getElementById('countdown-badge');
+      
+      // Elementos de Celebração
+      const celebrationOverlay = document.getElementById('celebration-overlay');
+      const celebrationMessage = document.getElementById('celebration-message');
+      const fireworksCanvas = document.getElementById('fireworks-canvas');
 
-      // Paleta de temas
-      const paletaDeTemas = [
+      // Estado da Celebração (para não disparar várias vezes no mesmo minuto)
+      let celebrationActive = false;
+
+      // Paleta de temas padrão
+      const paletaPadrao = [
         { name: "Oceanic Teal", header: ["from-cyan-500", "to-teal-500"], btn: ["from-cyan-600", "to-teal-600"], text: "text-cyan-600", part: "rgba(6, 182, 212, 0.3)", focus: "focus:ring-cyan-500", border: "border-cyan-500", bg: "bg-cyan-50", hover: "hover:text-cyan-800" },
         { name: "Sunset Orange", header: ["from-amber-500", "to-orange-600"], btn: ["from-amber-600", "to-orange-700"], text: "text-amber-600", part: "rgba(245, 158, 11, 0.3)", focus: "focus:ring-amber-500", border: "border-amber-500", bg: "bg-amber-50", hover: "hover:text-amber-800" },
         { name: "Grape Soda", header: ["from-fuchsia-500", "to-purple-600"], btn: ["from-fuchsia-600", "to-purple-700"], text: "text-fuchsia-600", part: "rgba(192, 38, 211, 0.3)", focus: "focus:ring-fuchsia-500", border: "border-fuchsia-500", bg: "bg-fuchsia-50", hover: "hover:text-fuchsia-800" },
         { name: "Jungle Lime", header: ["from-lime-400", "to-emerald-600"], btn: ["from-lime-500", "to-emerald-700"], text: "text-lime-500", part: "rgba(132, 204, 22, 0.3)", focus: "focus:ring-lime-500", border: "border-lime-500", bg: "bg-lime-50", hover: "hover:text-lime-800" },
-        { name: "Hot Pink", header: ["from-pink-500", "to-rose-500"], btn: ["from-pink-600", "to-rose-600"], text: "text-pink-600", part: "rgba(236, 72, 153, 0.3)", focus: "focus:ring-pink-500", border: "border-pink-500", bg: "bg-pink-50", hover: "hover:text-pink-800" },
         { name: "Deep Sky", header: ["from-sky-500", "to-indigo-600"], btn: ["from-sky-600", "to-indigo-700"], text: "text-sky-600", part: "rgba(14, 165, 233, 0.3)", focus: "focus:ring-sky-500", border: "border-sky-500", bg: "bg-sky-50", hover: "hover:text-sky-800" },
-        { name: "Burning Sunset", header: ["from-red-500", "to-orange-500"], btn: ["from-red-600", "to-orange-600"], text: "text-red-600", part: "rgba(239, 68, 68, 0.3)", focus: "focus:ring-red-500", border: "border-red-500", bg: "bg-red-50", hover: "hover:text-red-800" },
-        { name: "Minty Fresh", header: ["from-green-300", "to-cyan-400"], btn: ["from-green-400", "to-cyan-500"], text: "text-green-500", part: "rgba(16, 185, 129, 0.3)", focus: "focus:ring-green-500", border: "border-green-500", bg: "bg-green-50", hover: "hover:text-green-800" },
-        { name: "Cyberpunk Night", header: ["from-indigo-500", "to-fuchsia-500"], btn: ["from-indigo-600", "to-fuchsia-600"], text: "text-indigo-500", part: "rgba(99, 102, 241, 0.3)", focus: "focus:ring-indigo-500", border: "border-indigo-500", bg: "bg-indigo-50", hover: "hover:text-indigo-800" },
-        { name: "Golden Hour", header: ["from-yellow-400", "to-amber-500"], btn: ["from-yellow-500", "to-amber-600"], text: "text-yellow-500", part: "rgba(234, 179, 8, 0.3)", focus: "focus:ring-yellow-500", border: "border-yellow-500", bg: "bg-yellow-50", hover: "hover:text-yellow-800" },
         { name: "Royal Blue", header: ["from-blue-500", "to-blue-700"], btn: ["from-blue-600", "to-blue-800"], text: "text-blue-600", part: "rgba(59, 130, 246, 0.3)", focus: "focus:ring-blue-500", border: "border-blue-500", bg: "bg-blue-50", hover: "hover:text-blue-800" },
-        { name: "Emerald Sea", header: ["from-emerald-400", "to-teal-600"], btn: ["from-emerald-500", "to-teal-700"], text: "text-emerald-500", part: "rgba(16, 185, 129, 0.3)", focus: "focus:ring-emerald-500", border: "border-emerald-500", bg: "bg-emerald-50", hover: "hover:text-emerald-800" },
-        { name: "Sweet Plum", header: ["from-violet-500", "to-purple-500"], btn: ["from-violet-600", "to-purple-600"], text: "text-violet-600", part: "rgba(139, 92, 246, 0.3)", focus: "focus:ring-violet-500", border: "border-violet-500", bg: "bg-violet-50", hover: "hover:text-violet-800" },
-        { name: "Ruby Red", header: ["from-rose-600", "to-red-700"], btn: ["from-rose-700", "to-red-800"], text: "text-rose-600", part: "rgba(225, 29, 72, 0.3)", focus: "focus:ring-rose-500", border: "border-rose-500", bg: "bg-rose-50", hover: "hover:text-rose-800" },
-        { name: "Forest Green", header: ["from-green-600", "to-green-800"], btn: ["from-green-700", "to-green-900"], text: "text-green-600", part: "rgba(22, 163, 74, 0.3)", focus: "focus:ring-green-500", border: "border-green-500", bg: "bg-green-50", hover: "hover:text-green-800" },
         { name: "Electric Blue", header: ["from-cyan-400", "to-sky-500"], btn: ["from-cyan-500", "to-sky-600"], text: "text-cyan-500", part: "rgba(34, 211, 238, 0.3)", focus: "focus:ring-cyan-500", border: "border-cyan-500", bg: "bg-cyan-50", hover: "hover:text-cyan-800" },
-        { name: "Mango Tango", header: ["from-orange-400", "to-yellow-500"], btn: ["from-orange-500", "to-yellow-600"], text: "text-orange-500", part: "rgba(249, 115, 22, 0.3)", focus: "focus:ring-orange-500", border: "border-orange-500", bg: "bg-orange-50", hover: "hover:text-orange-800" },
-        { name: "Lavender Dream", header: ["from-purple-400", "to-violet-500"], btn: ["from-purple-500", "to-violet-600"], text: "text-purple-500", part: "rgba(168, 85, 247, 0.3)", focus: "focus:ring-purple-500", border: "border-purple-500", bg: "bg-purple-50", hover: "hover:text-purple-800" },
-        { name: "Crimson Tide", header: ["from-red-600", "to-rose-800"], btn: ["from-red-700", "to-rose-900"], text: "text-red-600", part: "rgba(220, 38, 38, 0.3)", focus: "focus:ring-red-500", border: "border-red-500", bg: "bg-red-50", hover: "hover:text-red-800" },
         { name: "Cool Slate", header: ["from-slate-500", "to-gray-600"], btn: ["from-slate-600", "to-gray-700"], text: "text-slate-600", part: "rgba(100, 116, 139, 0.3)", focus: "focus:ring-slate-500", border: "border-slate-500", bg: "bg-slate-50", hover: "hover:text-slate-800" }
       ];
 
-      // Lógica de tema
-      const totalTemas = paletaDeTemas.length;
-      const indiceAleatorio = Math.floor(Math.random() * totalTemas);
-      const tema = paletaDeTemas[indiceAleatorio];
+      const eventosEspeciais = [
+        {
+          nome: "Natal",
+          dia: 25,
+          mes: 11, // Dezembro
+          msgCelebra: "Feliz Natal!!! 🎄",
+          tema: { 
+            name: "Especial Natal", 
+            header: ["from-red-600", "to-green-700"], 
+            btn: ["from-red-600", "to-green-700"], 
+            text: "text-red-600", 
+            part: "rgba(220, 38, 38, 0.4)", 
+            focus: "focus:ring-red-500", 
+            border: "border-red-500", 
+            bg: "bg-red-50", 
+            hover: "hover:text-green-800" 
+          }
+        },
+        {
+          nome: "Ano Novo",
+          dia: 1,
+          mes: 0, // Janeiro
+          msgCelebra: "Um próspero ano novo!!! 🥂",
+          tema: { 
+            name: "Especial Ano Novo", 
+            header: ["from-slate-400", "to-yellow-500"], 
+            btn: ["from-slate-500", "to-yellow-600"], 
+            text: "text-yellow-600", 
+            part: "rgba(234, 179, 8, 0.4)", 
+            focus: "focus:ring-yellow-500", 
+            border: "border-yellow-500", 
+            bg: "bg-yellow-50", 
+            hover: "hover:text-yellow-800" 
+          }
+        }
+      ];
+
+      // --- LÓGICA DE DATA COMEMORATIVA ---
+      function calcularProximoEvento() {
+        const hoje = new Date();
+        const anoAtual = hoje.getFullYear();
+        let menorDiferenca = Infinity;
+        let proximoEvento = null;
+        let diasRestantes = 0;
+
+        eventosEspeciais.forEach(evento => {
+          let dataEvento = new Date(anoAtual, evento.mes, evento.dia);
+          if (dataEvento < hoje) {
+             dataEvento.setFullYear(anoAtual + 1);
+          }
+          const diffTime = dataEvento - hoje;
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+          if (diffDays >= 0 && diffDays < menorDiferenca) {
+            menorDiferenca = diffDays;
+            proximoEvento = evento;
+            diasRestantes = diffDays;
+          }
+        });
+        return { evento: proximoEvento, dias: diasRestantes };
+      }
+
+      // 1. Definição do Tema Inicial
+      const resultadoEvento = calcularProximoEvento();
+      let tema;
+
+      if (resultadoEvento.dias <= 10 && resultadoEvento.evento) {
+        tema = resultadoEvento.evento.tema;
+        const textoDias = resultadoEvento.dias === 1 ? 'dia' : 'dias';
+        const textoFalta = resultadoEvento.dias === 0 ? 'É hoje!' : `Faltam ${resultadoEvento.dias} ${textoDias} para o ${resultadoEvento.evento.nome}!`;
+        let icon = '✨';
+        if (resultadoEvento.evento.nome === 'Natal') icon = '🎄';
+        if (resultadoEvento.evento.nome === 'Ano Novo') icon = '🥂';
+        countdownBadge.textContent = `${icon} ${textoFalta}`;
+        countdownBadge.classList.remove('hidden');
+      } else {
+        const totalTemas = paletaPadrao.length;
+        const indiceAleatorio = Math.floor(Math.random() * totalTemas);
+        tema = paletaPadrao[indiceAleatorio];
+        if (resultadoEvento.dias <= 40 && resultadoEvento.evento) {
+           const textoDias = resultadoEvento.dias === 1 ? 'dia' : 'dias';
+           let icon = '⏳';
+           if (resultadoEvento.evento.nome === 'Natal') icon = '🎄';
+           if (resultadoEvento.evento.nome === 'Ano Novo') icon = '🥂';
+           countdownBadge.textContent = `${icon} Faltam ${resultadoEvento.dias} ${textoDias} para o ${resultadoEvento.evento.nome}`;
+           countdownBadge.classList.remove('hidden');
+        }
+      }
 
       localStorage.setItem('temaAtivo', JSON.stringify(tema));
 
       const header = document.getElementById("header");
       header.classList.add("bg-gradient-to-r", ...tema.header);
-
       saudacaoEl.classList.add(tema.text);
-
       nameSubmitBtn.classList.add("bg-gradient-to-br", ...tema.btn);
       document.getElementById("chatbot-btn").classList.add("bg-gradient-to-br", ...tema.btn);
+      
       for (let i = 1; i <= 4; i++) {
         document.getElementById(`icon-bg-${i}`).classList.add(tema.text.replace("text-", "bg-") + "-100");
         document.getElementById(`link-text-${i}`).classList.add(tema.text.replace("text-", "group-hover:text-"));
       }
 
-      // FUNÇÃO PARA ATUALIZAR O RELÓGIO
+      // ==========================================
+      // LÓGICA DE FOGOS DE ARTIFÍCIO
+      // ==========================================
+      let fireworksCtx = fireworksCanvas.getContext('2d');
+      let fireworks = [];
+      let animationId;
+
+      function resizeFireworksCanvas() {
+        fireworksCanvas.width = window.innerWidth;
+        fireworksCanvas.height = window.innerHeight;
+      }
+      window.addEventListener('resize', resizeFireworksCanvas);
+      resizeFireworksCanvas();
+
+      class Firework {
+        constructor(x, y, color) {
+          this.x = x;
+          this.y = y;
+          this.color = color;
+          this.particles = [];
+          for (let i = 0; i < 50; i++) {
+            this.particles.push(new Particle(this.x, this.y, this.color));
+          }
+        }
+        draw() {
+          this.particles.forEach(p => p.draw());
+        }
+        update() {
+          this.particles.forEach((p, index) => {
+            p.update();
+            if (p.alpha <= 0) this.particles.splice(index, 1);
+          });
+        }
+      }
+
+      class Particle {
+        constructor(x, y, color) {
+          this.x = x;
+          this.y = y;
+          this.color = color;
+          this.velocity = {
+            x: (Math.random() - 0.5) * 6,
+            y: (Math.random() - 0.5) * 6
+          };
+          this.alpha = 1;
+          this.friction = 0.95;
+          this.gravity = 0.05;
+        }
+        draw() {
+          fireworksCtx.save();
+          fireworksCtx.globalAlpha = this.alpha;
+          fireworksCtx.beginPath();
+          fireworksCtx.arc(this.x, this.y, 3, 0, Math.PI * 2, false);
+          fireworksCtx.fillStyle = this.color;
+          fireworksCtx.fill();
+          fireworksCtx.restore();
+        }
+        update() {
+          this.velocity.x *= this.friction;
+          this.velocity.y *= this.friction;
+          this.velocity.y += this.gravity;
+          this.x += this.velocity.x;
+          this.y += this.velocity.y;
+          this.alpha -= 0.01;
+        }
+      }
+
+      function animateFireworks() {
+        if (!celebrationActive) return;
+        animationId = requestAnimationFrame(animateFireworks);
+        fireworksCtx.fillStyle = 'rgba(0, 0, 0, 0.1)'; // Rastro
+        fireworksCtx.fillRect(0, 0, fireworksCanvas.width, fireworksCanvas.height);
+        
+        // Randomly create fireworks
+        if (Math.random() < 0.15) { // Densidade dos fogos
+             const x = Math.random() * fireworksCanvas.width;
+             const y = Math.random() * fireworksCanvas.height / 2;
+             const colors = ['#ff0043', '#14fc56', '#1e90ff', '#ffe100', '#ffffff'];
+             const color = colors[Math.floor(Math.random() * colors.length)];
+             fireworks.push(new Firework(x, y, color));
+        }
+
+        fireworks.forEach((fw, index) => {
+          fw.update();
+          fw.draw();
+          if (fw.particles.length === 0) fireworks.splice(index, 1);
+        });
+      }
+
+      function startCelebration(message) {
+        if (celebrationActive) return;
+        celebrationActive = true;
+        
+        // Ativa UI
+        celebrationMessage.textContent = message;
+        celebrationMessage.classList.add('celebration-text');
+        celebrationOverlay.classList.add('active');
+        fireworksCanvas.style.display = 'block';
+
+        // Inicia Loop
+        animateFireworks();
+
+        // Para após 15 segundos
+        setTimeout(() => {
+          celebrationActive = false;
+          celebrationOverlay.classList.remove('active');
+          fireworksCanvas.style.display = 'none';
+          cancelAnimationFrame(animationId);
+          fireworks = []; // Limpa memória
+          fireworksCtx.clearRect(0, 0, fireworksCanvas.width, fireworksCanvas.height);
+        }, 15000); 
+      }
+
+      // ==========================================
+      // RELÓGIO & CHECAGEM DE EVENTOS
+      // ==========================================
       function atualizarRelogio() {
         const agora = new Date();
-
         const dia = String(agora.getDate()).padStart(2, '0');
-        const mes = String(agora.getMonth() + 1).padStart(2, '0');
+        const mes = String(agora.getMonth() + 1).padStart(2, '0'); // 0-11
         const ano = agora.getFullYear();
         const dataFormatada = `${dia}/${mes}/${ano}`;
-
         const horas = String(agora.getHours()).padStart(2, '0');
         const minutos = String(agora.getMinutes()).padStart(2, '0');
         const segundos = String(agora.getSeconds()).padStart(2, '0');
@@ -204,56 +428,55 @@
 
         dataAtualEl.textContent = dataFormatada;
         horaAtualEl.textContent = horaFormatada;
+
+        // Checagem de Meia-Noite (Virada)
+        if (horas === '00' && minutos === '00' && segundos === '00') {
+           // Verifica Natal (25/12)
+           if (dia === '25' && mes === '12') {
+               startCelebration("Feliz Natal!!! 🎄");
+           }
+           // Verifica Ano Novo (01/01)
+           else if (dia === '01' && mes === '01') {
+               startCelebration("Um próspero ano novo!!! 🥂");
+           }
+        }
       }
 
-      // Lógica de gênero
+      // IBGE Gender Logic
       async function getGender(name) {
         try {
           const [resM, resF] = await Promise.all([
             fetch(`https://servicodados.ibge.gov.br/api/v2/censos/nomes/${name}?sexo=M`),
             fetch(`https://servicodados.ibge.gov.br/api/v2/censos/nomes/${name}?sexo=F`)
           ]);
-
           const dataM = await resM.json();
           const dataF = await resF.json();
-
           const freqM = dataM.length > 0 ? dataM[0].res.reduce((acc, item) => acc + item.frequencia, 0) : 0;
           const freqF = dataF.length > 0 ? dataF[0].res.reduce((acc, item) => acc + item.frequencia, 0) : 0;
-
           if (freqM > freqF) return 'M';
           if (freqF > freqM) return 'F';
           return 'N';
-        } catch {
-          return 'N';
-        }
+        } catch { return 'N'; }
       }
 
-      // Função de saudação
       function displayGreeting(name, gender) {
         const horaAtual = new Date().getHours();
         let saudacaoDoDia;
         let boasVindas;
-
         if (horaAtual >= 5 && horaAtual < 12) saudacaoDoDia = 'Bom dia';
         else if (horaAtual >= 12 && horaAtual < 18) saudacaoDoDia = 'Boa tarde';
         else saudacaoDoDia = 'Boa noite';
-
         if (gender === 'M') boasVindas = 'Seja bem-vindo.';
         else if (gender === 'F') boasVindas = 'Seja bem-vinda.';
         else boasVindas = 'Seja bem-vinda(o).';
-
         saudacaoEl.innerHTML = `${saudacaoDoDia}, <span class="${tema.text}">${name}</span>! ${boasVindas}`;
         saudacaoEl.classList.add("show");
-
-        // Torna o relógio visível
         relogioContainer.style.opacity = '1';
       }
 
-      // Função principal
       async function main() {
         const nome = localStorage.getItem('nomeUsuario');
         const genero = localStorage.getItem('generoUsuario');
-
         if (nome && genero) {
           displayGreeting(nome, genero);
         } else {
@@ -262,7 +485,6 @@
         }
       }
 
-      // Manipulador do formulário
       async function handleNameSubmit() {
         const nome = nameInput.value.trim().split(' ')[0];
         if (!nome) {
@@ -272,12 +494,9 @@
         nameError.textContent = '';
         nameSubmitBtn.textContent = 'Aguarde...';
         nameSubmitBtn.disabled = true;
-
         const genero = await getGender(nome);
-
         localStorage.setItem('nomeUsuario', nome);
         localStorage.setItem('generoUsuario', genero);
-
         modalOverlay.classList.remove('active');
         setTimeout(() => {
           modalOverlay.classList.add('hidden');
@@ -285,24 +504,21 @@
         }, 500);
       }
 
-      // Event Listeners
       nameSubmitBtn.addEventListener('click', handleNameSubmit);
       nameInput.addEventListener('keydown', (e) => e.key === 'Enter' && handleNameSubmit());
       
       main();
 
-      // Lógica das partículas
+      // Partículas de Fundo (Bolhas)
       const canvas = document.getElementById("particles");
       const ctx = canvas.getContext("2d");
       let particles = [];
-
       function resizeCanvas() {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
       }
       window.addEventListener("resize", resizeCanvas);
       resizeCanvas();
-
       function createParticles() {
         particles = [];
         const particleCount = window.innerWidth < 768 ? 30 : 60;
@@ -316,7 +532,6 @@
           });
         }
       }
-
       function drawParticles() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         particles.forEach(p => {
@@ -326,7 +541,6 @@
           ctx.fill();
         });
       }
-
       function updateParticles() {
         particles.forEach(p => {
           p.x += p.dx;
@@ -335,20 +549,16 @@
           if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
         });
       }
-
       function animate() {
         drawParticles();
         updateParticles();
         requestAnimationFrame(animate);
       }
-
       createParticles();
       animate();
 
-      // INICIA O RELÓGIO
       atualizarRelogio();
       setInterval(atualizarRelogio, 1000);
-
     });
   </script>
 </body>
