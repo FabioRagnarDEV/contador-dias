@@ -8,15 +8,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css">
-  <style>
-      .btn-3d { box-shadow: 4px 6px 0px rgba(0,0,0,0.2); transition: all 0.2s ease; }
-      .btn-3d:hover { transform: translateY(-2px); box-shadow: 6px 8px 0px rgba(0,0,0,0.2); }
-      .btn-3d:active { transform: translateY(1px); box-shadow: 2px 3px 0px rgba(0,0,0,0.2); }
-      #saudacao-usuario { opacity: 0; transform: translateY(10px); transition: all 0.6s ease; }
-      #saudacao-usuario.show { opacity: 1; transform: translateY(0); }
-      .modal-box { transform: scale(0.95); opacity: 0; transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1); }
-      .modal.active .modal-box { transform: scale(1); opacity: 1; }
-  </style>
 </head>
 <body class="bg-slate-50 text-slate-800">
 
@@ -32,7 +23,7 @@
   <main class="container mx-auto px-4 py-8 sm:py-12">
     <div class="relative bg-white p-6 sm:p-8 rounded-2xl shadow-xl w-full max-w-2xl mx-auto space-y-6">
       
-      <button id="abrir-instrucoes-btn" class="absolute top-6 right-6 text-white rounded-full h-8 w-8 flex items-center justify-center font-bold text-lg btn-3d transition z-10">?</button>
+      <button id="abrir-instrucoes-btn" class="absolute top-6 right-6 text-white rounded-full h-8 w-8 flex items-center justify-center font-bold text-lg btn-3d transition z-10" title="Manual de Uso">?</button>
 
       <div class="text-center">
         <div class="icon-wrapper relative inline-block">
@@ -45,7 +36,7 @@
       </div>
 
       <div id="aviso-box" class="border-l-4 p-4 rounded-r-md">
-        <p class="font-medium">Selecione o status do consorciado e preencha os dados para uma análise precisa do risco.</p>
+        <p class="font-medium">Selecione o status e preencha os dados para análise.</p>
       </div>
 
       <div class="space-y-4 pt-2">
@@ -111,18 +102,15 @@
         <button id="calcular-btn" class="w-auto text-white py-3 px-8 rounded-lg font-semibold shadow-md btn-3d">Analisar</button>
         <button id="reset-btn" class="w-auto bg-slate-500 text-white py-3 px-8 rounded-lg hover:bg-slate-600 font-semibold shadow-md btn-3d">Zerar</button>
       </div>
+
+      <div class="pt-2 text-center">
+        <button id="btnAbrirDevolucao" class="btn-destaque-outline" style="display: none;">
+            ⚠️ Cota cancelou? Verifique como funciona o cálculo para devolução
+        </button>
+      </div>
       
       <div id="mensagem-erro" class="text-center pt-2 text-sm font-bold text-amber-600 min-h-[20px]"></div>
       <div id="resultado" class="text-center text-lg p-4 rounded-lg transition-opacity duration-300 opacity-0"></div>
-      
-      <div id="info-legal" class="hidden mt-6 pt-4 border-t border-slate-200 text-sm text-slate-600">
-        <details class="bg-slate-50 p-4 rounded-lg">
-          <summary class="font-semibold cursor-pointer">Entendendo as Regras de Atraso e Cancelamento ▼</summary>
-          <div id="regras-conteudo" class="mt-4 space-y-4">
-          </div>
-        </details>
-      </div>
-
     </div>
 
     <div class="text-center">
@@ -133,18 +121,168 @@
   </main>
 
   <div id="modal-instrucoes" class="modal fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 transition-opacity duration-300 hidden p-4">
-    <div id="modal-instrucoes-box" class="modal-box bg-white p-8 rounded-xl shadow-2xl w-full max-w-2xl relative">
+    <div id="modal-instrucoes-box" class="modal-box bg-white p-8 rounded-xl shadow-2xl w-full max-w-3xl relative max-h-[90vh] overflow-y-auto">
       <button id="fechar-instrucoes-btn" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
           <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
         </svg>
       </button>
-      <h3 class="text-2xl font-bold text-slate-900 mb-6 text-center">Manual da Calculadora de Análise de Atraso</h3>
-      <div id="manual-conteudo" class="space-y-6 text-slate-600">
-      </div>
+      <h3 class="text-2xl font-bold text-slate-900 mb-6 text-center">Manual da Calculadora e Regras de Cancelamento/Devolução</h3>
+      <div id="manual-conteudo" class="space-y-6 text-slate-600 text-sm"></div>
     </div>
   </div>
-  
+
+  <div id="modalDevolucao" class="modal-overlay">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h2>Simulador de Devolução  (Quando contemplado)</h2>
+            <button id="btnFecharDevolucao" class="btn-close-modal">&times;</button>
+        </div>
+        
+        <div class="modal-body overflow-y-auto max-h-[80vh]">
+            
+            <div class="mb-4 p-3 bg-yellow-50 border border-yellow-100 rounded-lg flex items-center gap-3">
+                <input type="checkbox" id="checkDescontemplacao" class="w-5 h-5 text-red-600 rounded border-gray-300 focus:ring-red-500">
+                <label for="checkDescontemplacao" class="text-sm text-yellow-800 font-bold cursor-pointer select-none">
+                    A cota estava Contemplada (Crédito Pendente)?
+                </label>
+            </div>
+
+            <div id="boxDescontemplacao" class="hidden mb-4 p-4 bg-gray-50 border border-gray-200 rounded-lg animate-fade-in">
+                <p class="text-xs text-gray-500 mb-2 font-bold uppercase">Cálculo de Diferença (Parágrafo 15)</p>
+                <div class="dev-grid">
+                    <div>
+                        <label class="dev-label">Crédito Atual Grupo (R$)</label>
+                        <input type="text" id="dev-credito-grupo" placeholder="Ex: 57.658,00" class="dev-input">
+                    </div>
+                    <div>
+                        <label class="dev-label">Crédito Cliente + Rendimentos (R$)</label>
+                        <input type="text" id="dev-credito-cliente" placeholder="Ex: 55.350,00" class="dev-input">
+                    </div>
+                </div>
+            </div>
+
+            <div class="dev-grid">
+                <div>
+                    <label class="dev-label">Grupo / Cota</label>
+                    <input type="text" id="dev-grupoCota" placeholder="0000/00" class="dev-input">
+                </div>
+                <div>
+                    <label class="dev-label">Crédito Contratado (Base)</label>
+                    <input type="text" id="dev-credito" placeholder="0,00" class="dev-input">
+                </div>
+                <div>
+                    <label class="dev-label">% Pago (Fundo Comum)</label>
+                    <input type="text" id="dev-percentual" placeholder="0,00" class="dev-input">
+                </div>
+                <div>
+                    <label class="dev-label">Valor Total Pago (R$)</label>
+                    <input type="text" id="dev-valorPago" placeholder="0,00" class="dev-input">
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <button id="btnCalcularDevolucao" class="btn-dev-action btn-dev-calc">
+                    Calcular
+                </button>
+                <button id="btnLimparDevolucao" class="btn-dev-action btn-dev-clear">
+                    Limpar
+                </button>
+            </div>
+
+            <div id="dev-resultado" class="dev-result-box">
+                <div id="res-descontemplacao" class="hidden mb-4 p-3 bg-red-100 text-red-800 rounded-lg border border-red-200 text-sm font-bold">
+                    Diferença a Pagar (Descontemplação): <br>
+                    <span id="val-descontemplacao" class="text-lg">R$ 0,00</span>
+                </div>
+
+                <p class="dev-res-title">Valor Estimado de Devolução</p>
+                <div class="dev-result-value" id="dev-valorFinal">R$ 0,00</div>
+                
+                <button id="btnToggleMemoria" class="dev-toggle-memoria">
+                    Ver Memória de Cálculo ▼
+                </button>
+
+                <div id="memoriaCalculo" class="memoria-box hidden">
+                     <div class="mem-row">
+                        <span>Valor Total Pago</span>
+                        <span id="memTotalPago" class="font-bold">R$ 0,00</span>
+                     </div>
+                     <div class="mem-row sub-row text-red-500">
+                        <span>(-) Taxas (Adm/Seguro/Reserva) - Cláusula 41</span>
+                        <span id="memTaxasRetidas">- R$ 0,00</span>
+                     </div>
+                     <div class="mem-row highlight-blue">
+                        <span>(=) Fundo Comum Arrecadado</span>
+                        <span id="memFundoComum">R$ 0,00</span>
+                     </div>
+                     <div class="mem-row sub-row text-red-500">
+                        <span>(-) Multa Prejuízo Grupo (10%) - Cláusula 41.1</span>
+                        <span id="memValorClausula41">- R$ 0,00</span>
+                     </div>
+                     <div class="mem-row sub-row text-red-500">
+                        <span>(-) Multa Penal (<span id="memTaxaClausula42">0%</span>) - Cláusula 42</span>
+                        <span id="memValorClausula42">- R$ 0,00</span>
+                     </div>
+                     <div class="mem-row total-row">
+                        <span>Total a Devolver</span>
+                        <span id="memTotal">R$ 0,00</span>
+                     </div>
+                </div>
+            </div>
+
+            <div class="mt-6">
+                <h3 class="text-sm font-bold text-gray-700 mb-2 uppercase">Entenda o Cálculo</h3>
+                <div id="accordion-container">
+                    </div>
+            </div>
+
+            <div class="mt-8 pt-4 border-t border-slate-200">
+                <h3 class="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+                    📚 Base Legal e Normativos
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    
+                    <a href="https://www.embracon.com.br/docs/regulamentos/Condi%C3%A7%C3%B5es%20Gerais%20-%20Embracon.pdf" target="_blank" class="block p-3 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 transition-colors group">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-bold text-slate-800 text-sm group-hover:text-red-700">Regulamento Embracon</span>
+                            <svg class="w-4 h-4 text-slate-400 group-hover:text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                        </div>
+                        <p class="text-[10px] text-slate-500 leading-tight">
+                            Ver: Cláusulas 39 a 42 (Cancelamento) e Cláusula 12.h / Parágrafo 15 (Descontemplação).
+                        </p>
+                    </a>
+
+                    <a href="https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2008/lei/l11795.htm" target="_blank" class="block p-3 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 transition-colors group">
+                         <div class="flex items-center justify-between mb-1">
+                            <span class="font-bold text-slate-800 text-sm group-hover:text-red-700">Lei 11.795/08</span>
+                            <svg class="w-4 h-4 text-slate-400 group-hover:text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                        </div>
+                        <p class="text-[10px] text-slate-500 leading-tight">Lei do Consórcio. Base para devolução do Fundo Comum.</p>
+                    </a>
+
+                    <a href="https://www.bcb.gov.br/pre/normativos/circ/2009/pdf/circ_3432_v3_l.pdf" target="_blank" class="block p-3 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 transition-colors group">
+                         <div class="flex items-center justify-between mb-1">
+                            <span class="font-bold text-slate-800 text-sm group-hover:text-red-700">Carta Circular 3.432</span>
+                            <svg class="w-4 h-4 text-slate-400 group-hover:text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                        </div>
+                        <p class="text-[10px] text-slate-500 leading-tight">Normas sobre constituição e funcionamento de grupos.</p>
+                    </a>
+
+                    <a href="https://www.bcb.gov.br/estabilidadefinanceira/exibenormativo?tipo=Resolu%C3%A7%C3%A3o%20BCB&numero=285" target="_blank" class="block p-3 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 transition-colors group">
+                         <div class="flex items-center justify-between mb-1">
+                            <span class="font-bold text-slate-800 text-sm group-hover:text-red-700">Resolução BCB 285</span>
+                            <svg class="w-4 h-4 text-slate-400 group-hover:text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                        </div>
+                         <p class="text-[10px] text-slate-500 leading-tight">Disposições gerais sobre consórcios.</p>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+  </div>
+
   <script src="script.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -185,10 +323,7 @@
       document.getElementById("abrir-instrucoes-btn").classList.add("bg-gradient-to-br", ...tema.btn);
       document.getElementById("icon-bg").classList.add(tema.bg.replace('-50', '-100'));
       document.getElementById("aviso-box").classList.add(tema.text.replace('600', '800'), tema.border, tema.bg);
-      document.querySelector("#info-legal summary").classList.add(tema.text, tema.hover);
-      document.querySelectorAll('input[type="text"], input[type="number"]').forEach(input => input.classList.add(tema.focus));
-      document.querySelectorAll('input[type="radio"]').forEach(radio => radio.classList.add(tema.text, tema.focus));
-
+      
       const nomeUsuario = localStorage.getItem('nomeUsuario');
       const generoUsuario = localStorage.getItem('generoUsuario');
       const saudacaoEl = document.getElementById('saudacao-usuario');
@@ -199,7 +334,7 @@
           saudacaoEl.textContent = 'Vamos analisar a situação da cota.';
       }
       setTimeout(() => saudacaoEl.classList.add('show'), 100);
-
+      
       const modal = document.getElementById('modal-instrucoes');
       const abrirBtn = document.getElementById('abrir-instrucoes-btn');
       const fecharBtn = document.getElementById('fechar-instrucoes-btn');
