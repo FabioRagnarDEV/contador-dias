@@ -215,7 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (parcelas >= limiteCancelamento) {
                 const regraTexto = isInauguracaoAntiga ? "2 parcelas (Grupos até 06/24)" : "3 parcelas (Grupos pós 07/24)";
                 mensagem = `🚫 <strong>COTA EM PROCESSO DE CANCELAMENTO</strong><br>Atingiu o limite de ${regraTexto}.`;
-                acao = "A cota será excluída por inadimplência conforme Cláusula 39. Verifique abaixo o cálculo estimado de devolução.";
+                acao = "A cota será excluída por inadimplência conforme Cláusula 39. Verifique acima o cálculo estimado de devolução.";
                 corTexto = 'text-red-700';
             } else {
                 mensagem = `ℹ️ <strong>Cobrança Administrativa</strong><br>${diasAtraso} dias de atraso.`;
