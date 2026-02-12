@@ -57,8 +57,8 @@ Gerencia prazos do setor de pós-vendas de forma prática e automatizada.
 
 ---
 
-### 📌 **Análise de Atraso & Simulador de Devolução (Novo!)**
-Uma ferramenta completa para gestão de inadimplência e cálculo de restituição (SAC).
+### 📌 **Análise de Atraso & Simulador de Devolução (Atualizado!)**
+Uma ferramenta completa para gestão de inadimplência, cálculo de restituição (SAC) e automação de scripts de atendimento.
 
 #### 1. Análise de Risco
 Avalia a situação da cota baseada na data de inauguração do grupo e parcelas em aberto.
@@ -68,18 +68,27 @@ Avalia a situação da cota baseada na data de inauguração do grupo e parcelas
 - **Classificação de Risco:** Diferencia cobrança simples, cancelamento administrativo e busca e apreensão (para contemplados).
 
 #### 2. Simulador de Devolução (Lei 11.795/08)
-Caso a cota seja identificada como cancelada, o sistema libera o **Simulador de Devolução**.
+Caso a cota seja identificada como cancelada, o sistema libera o **Simulador de Devolução** com lógica financeira avançada.
 - **Cálculo Financeiro:**
-  - Base: Fundo Comum amortizado.
+  - Base: Fundo Comum amortizado (exclui taxas administrativas).
   - Deduções: Taxa Adm, Fundo Reserva e Seguro (Cláusula 41).
-  - Multas: 10% (Prejuízo ao Grupo) + Multa Penal Variável (0% a 20%, conforme Cláusula 42).
+- **Lógica Inteligente de Multas:**
+  - **Regra Padrão:** 10% (Prejuízo ao Grupo) + Multa Penal Variável (0% a 20%, conforme Cláusula 42).
+  - **Regra de Isenção (>50%):** Se o consorciado contribuiu com **mais de 50%** do Fundo Comum, o sistema aplica automaticamente a isenção da Cláusula Penal (Multa Administrativa), cobrando apenas os 10% do Grupo.
 - **Descontemplação:** Calcula a diferença a pagar caso a cota estivesse contemplada (Diferença entre crédito atualizado do grupo e crédito do cliente + rendimentos).
 
-#### 3. Base Legal Integrada
-Acesso direto aos documentos normativos dentro da ferramenta:
-- 📜 Regulamento Embracon (Cláusulas 39-42).
-- ⚖️ Lei 11.795/08 (Lei dos Consórcios).
-- 🏦 Normativos BCB (Carta Circular 3.432 e Resolução 285).
+#### 3. Gerador de Scripts de Atendimento 🤖
+Gera e copia automaticamente roteiros prontos para o atendimento, adaptados ao canal escolhido:
+
+- **🟢 Script WhatsApp:**
+  - Texto **resumido e dinâmico**, focado na apresentação rápida dos valores.
+  - Explicação simplificada das multas para leitura em dispositivos móveis.
+  
+- **📧 Script E-mail (Salesforce):**
+  - Texto **formal e jurídico**, contendo a defesa completa baseada na **Lei 11.795/08**, **CDC** e **Código Civil**.
+  - Detalha pedagogicamente a diferença entre Fundo Comum e Taxas, e explica a natureza jurídica de cada multa (Grupo vs Administradora).
+  
+- **Adaptação Dinâmica:** O conteúdo dos scripts (explicação e cálculo) muda automaticamente caso o cliente tenha atingido a regra de isenção de multa (>50%), garantindo coerência jurídica.
 
 ---
 
@@ -89,8 +98,9 @@ Acesso direto aos documentos normativos dentro da ferramenta:
 |-------------|-------------|
 | **HTML5** | Estrutura semântica moderna |
 | **Tailwind CSS** | Estilização responsiva baseada em utilitários |
-| **JavaScript (ES6+)** | Interatividade, cálculos complexos e consumo de APIs |
+| **JavaScript (ES6+)** | Interatividade, cálculos complexos, lógica condicional e consumo de APIs |
 | **LocalStorage API** | Armazenamento local de dados e temas |
+| **Clipboard API** | Cópia automática dos scripts gerados para a área de transferência |
 | **CSS3 Animations** | Microinterações com `@keyframes`, `transitions` e `transforms` |
 | **APIs Externas** |  |
 | → [BrasilAPI](https://brasilapi.com.br/) | Feriados nacionais (para cálculo de dias úteis) |
@@ -112,7 +122,7 @@ PAINEL_CALCULADORAS/
 │
 ├── CalculadoraAtraso/
 │   ├── analiseAtraso.html    # HTML com Modais de Manual e Devolução
-│   ├── script.js             # Lógica de atraso, cancelamento e cálculos financeiros
+│   ├── script.js             # Lógica de atraso, cancelamento, cálculos financeiros e gerador de scripts
 │   └── style.css             # Estilos específicos dos modais
 │
 ├── CalculadoraCreditoEspecie/
