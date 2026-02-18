@@ -1,3 +1,5 @@
+// script.js
+
 document.addEventListener('DOMContentLoaded', () => {
     
     // ==========================================================================
@@ -34,111 +36,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const botaoScriptWhatsapp = document.getElementById('btnScriptWhatsapp');
     const mensagemCopiado = document.getElementById('msg-copiado');
 
+    
     // ==========================================================================
-    //                 2. MANUAL DE UTILIZAÇÃO (RESTAURADO)
-    // ==========================================================================
-    const conteudoManual = document.getElementById('manual-conteudo');
-    if (conteudoManual) {
-        conteudoManual.innerHTML = `
-            <div class="space-y-8 text-slate-700">
-                
-                <div>
-                    <h4 class="font-bold text-lg text-slate-900 mb-3">1. Como realizar a Análise de Atraso</h4>
-                    <p class="mb-3 text-sm">Preencha os campos para identificar o risco atual da cota:</p>
-                    <ul class="list-disc pl-5 space-y-2 text-sm mb-4">
-                        <li><strong>Status:</strong> Defina se o cliente já retirou o bem (Contemplado) ou não.</li>
-                        <li><strong>Data de Inauguração:</strong> Fundamental para definir a regra de cancelamento (veja abaixo).</li>
-                        <li><strong>Vencimento:</strong> Data da parcela mais antiga em aberto.</li>
-                        <li><strong>Nº Parcelas:</strong> Quantidade total de parcelas pendentes.</li>
-                    </ul>
-                    <div class="bg-blue-50 p-4 rounded-lg border border-blue-100 text-sm text-blue-900">
-                        <strong>Resultado:</strong> O sistema informará se é caso de cobrança simples, cancelamento ou busca e apreensão (Para cotas com o crédito pago).
-                    </div>
-                </div>
-
-                <div>
-                    <h4 class="font-bold text-lg text-slate-900 mb-3">2. Regras de Cancelamento (Cláusula 39)</h4>
-                    <p class="mb-3 text-sm">O sistema identifica automaticamente se a cota está em processo de exclusão baseando-se na data do grupo:</p>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="bg-gray-100 p-4 rounded-lg">
-                            <p class="font-bold text-gray-800 text-sm mb-1">Grupos até 30/06/2024</p>
-                            <p class="text-xs leading-relaxed">Cancelamento com <strong class="text-red-600">2 parcelas</strong> em atraso (consecutivas ou não).</p>
-                        </div>
-                        <div class="bg-gray-100 p-4 rounded-lg">
-                            <p class="font-bold text-gray-800 text-sm mb-1">Grupos após 01/07/2024</p>
-                            <p class="text-xs leading-relaxed">Cancelamento com <strong class="text-red-600">3 parcelas</strong> em atraso (consecutivas ou não).</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div>
-                    <h4 class="font-bold text-lg text-slate-900 mb-3">3. Simulador para Devolução</h4>
-                    <p class="mb-3 text-sm">Quando a análise identificar que a cota atingiu os critérios de cancelamento (Ex: Não Contemplada com 3 parcelas), aparecerá um botão: <strong class="text-red-600">"⚠️ Cota cancelou?"</strong>.</p>
-                    
-                    <p class="font-bold text-sm mb-2">Como é calculado o valor a devolver?</p>
-                    <ul class="list-disc pl-5 space-y-2 text-sm">
-                        <li><strong>Base de Cálculo:</strong> Apenas o Fundo Comum pago (exclui Taxa Adm. e Seguro).</li>
-                        <li><strong>Multa 1 (Cláusula 41.1):</strong> 10% fixo sobre o Fundo Comum (Prejuízo ao Grupo).</li>
-                        <li><strong>Multa 2 (Cláusula 42 - Penal):</strong> Escalonada conforme o percentual pago:
-                            <ul class="list-none pl-4 mt-1 space-y-1 text-xs text-slate-500 border-l-2 border-slate-300">
-                                <li>• Até 20% pago: 20% multa</li>
-                                <li>• 20,1% a 40%: 15% multa</li>
-                                <li>• 40,1% a 50%: 10% multa</li>
-                                <li>• Acima de 50%: Isento</li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-
-                <div>
-                    <h4 class="font-bold text-lg text-slate-900 mb-3">4. Diferença de Descontemplação</h4>
-                    <p class="mb-3 text-sm">Aplica-se a cotas <strong>Contempladas com Crédito Pendente</strong> que foram canceladas.</p>
-                    <p class="mb-3 text-sm">No simulador, marque a opção <em>"A cota estava Contemplada?"</em>. O cálculo segue o <strong>Parágrafo 15</strong> da seção de Cancelamento da Contemplação:</p>
-                    
-                    <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200 text-yellow-800 font-mono text-xs text-center shadow-sm">
-                        Diferença = Crédito Atualizado do Grupo - (Crédito do Cliente + Rendimentos)
-                    </div>
-                    <p class="mt-2 text-xs text-slate-500">Se o crédito atual do grupo for maior, o consorciado deve pagar essa diferença para recompor o saldo do grupo.</p>
-                </div>
-
-            </div>
-        `;
-    }
-
-    // Conteúdo do Acordeão (Base Legal)
-    const containerAcordeao = document.getElementById('accordion-container');
-    if (containerAcordeao) {
-        containerAcordeao.innerHTML = `
-            <div class="accordion-item">
-                <button class="accordion-header" onclick="alternarAcordeaoDevolucao(this)">
-                    Fundo Comum e Base Legal (Lei 11.795) <span>▼</span>
-                </button>
-                <div class="accordion-content">
-                    <p>É a parte da parcela destinada à compra do bem (Art. 25). É o único valor passível de devolução ao excluído (Art. 30, Lei 11.795/08).</p>
-                </div>
-            </div>
-            <div class="accordion-item">
-                <button class="accordion-header" onclick="alternarAcordeaoDevolucao(this)">
-                    Por que taxas não são devolvidas? (Cláusula 41) <span>▼</span>
-                </button>
-                <div class="accordion-content">
-                    <p>A Taxa de Administração, Fundo de Reserva e Seguro remuneram serviços já prestados e a proteção usufruída durante a vigência do contrato, não sendo reembolsáveis.</p>
-                </div>
-            </div>
-            <div class="accordion-item">
-                <button class="accordion-header" onclick="alternarAcordeaoDevolucao(this)">
-                    Entenda as Multas (Cláusulas 41.1 e 42) <span>▼</span>
-                </button>
-                <div class="accordion-content">
-                    <p><strong>Cláusula 41.1 (10%):</strong> Indenização pelos prejuízos causados ao grupo.<br>
-                    <strong>Cláusula 42 (Penal):</strong> Penalidade compensatória variável (0% a 20%) para cobrir custos de venda.</p>
-                </div>
-            </div>
-        `;
-    }
-
-    // ==========================================================================
-    //                    3. UTILITÁRIOS E MÁSCARAS
+    //                    2. UTILITÁRIOS E MÁSCARAS
     // ==========================================================================
 
     // Máscara Data
@@ -172,15 +72,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Função auxiliar para formatar Float para Moeda PT-BR
     const formatarMoeda = (valorNumerico) => valorNumerico.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    const parseDataBrasileiraEstrita = (valorTexto) => {
+        if (!/^\d{2}\/\d{2}\/\d{4}$/.test(valorTexto)) return null;
+        const [diaTexto, mesTexto, anoTexto] = valorTexto.split('/');
+        const dia = Number(diaTexto);
+        const mes = Number(mesTexto);
+        const ano = Number(anoTexto);
+
+        if (!Number.isInteger(dia) || !Number.isInteger(mes) || !Number.isInteger(ano)) return null;
+        if (mes < 1 || mes > 12) return null;
+
+        const data = new Date(ano, mes - 1, dia);
+        if (data.getFullYear() !== ano || data.getMonth() !== (mes - 1) || data.getDate() !== dia) return null;
+
+        data.setHours(0, 0, 0, 0);
+        return data;
+    };
+    const obterHojeSemHora = () => {
+        const hoje = new Date();
+        hoje.setHours(0, 0, 0, 0);
+        return hoje;
+    };
 
 
     // ==========================================================================
-    //              4. LÓGICA DA CALCULADORA DE ATRASO (PRINCIPAL)
+    //              3. LÓGICA DA CALCULADORA DE ATRASO (PRINCIPAL)
     // ==========================================================================
 
     function calcularAtraso() {
         caixaErro.textContent = '';
         caixaResultado.style.opacity = '0';
+        caixaResultado.className = "text-center p-4 rounded-lg transition-all duration-300 opacity-0 mt-4"; // Reseta as classes
 
         const textoDataVencimento = entradaDataVencimento.value;
         const numeroParcelas = parseInt(entradaParcelas.value);
@@ -190,7 +112,8 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const ehInauguracaoAntiga = document.getElementById('data-ate-jun24').checked;
 
-        if (textoDataVencimento.length !== 10) {
+        const dataVencimento = parseDataBrasileiraEstrita(textoDataVencimento);
+        if (!dataVencimento) {
             caixaErro.textContent = 'Informe uma data válida (DD/MM/AAAA).';
             return;
         }
@@ -199,50 +122,41 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const partesData = textoDataVencimento.split('/');
-        const dataVencimento = new Date(partesData[2], partesData[1] - 1, partesData[0]);
-        const dataHoje = new Date();
-        const diferencaTempo = dataHoje - dataVencimento;
-        const diasAtraso = Math.floor(diferencaTempo / (1000 * 60 * 60 * 24));
+        const dataHoje = obterHojeSemHora();
+        
+        // CÁLCULO PELO NOVO SERVIÇO
+        const resultadoAtraso = ConsorcioService.analisarAtraso(dataVencimento, dataHoje, numeroParcelas, statusConsorciado, ehInauguracaoAntiga);
 
-        if (diasAtraso < 1) {
-            caixaErro.textContent = 'A data de vencimento não indica atraso.';
+        if (resultadoAtraso.erro) {
+            caixaErro.textContent = resultadoAtraso.erro;
             return;
         }
 
-        let mensagemResultado = '';
-        let corTexto = '';
-        let acaoRecomendada = '';
+        // 🔒 CONSTRUÇÃO SEGURA E COLORIDA DA INTERFACE (XSS MITIGADO)
+        caixaResultado.textContent = ''; // Limpa tudo com segurança
+        
+        // Adiciona a cor de fundo personalizada retornada pelo serviço
+        caixaResultado.className = `text-center p-5 rounded-lg transition-all duration-300 shadow-sm mt-4 ${resultadoAtraso.corFundo}`;
 
-        if (statusConsorciado === 'contemplado') {
-            if (diasAtraso > 15 || numeroParcelas >= 2) {
-                mensagemResultado = `🚨 <strong>RISCO JURÍDICO IMEDIATO!</strong><br>Cliente contemplado com ${diasAtraso} dias de atraso.`;
-                acaoRecomendada = "Encaminhar para Jurídico/Cobrança urgente. Risco de Busca e Apreensão.";
-                corTexto = 'text-red-600';
-            } else {
-                mensagemResultado = `⚠️ <strong>Atenção:</strong> Contemplado em atraso (${diasAtraso} dias).`;
-                acaoRecomendada = "Realizar cobrança preventiva.";
-                corTexto = 'text-orange-600';
-            }
-        } else {
-            const limiteCancelamento = ehInauguracaoAntiga ? 2 : 3;
-            
-            if (numeroParcelas >= limiteCancelamento) {
-                const textoRegra = ehInauguracaoAntiga ? "2 parcelas (Grupos até 06/24)" : "3 parcelas (Grupos pós 07/24)";
-                mensagemResultado = `🚫 <strong>COTA EM PROCESSO DE CANCELAMENTO</strong><br>Atingiu o limite de ${textoRegra}.`;
-                acaoRecomendada = "A cota será excluída por inadimplência (Cláusula 39). Verifique o cálculo de devolução.";
-                corTexto = 'text-red-700';
-            } else {
-                mensagemResultado = `ℹ️ <strong>Cobrança Administrativa</strong><br>${diasAtraso} dias de atraso.`;
-                acaoRecomendada = `Emitir boleto. O cancelamento ocorre com ${ehInauguracaoAntiga ? '2' : '3'} parcelas vencidas.`;
-                corTexto = 'text-blue-600';
-            }
-        }
+        // Cria Título Principal
+        const divTitulo = document.createElement('div');
+        divTitulo.className = `${resultadoAtraso.cor} font-extrabold mb-1 text-xl flex items-center justify-center gap-2`;
+        divTitulo.textContent = `${resultadoAtraso.icone} ${resultadoAtraso.titulo}`;
+        
+        // Cria a Descrição
+        const divDescricao = document.createElement('div');
+        divDescricao.className = `${resultadoAtraso.cor} font-semibold mb-3 text-base`;
+        divDescricao.textContent = resultadoAtraso.descricao;
 
-        caixaResultado.innerHTML = `
-            <div class="${corTexto} font-bold mb-2 text-xl">${mensagemResultado}</div>
-            <div class="text-slate-600 mt-2 text-sm">${acaoRecomendada}</div>
-        `;
+        // Cria a Ação Recomendada
+        const divAcao = document.createElement('div');
+        divAcao.className = "text-slate-700 bg-white/60 p-2 rounded text-sm font-medium border border-white/40 inline-block";
+        divAcao.textContent = resultadoAtraso.acao;
+
+        caixaResultado.appendChild(divTitulo);
+        caixaResultado.appendChild(divDescricao);
+        caixaResultado.appendChild(divAcao);
+        
         caixaResultado.style.opacity = '1';
 
         verificarBotaoDevolucao(statusConsorciado, numeroParcelas, ehInauguracaoAntiga);
@@ -273,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================================================
-    //              5. LÓGICA DE DEVOLUÇÃO E CÁLCULOS
+    //              4. LÓGICA DE DEVOLUÇÃO E CÁLCULOS
     // ==========================================================================
 
     // Descontemplação
@@ -289,10 +203,54 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Modal
-    botaoAbrirDevolucao.addEventListener('click', (evento) => { evento.preventDefault(); modalDevolucao.style.display = 'flex'; });
-    const funcaoFecharModal = () => { modalDevolucao.style.display = 'none'; };
+    let ultimoFocoDevolucao = null;
+    const obterFocaveisDevolucao = () => modalDevolucao.querySelectorAll(
+        'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
+    );
+    const capturarTabNoModalDevolucao = (evento) => {
+        if (evento.key !== 'Tab' || modalDevolucao.getAttribute('aria-hidden') !== 'false') return;
+        const focaveis = obterFocaveisDevolucao();
+        if (!focaveis.length) return;
+        const primeiro = focaveis[0];
+        const ultimo = focaveis[focaveis.length - 1];
+
+        if (evento.shiftKey && document.activeElement === primeiro) {
+            evento.preventDefault();
+            ultimo.focus();
+        } else if (!evento.shiftKey && document.activeElement === ultimo) {
+            evento.preventDefault();
+            primeiro.focus();
+        }
+    };
+
+    const abrirModalDevolucao = () => {
+        ultimoFocoDevolucao = document.activeElement;
+        modalDevolucao.style.display = 'flex';
+        modalDevolucao.setAttribute('aria-hidden', 'false');
+        botaoAbrirDevolucao.setAttribute('aria-expanded', 'true');
+        setTimeout(() => botaoFecharDevolucao.focus(), 20);
+        document.addEventListener('keydown', capturarTabNoModalDevolucao);
+    };
+    const funcaoFecharModal = () => {
+        modalDevolucao.style.display = 'none';
+        modalDevolucao.setAttribute('aria-hidden', 'true');
+        botaoAbrirDevolucao.setAttribute('aria-expanded', 'false');
+        document.removeEventListener('keydown', capturarTabNoModalDevolucao);
+        if (ultimoFocoDevolucao && typeof ultimoFocoDevolucao.focus === 'function') {
+            ultimoFocoDevolucao.focus();
+        }
+    };
+    botaoAbrirDevolucao.addEventListener('click', (evento) => {
+        evento.preventDefault();
+        abrirModalDevolucao();
+    });
     botaoFecharDevolucao.addEventListener('click', funcaoFecharModal);
     window.addEventListener('click', (evento) => { if (evento.target === modalDevolucao) funcaoFecharModal(); });
+    document.addEventListener('keydown', (evento) => {
+        if (evento.key === 'Escape' && modalDevolucao.getAttribute('aria-hidden') === 'false') {
+            funcaoFecharModal();
+        }
+    });
 
     // Memória de Cálculo
     if (botaoAlternarMemoria) {
@@ -331,55 +289,51 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
-                // 1. Descontemplação
+                // 1. Descontemplação (service.js)
                 if (selecaoDescontemplacao.checked) {
                     const creditoGrupo = converterMoeda(entradaCreditoGrupo.value);
                     const creditoCliente = converterMoeda(entradaCreditoCliente.value);
+                    const divResultado = document.getElementById('res-descontemplacao');
                     
                     if (creditoGrupo > 0 && creditoCliente > 0) {
-                        const diferencaValores = creditoGrupo - creditoCliente;
-                        const divResultado = document.getElementById('res-descontemplacao');
+                        const diferencaValores = ConsorcioService.calcularDescontemplacao(creditoGrupo, creditoCliente);
                         
+                        divResultado.classList.remove('hidden');
+                        divResultado.textContent = ''; // Limpeza segura
+
                         if (diferencaValores > 0) {
-                            divResultado.classList.remove('hidden');
                             divResultado.className = "mb-4 p-3 bg-red-100 text-red-800 rounded-lg border border-red-200 text-sm font-bold block";
-                            divResultado.innerHTML = `Diferença a Pagar (Descontemplação):<br><span class="text-lg">${formatarMoeda(diferencaValores)}</span>`;
+                            
+                            const textoDescontemplacao = document.createTextNode("Diferença a Pagar (Descontemplação): ");
+                            const quebraLinha = document.createElement('br');
+                            const spanValor = document.createElement('span');
+                            spanValor.className = "text-lg";
+                            spanValor.textContent = formatarMoeda(diferencaValores);
+                            
+                            divResultado.appendChild(textoDescontemplacao);
+                            divResultado.appendChild(quebraLinha);
+                            divResultado.appendChild(spanValor);
                         } else {
-                            divResultado.classList.remove('hidden');
                             divResultado.className = "mb-4 p-3 bg-green-100 text-green-800 rounded-lg border border-green-200 text-sm font-bold block";
-                            divResultado.innerHTML = "Sem diferença a pagar (Crédito do cliente cobre o valor atual).";
+                            divResultado.textContent = "Sem diferença a pagar (Crédito do cliente cobre o valor atual).";
                         }
                     }
                 } else {
                     document.getElementById('res-descontemplacao').classList.add('hidden');
                 }
 
-                // 2. Devolução
-                const valorFundoComum = valorCredito * (valorPercentual / 100);
-                
-                let valorTaxasRetidas = valorTotalPago - valorFundoComum;
-                if(valorTaxasRetidas < 0) valorTaxasRetidas = 0;
-
-                const multaPrejuizoGrupo = valorFundoComum * 0.10; // 10% fixo
-
-                let taxaPenal = 0;
-                if (valorPercentual <= 20) taxaPenal = 0.20;
-                else if (valorPercentual <= 40) taxaPenal = 0.15;
-                else if (valorPercentual <= 50) taxaPenal = 0.10;
-                else taxaPenal = 0.00;
-                
-                const multaPenal = valorFundoComum * taxaPenal;
-                const valorDevolucao = valorFundoComum - multaPrejuizoGrupo - multaPenal;
+                // 2. Devolução (service.js)
+                const resultado = ConsorcioService.calcularDevolucao(valorCredito, valorPercentual, valorTotalPago);
 
                 // Preencher DOM (Tela)
-                document.getElementById('dev-valorFinal').textContent = formatarMoeda(valorDevolucao);
+                document.getElementById('dev-valorFinal').textContent = formatarMoeda(resultado.valorDevolucao);
                 document.getElementById('memTotalPago').textContent = formatarMoeda(valorTotalPago);
-                document.getElementById('memTaxasRetidas').textContent = '- ' + formatarMoeda(valorTaxasRetidas);
-                document.getElementById('memFundoComum').textContent = formatarMoeda(valorFundoComum);
-                document.getElementById('memValorClausula41').textContent = '- ' + formatarMoeda(multaPrejuizoGrupo);
-                document.getElementById('memTaxaClausula42').textContent = (taxaPenal * 100) + '%';
-                document.getElementById('memValorClausula42').textContent = '- ' + formatarMoeda(multaPenal);
-                document.getElementById('memTotal').textContent = formatarMoeda(valorDevolucao);
+                document.getElementById('memTaxasRetidas').textContent = '- ' + formatarMoeda(resultado.valorTaxasRetidas);
+                document.getElementById('memFundoComum').textContent = formatarMoeda(resultado.valorFundoComum);
+                document.getElementById('memValorClausula41').textContent = '- ' + formatarMoeda(resultado.multaPrejuizoGrupo);
+                document.getElementById('memTaxaClausula42').textContent = (resultado.taxaPenal * 100) + '%';
+                document.getElementById('memValorClausula42').textContent = '- ' + formatarMoeda(resultado.multaPenal);
+                document.getElementById('memTotal').textContent = formatarMoeda(resultado.valorDevolucao);
 
                 caixaResultadoDevolucao.style.display = 'block';
                 caixaResultadoDevolucao.style.opacity = '0';
@@ -429,20 +383,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const nomeUsuario = '[Nome do Consorciado]';
         const textoGrupoCota = entradaGrupoCota.value || '____/____';
         const valorPercentual = parseFloat((entradaPercentual.value || '0').replace(',', '.'));
+        const valorTotalPago = converterMoeda(entradaValorPago.value);
         
-        const valorFundoComum = valorCredito * (valorPercentual / 100);
-        const multaPrejuizoGrupo = valorFundoComum * 0.10;
-        let taxaPenal = 0;
-        
-        // Regra de isenção de multa penal acima de 50%
-        if (valorPercentual <= 20) taxaPenal = 0.20;
-        else if (valorPercentual <= 40) taxaPenal = 0.15;
-        else if (valorPercentual <= 50) taxaPenal = 0.10;
-        else taxaPenal = 0.00;
-        
-        const multaPenal = valorFundoComum * taxaPenal;
-        const totalMultaPercentual = 10 + (taxaPenal * 100);
-        const valorDevolucao = valorFundoComum - multaPrejuizoGrupo - multaPenal;
+        // Reaproveitando o Service para gerar o script com os mesmos dados calculados
+        const res = ConsorcioService.calcularDevolucao(valorCredito, valorPercentual, valorTotalPago);
+
+        const totalMultaPercentual = 10 + (res.taxaPenal * 100);
 
         return {
             nomeUsuario,
@@ -450,10 +396,10 @@ document.addEventListener('DOMContentLoaded', () => {
             valorCredito,
             valorPercentualStr: valorPercentual.toFixed(4).replace('.', ','), 
             valorPercentual,
-            valorFundoComum,
-            taxaPenal,
+            valorFundoComum: res.valorFundoComum,
+            taxaPenal: res.taxaPenal,
             totalMultaPercentual,
-            valorDevolucao
+            valorDevolucao: res.valorDevolucao
         };
     };
 
@@ -465,12 +411,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const { nomeUsuario, textoGrupoCota, valorCredito, valorPercentualStr, valorFundoComum, taxaPenal, totalMultaPercentual, valorDevolucao, valorPercentual } = dados;
 
-            // VARIÁVEL DE TEXTO DINÂMICA (SINGULAR/PLURAL e EXPLICAÇÃO)
             let textoExplicacaoMultas = "";
             let textoCalculoLinha2 = "";
 
             if (valorPercentual > 50) {
-                // Caso > 50% (Apenas 1 multa)
                 textoExplicacaoMultas = 
 `No cancelamento do consórcio, houve a aplicação da multa contratual de 10% destinada ao grupo de consórcio, prevista para compensar o impacto da saída de um participante.
 Como você contribuiu com mais de 50% do fundo comum, houve isenção da cláusula penal compensatória (administradora).`;
@@ -478,7 +422,6 @@ Como você contribuiu com mais de 50% do fundo comum, houve isenção da cláusu
                 textoCalculoLinha2 = `${formatarMoeda(valorFundoComum)} (FC) - 10% (Referente apenas ao prejuízo causado ao grupo)`;
             
             } else {
-                // Caso <= 50% (Duas multas)
                 textoExplicacaoMultas = 
 `No cancelamento do consórcio, podem existir dois tipos de descontos previstos no regulamento:
 
@@ -524,14 +467,12 @@ Qualquer dúvida, estou à disposição!`;
 
             const { nomeUsuario, textoGrupoCota, valorCredito, valorPercentualStr, valorPercentual, valorFundoComum, taxaPenal, totalMultaPercentual, valorDevolucao } = dados;
             
-            // LÓGICA CONDICIONAL PARA O E-MAIL
             let blocoJuridicoMultas = "";
             let blocoAplicacaoMultas = "";
             let blocoResumoMultas = "";
             let blocoCalculoFinal = "";
 
             if (valorPercentual > 50) {
-                // > 50% - SINGULAR
                 blocoJuridicoMultas = 
 `No cancelamento do consórcio, aplica-se a multa destinada ao grupo de consórcio, prevista na Cláusula 41.1, com fundamento no Art. 53, §2º do Código de Defesa do Consumidor e Lei 11.795/2008.
 Sua finalidade é indenizar o grupo pelos prejuízos decorrentes da saída de um consorciado, mantendo o equilíbrio financeiro do grupo.`;
@@ -546,7 +487,6 @@ Sua finalidade é indenizar o grupo pelos prejuízos decorrentes da saída de um
 `${formatarMoeda(valorFundoComum)} - 10% (Multa) = ${formatarMoeda(valorDevolucao)}`;
 
             } else {
-                // <= 50% - PLURAL (DUAS MULTAS)
                 blocoJuridicoMultas = 
 `No cancelamento do consórcio, não estamos tratando de uma única multa, mas de duas penalidades distintas, cada uma com fundamento legal e finalidade própria.
 

@@ -23,7 +23,7 @@
   <main class="container mx-auto px-4 py-8 sm:py-12">
     <div class="relative bg-white p-6 sm:p-8 rounded-2xl shadow-xl w-full max-w-2xl mx-auto space-y-6">
       
-      <button id="abrir-instrucoes-btn" class="absolute top-6 right-6 text-white rounded-full h-8 w-8 flex items-center justify-center font-bold text-lg btn-3d transition z-10" title="Manual de Uso">?</button>
+      <button id="abrir-instrucoes-btn" type="button" aria-label="Abrir manual de uso" aria-controls="modal-instrucoes" aria-expanded="false" class="absolute top-6 right-6 text-white rounded-full h-8 w-8 flex items-center justify-center font-bold text-lg btn-3d transition z-10" title="Manual de Uso">?</button>
 
       <div class="text-center">
         <div class="icon-wrapper relative inline-block">
@@ -89,7 +89,7 @@
 
         <div class="pt-4 border-t">
           <label for="data-vencimento" class="block mb-1 font-medium text-slate-700">Vencimento da Parcela Mais Antiga:</label>
-          <input type="text" id="data-vencimento" class="w-full border border-slate-300 rounded-lg p-3" placeholder="DD/MM/AAAA" maxlength="10">
+          <input type="text" id="data-vencimento" class="w-full border border-slate-300 rounded-lg p-3" placeholder="DD/MM/AAAA" maxlength="10" inputmode="numeric" autocomplete="off" aria-describedby="mensagem-erro">
         </div>
         
         <div>
@@ -104,7 +104,7 @@
       </div>
 
       <div class="pt-2 text-center">
-        <button id="btnAbrirDevolucao" class="btn-destaque-outline" style="display: none;">
+        <button id="btnAbrirDevolucao" type="button" aria-controls="modalDevolucao" aria-expanded="false" class="btn-destaque-outline" style="display: none;">
             ⚠️ Cota cancelou? Verifique como funciona o cálculo para devolução
         </button>
       </div>
@@ -120,23 +120,88 @@
     </div>
   </main>
 
-  <div id="modal-instrucoes" class="modal fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 transition-opacity duration-300 hidden p-4">
+  <div id="modal-instrucoes" role="dialog" aria-modal="true" aria-labelledby="modal-instrucoes-titulo" aria-hidden="true" class="modal fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 transition-opacity duration-300 hidden p-4">
     <div id="modal-instrucoes-box" class="modal-box bg-white p-8 rounded-xl shadow-2xl w-full max-w-3xl relative max-h-[90vh] overflow-y-auto">
-      <button id="fechar-instrucoes-btn" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition">
+      <button id="fechar-instrucoes-btn" type="button" aria-label="Fechar manual" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
           <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
         </svg>
       </button>
-      <h3 class="text-2xl font-bold text-slate-900 mb-6 text-center">Manual da Calculadora e Regras de Cancelamento/Devolução</h3>
-      <div id="manual-conteudo" class="space-y-6 text-slate-600 text-sm"></div>
+      <h3 id="modal-instrucoes-titulo" class="text-2xl font-bold text-slate-900 mb-6 text-center">Manual da Calculadora e Regras de Cancelamento/Devolução</h3>
+      
+      <div id="manual-conteudo" class="space-y-6 text-slate-600 text-sm">
+    <div class="space-y-8 text-slate-700">
+        
+        <div>
+            <h4 class="font-bold text-lg text-slate-900 mb-3">1. Como realizar a Análise de Atraso</h4>
+            <p class="mb-3 text-sm">Preencha os campos para identificar o risco atual da cota:</p>
+            <ul class="list-disc pl-5 space-y-2 text-sm mb-4">
+                <li><strong>Status:</strong> Defina se o cliente já retirou o bem (Contemplado) ou não.</li>
+                <li><strong>Data de Inauguração:</strong> Fundamental para definir a regra de cancelamento (veja abaixo).</li>
+                <li><strong>Vencimento:</strong> Data da parcela mais antiga em aberto.</li>
+                <li><strong>Nº Parcelas:</strong> Quantidade total de parcelas pendentes.</li>
+            </ul>
+            <div class="bg-blue-50 p-4 rounded-lg border border-blue-100 text-sm text-blue-900">
+                <strong>Resultado:</strong> O sistema informará se é caso de cobrança simples, cancelamento ou busca e apreensão (Para cotas com o crédito pago).
+            </div>
+        </div>
+
+        <div>
+            <h4 class="font-bold text-lg text-slate-900 mb-3">2. Regras de Cancelamento (Cláusula 39)</h4>
+            <p class="mb-3 text-sm">O sistema identifica automaticamente se a cota está em processo de exclusão baseando-se na data do grupo:</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="bg-gray-100 p-4 rounded-lg">
+                    <p class="font-bold text-gray-800 text-sm mb-1">Grupos até 30/06/2024</p>
+                    <p class="text-xs leading-relaxed">Cancelamento com <strong class="text-red-600">2 parcelas</strong> em atraso (consecutivas ou não).</p>
+                </div>
+                <div class="bg-gray-100 p-4 rounded-lg">
+                    <p class="font-bold text-gray-800 text-sm mb-1">Grupos após 01/07/2024</p>
+                    <p class="text-xs leading-relaxed">Cancelamento com <strong class="text-red-600">3 parcelas</strong> em atraso (consecutivas ou não).</p>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <h4 class="font-bold text-lg text-slate-900 mb-3">3. Simulador para Devolução</h4>
+            <p class="mb-3 text-sm">Quando a análise identificar que a cota atingiu os critérios de cancelamento, aparecerá um botão: <strong class="text-red-600">"⚠️ Cota cancelou?"</strong>.</p>
+            <p class="font-bold text-sm mb-2">Como é calculado o valor a devolver?</p>
+            <ul class="list-disc pl-5 space-y-2 text-sm">
+                <li><strong>Base de Cálculo:</strong> Apenas o Fundo Comum pago (exclui Taxa Adm. e Seguro).</li>
+                <li><strong>Multa 1 (Cláusula 41.1):</strong> 10% fixo sobre o Fundo Comum (Prejuízo ao Grupo).</li>
+                <li><strong>Multa 2 (Cláusula 42 - Penal):</strong> Escalonada conforme o percentual pago:
+                    <ul class="list-none pl-4 mt-1 space-y-1 text-xs text-slate-500 border-l-2 border-slate-300">
+                        <li>• Até 20% pago: 20% multa</li>
+                        <li>• 20,1% a 40%: 15% multa</li>
+                        <li>• 40,1% a 50%: 10% multa</li>
+                        <li>• Acima de 50%: Isento</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div>
+            <h4 class="font-bold text-lg text-slate-900 mb-3">4. Diferença de Descontemplação</h4>
+            <p class="mb-3 text-sm">Aplica-se a cotas <strong>Contempladas com Crédito Pendente</strong> que foram canceladas.</p>
+            <p class="mb-3 text-sm">No simulador, marque a opção <em>"A cota estava Contemplada?"</em>. O cálculo segue o <strong>Parágrafo 15</strong> da seção de Cancelamento da Contemplação:</p>
+            <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200 text-yellow-800 font-mono text-xs text-center shadow-sm">
+                Diferença = Crédito Atualizado do Grupo - (Crédito do Cliente + Rendimentos)
+            </div>
+            <p class="mt-2 text-xs text-slate-500">Se o crédito atual do grupo for maior, o consorciado deve pagar essa diferença para recompor o saldo do grupo.</p>
+        </div>
+
+    </div>
+</div>
+
+
+
     </div>
   </div>
 
-  <div id="modalDevolucao" class="modal-overlay">
+  <div id="modalDevolucao" role="dialog" aria-modal="true" aria-labelledby="modal-devolucao-titulo" aria-hidden="true" class="modal-overlay">
     <div class="modal-card">
         <div class="modal-header">
-            <h2>Simulador de Devolução  (Quando contemplado)</h2>
-            <button id="btnFecharDevolucao" class="btn-close-modal">&times;</button>
+            <h2 id="modal-devolucao-titulo">Simulador de Devolução  (Quando contemplado)</h2>
+            <button id="btnFecharDevolucao" type="button" aria-label="Fechar simulador de devolução" class="btn-close-modal">&times;</button>
         </div>
         
         <div class="modal-body overflow-y-auto max-h-[80vh]">
@@ -254,7 +319,36 @@
             <div class="mt-6">
                 <h3 class="text-sm font-bold text-gray-700 mb-2 uppercase">Guia rápido</h3>
                 <div id="accordion-container">
+                    
+                    <div class="accordion-item">
+                        <button type="button" class="accordion-header" onclick="alternarAcordeaoDevolucao(this)">
+                            Fundo Comum e Base Legal (Lei 11.795) <span>▼</span>
+                        </button>
+                        <div class="accordion-content">
+                            <p>É a parte da parcela destinada à compra do bem (Art. 25). É o único valor passível de devolução ao excluído (Art. 30, Lei 11.795/08).</p>
+                        </div>
                     </div>
+                    
+                    <div class="accordion-item">
+                        <button type="button" class="accordion-header" onclick="alternarAcordeaoDevolucao(this)">
+                            Por que taxas não são devolvidas? (Cláusula 41) <span>▼</span>
+                        </button>
+                        <div class="accordion-content">
+                            <p>A Taxa de Administração, Fundo de Reserva e Seguro remuneram serviços já prestados e a proteção usufruída durante a vigência do contrato, não sendo reembolsáveis.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <button type="button" class="accordion-header" onclick="alternarAcordeaoDevolucao(this)">
+                            Entenda as Multas (Cláusulas 41.1 e 42) <span>▼</span>
+                        </button>
+                        <div class="accordion-content">
+                            <p><strong>Cláusula 41.1 (10%):</strong> Indenização pelos prejuízos causados ao grupo.<br>
+                            <strong>Cláusula 42 (Penal):</strong> Penalidade compensatória variável (0% a 20%) para cobrir custos de venda.</p>
+                        </div>
+                    </div>
+
+                </div>
             </div>
 
             <div class="mt-8 pt-4 border-t border-slate-200">
@@ -303,6 +397,7 @@
     </div>
   </div>
 
+  <script src="consorcioService.js"></script>
   <script src="script.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -349,7 +444,12 @@
       const saudacaoEl = document.getElementById('saudacao-usuario');
       if (nomeUsuario) {
           let boasVindas = generoUsuario === 'M' ? 'Bem-vindo de volta.' : (generoUsuario === 'F' ? 'Bem-vinda de volta.' : 'Bem-vindo(a) de volta.');
-          saudacaoEl.innerHTML = `Olá, <span class="font-bold ${tema.text}">${nomeUsuario}</span>! ${boasVindas}`;
+          saudacaoEl.textContent = `Olá, ${nomeUsuario}! ${boasVindas}`;
+          const nomeSpan = document.createElement('span');
+          nomeSpan.className = `font-bold ${tema.text}`;
+          nomeSpan.textContent = nomeUsuario;
+          saudacaoEl.textContent = '';
+          saudacaoEl.append('Olá, ', nomeSpan, `! ${boasVindas}`);
       } else {
           saudacaoEl.textContent = 'Vamos analisar a situação da cota.';
       }
@@ -358,20 +458,57 @@
       const modal = document.getElementById('modal-instrucoes');
       const abrirBtn = document.getElementById('abrir-instrucoes-btn');
       const fecharBtn = document.getElementById('fechar-instrucoes-btn');
+      let ultimoFoco = null;
+      let focoRef = null;
+
+      const obterFocaveis = () => modal.querySelectorAll(
+        'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
+      );
+      const capturarTabNoModal = (e) => {
+        if (e.key !== 'Tab') return;
+        const focaveis = obterFocaveis();
+        if (!focaveis.length) return;
+        const primeiro = focaveis[0];
+        const ultimo = focaveis[focaveis.length - 1];
+        if (e.shiftKey && document.activeElement === primeiro) {
+          e.preventDefault();
+          ultimo.focus();
+        } else if (!e.shiftKey && document.activeElement === ultimo) {
+          e.preventDefault();
+          primeiro.focus();
+        }
+      };
       
       abrirBtn.addEventListener('click', () => {
+        ultimoFoco = document.activeElement;
+        abrirBtn.setAttribute('aria-expanded', 'true');
+        modal.setAttribute('aria-hidden', 'false');
         modal.classList.remove('hidden');
         setTimeout(() => modal.classList.add('active'), 10);
+        focoRef = setTimeout(() => fecharBtn.focus(), 20);
+        document.addEventListener('keydown', capturarTabNoModal);
       });
 
       const fecharModal = () => {
+        abrirBtn.setAttribute('aria-expanded', 'false');
+        modal.setAttribute('aria-hidden', 'true');
         modal.classList.remove('active');
+        document.removeEventListener('keydown', capturarTabNoModal);
+        clearTimeout(focoRef);
         setTimeout(() => modal.classList.add('hidden'), 300);
+        if (ultimoFoco && typeof ultimoFoco.focus === 'function') {
+          ultimoFoco.focus();
+        }
       };
 
       fecharBtn.addEventListener('click', fecharModal);
       modal.addEventListener('click', (e) => {
         if (e.target === modal) fecharModal();
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.getAttribute('aria-hidden') === 'false') {
+          fecharModal();
+        }
       });
     });
   </script>
