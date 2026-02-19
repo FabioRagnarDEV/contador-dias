@@ -1,0 +1,27 @@
+{
+  "name": "calculadoradias",
+  "version": "1.0.0",
+  "description": "O **Painel de Ferramentas de Cálculo de Prazos** é uma aplicação web interativa desenvolvida para **otimizar e automatizar cálculos de prazos críticos** relacionados a processos de consórcio.",
+  "main": "index.js",
+  
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FabioRagnarDEV/contador-dias.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/FabioRagnarDEV/contador-dias/issues"
+  },
+  "homepage": "https://github.com/FabioRagnarDEV/contador-dias#readme",
+  "dependencies": {
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0"
+  }
+}

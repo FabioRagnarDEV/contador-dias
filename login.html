@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Acesso Restrito</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 h-screen flex items-center justify-center font-sans">
+    <div class="bg-white p-8 rounded-xl shadow-2xl w-96">
+        <h2 class="text-2xl font-bold mb-6 text-center text-slate-800">Login Restrito</h2>
+        
+        <form action="/fazer-login" method="POST" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Usuário</label>
+                <input type="text" name="usuario" required class="w-full mt-1 p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Senha</label>
+                <input type="password" name="senha" required class="w-full mt-1 p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+            <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2 rounded hover:bg-blue-700 transition">
+                Entrar
+            </button>
+        </form>
+    </div>
+</body>
+</html>
