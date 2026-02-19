@@ -32,6 +32,13 @@ app.post('/fazer-login', (req, res) => {
     }
 });
 
+// Rota para encerrar a sessão (Logout)
+app.get('/logout', (req, res) => {
+    req.session.destroy(() => {
+        res.redirect('/login');
+    });
+});
+
 // Middleware de Autenticação: Protege o acesso aos arquivos estáticos
 app.use((req, res, next) => {
     if (req.session.logado) {
