@@ -1,55 +1,51 @@
 const express = require('express');
 const session = require('express-session');
 const path = require('path');
-require('dotenv').config(); // Carrega as informações do arquivo .env
+require('dotenv').config();
 
 const app = express();
 
-// Configura o servidor para conseguir ler os dados digitados no formulário de login
 app.use(express.urlencoded({ extended: true }));
 
-// Configura a sessão (a "memória" que lembra que o usuário já digitou a senha certa)
+// Configuração de sessão para manter o usuário logado
 app.use(session({
-    secret: 'chave-secreta-do-meu-projeto', // Uma chave interna para criptografar a sessão
+    secret: 'chave-secreta-do-meu-projeto',
     resave: false,
     saveUninitialized: false,
-    cookie: { maxAge: 1000 * 60 * 60 * 24 } // A sessão expira em 24 horas (em milissegundos)
+    cookie: { maxAge: 1000 * 60 * 60 * 24 } // Expira em 24h
 }));
 
-// Rota 1: Entrega a página de login
+// Rota GET: Exibe a página de login
 app.get('/login', (req, res) => {
     res.sendFile(path.join(__dirname, 'login.html'));
 });
 
-// Rota 2: Processa os dados que vieram do formulário
+// Rota POST: Processa a autenticação
 app.post('/fazer-login', (req, res) => {
-    const usuarioDigitado = req.body.usuario;
-    const senhaDigitada = req.body.senha;
+    const { usuario, senha } = req.body;
 
-    // Compara o que foi digitado com o que está guardado no seu .env
-    if (usuarioDigitado === process.env.MEU_USUARIO && senhaDigitada === process.env.MINHA_SENHA) {
-        req.session.logado = true; // Marca o usuário como logado
-        res.redirect('/'); // Redireciona para o painel de calculadoras
+    if (usuario === process.env.MEU_USUARIO && senha === process.env.MINHA_SENHA) {
+        req.session.logado = true;
+        res.redirect('/');
     } else {
         res.send('<h3>Usuário ou senha incorretos!</h3><a href="/login">Voltar e tentar novamente</a>');
     }
 });
 
-// MIDDLEWARE DE PROTEÇÃO (O "Porteiro")
-// Tudo que estiver abaixo desta linha só será acessado se o usuário estiver logado
+// Middleware de Autenticação: Protege o acesso aos arquivos estáticos
 app.use((req, res, next) => {
     if (req.session.logado) {
-        next(); // Está logado? Pode passar para o próximo passo!
+        next();
     } else {
-        res.redirect('/login'); // Não está logado? Vai para a tela de login!
+        res.redirect('/login');
     }
 });
 
-// Rota 3: Libera o acesso aos arquivos do seu projeto (HTML, CSS, JS) que estão na pasta public
+// Arquivos estáticos (HTML, CSS, JS do painel) liberados apenas após o login
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Liga o servidor
+// Inicialização do servidor
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`🚀 Servidor protegido rodando em http://localhost:${PORT}`);
+    console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
 });
