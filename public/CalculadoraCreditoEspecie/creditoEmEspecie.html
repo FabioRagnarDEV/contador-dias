@@ -25,14 +25,6 @@
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800">
-
-  <a href="/logout" class="absolute top-4 right-4 z-50 bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-full shadow-lg transition-transform transform hover:scale-105 flex items-center gap-2 text-sm">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-    </svg>
-    Sair
-  </a>
-
   <header id="header" class="shadow-md transition-colors duration-500">
     <nav class="container mx-auto px-4 py-3 flex items-center justify-between">
       <h1 class="text-xl sm:text-2xl font-bold text-white drop-shadow-sm">
@@ -147,9 +139,19 @@
       </a>
     </div>
   </main>
-  <footer class="w-full text-center py-4 mt-8">
-    <p class="text-sm text-slate-500">&copy; Todos os direitos reservados.</p>
-  </footer>
+
+  <footer class="w-full py-8 mt-4 sm:mt-8 relative z-10 flex flex-col items-center gap-6">
+  
+  <a href="/logout" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2.5 px-6 rounded-full shadow-md transition-transform transform hover:scale-105 flex items-center gap-2 text-sm w-max">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+    </svg>
+    Encerrar Sessão
+  </a>
+
+  <p class="text-sm text-slate-500">&copy; Todos os direitos reservados.</p>
+</footer>
+
   <div id="modal-instrucoes" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 transition-opacity duration-300 hidden">
     <div id="modal-instrucoes-box" class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-lg relative">
       <button id="fechar-instrucoes-btn" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition">
@@ -181,6 +183,7 @@
     </div>
   </div>
   <audio id="som-dinheiro" src="../assets/som-caixa.mp3" preload="auto"></audio>
+  
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const paletaDeTemas = [
