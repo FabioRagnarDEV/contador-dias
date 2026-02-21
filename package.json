@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "O **Painel de Ferramentas de Cálculo de Prazos** é uma aplicação web interativa desenvolvida para **otimizar e automatizar cálculos de prazos críticos** relacionados a processos de consórcio.",
   "main": "index.js",
-  
   "scripts": {
     "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -20,6 +19,7 @@
   },
   "homepage": "https://github.com/FabioRagnarDEV/contador-dias#readme",
   "dependencies": {
+    "@supabase/supabase-js": "^2.97.0",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "express-session": "^1.19.0"
