@@ -3,62 +3,67 @@ const session = require('express-session');
 const path = require('path');
 require('dotenv').config();
 
-// 1. Importa e configura o Supabase
+// --- BIBLIOTECAS DE SEGURANÇA ---
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+
+// --- CONFIGURAÇÃO DO SUPABASE ---
 const { createClient } = require('@supabase/supabase-js');
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
 const app = express();
 
-app.set('trust proxy', 1);
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json()); // Necessário para ler o relatório do frontend
-
-app.use(session({
-    secret: 'chave-secreta-do-meu-projeto',
-    resave: false,
-    saveUninitialized: false,
-    cookie: { maxAge: 1000 * 60 * 60 * 24 }
+app.use(helmet({
+  contentSecurityPolicy: false, // Desativado para não bloquear scripts externos
 }));
 
-const controleTentativas = {}; 
+
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, 
+    max: 2, 
+    handler: (req, res) => {
+        console.log(`⛔ Bloqueio de IP ativado para: ${req.ip}`);
+        res.redirect('/login?erro=bloqueado');
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+app.set('trust proxy', 1); 
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
+// Configuração da Sessão
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'chave-secreta-temporaria', // Defina SESSION_SECRET no .env
+    resave: false,
+    saveUninitialized: false,
+    cookie: { 
+        maxAge: 1000 * 60 * 60 * 24, // 1 dia
+        httpOnly: true, 
+        secure: process.env.NODE_ENV === 'production' 
+    }
+}));
+
+// --- ROTAS DE ACESSO ---
 
 app.get('/login', (req, res) => {
     res.sendFile(path.join(__dirname, 'login.html'));
 });
 
-app.post('/fazer-login', (req, res) => {
+// Rota de Login com o Limitador de Segurança aplicado
+app.post('/fazer-login', loginLimiter, (req, res) => {
     const { usuario, senha } = req.body;
-    const ip = req.ip; 
 
-    if (!controleTentativas[ip]) {
-        controleTentativas[ip] = { falhas: 0, bloqueadoAte: null };
-    }
-
-    const controle = controleTentativas[ip];
-    
-    if (controle.bloqueadoAte && controle.bloqueadoAte > Date.now()) {
-        return res.redirect('/login?erro=bloqueado'); 
-    }
-
-    if (controle.bloqueadoAte && controle.bloqueadoAte <= Date.now()) {
-        controle.falhas = 0;
-        controle.bloqueadoAte = null;
-    }
-
+    // Verifica credenciais do .env
     if (usuario === process.env.MEU_USUARIO && senha === process.env.MINHA_SENHA) {
         req.session.logado = true;
-        controle.falhas = 0; 
+        console.log(`✅ Login Sucesso: ${req.ip}`);
         res.redirect('/');
     } else {
-        controle.falhas += 1;
-        const tentativasRestantes = 3 - controle.falhas;
-
-        if (controle.falhas >= 3) {
-            controle.bloqueadoAte = Date.now() + 10 * 60 * 1000;
-            return res.redirect('/login?erro=bloqueado');
-        } else {
-            return res.redirect(`/login?erro=invalida&restantes=${tentativasRestantes}`);
-        }
+        console.log(`❌ Falha Login: ${req.ip}`);
+        // O rateLimit já conta as falhas automaticamente. Apenas redirecionamos.
+        res.redirect('/login?erro=senha'); 
     }
 });
 
@@ -68,13 +73,15 @@ app.get('/logout', (req, res) => {
     });
 });
 
-// --- SISTEMA DE ANALYTICS COM SUPABASE ---
+// --- SISTEMA DE ANALYTICS ---
+
 app.post('/api/rastrear', async (req, res) => {
     if (!req.session.logado) return res.sendStatus(401);
 
     const { pagina, tempoSegundos } = req.body;
     let ip = req.ip;
 
+    // Normalização de IP para testes locais (Remover em produção se desejar)
     if (ip === '::1' || ip === '127.0.0.1') ip = '177.136.255.255'; 
 
     let localizacao = "Localização Desconhecida";
@@ -90,11 +97,13 @@ app.post('/api/rastrear', async (req, res) => {
     }
 
     const dataHora = new Date().toLocaleString('pt-BR');
+    
+    // Formatação de tempo
     const minutos = Math.floor(tempoSegundos / 60);
     const segundos = tempoSegundos % 60;
     const tempoFormatado = minutos > 0 ? `${minutos}m ${segundos}s` : `${segundos}s`;
 
-    // 2. Salva o acesso DE VERDADE no Supabase
+    // Salva no Supabase
     const { error } = await supabase
         .from('acessos')
         .insert([{ 
@@ -111,23 +120,21 @@ app.post('/api/rastrear', async (req, res) => {
     res.sendStatus(200);
 });
 
-// 3. Rota para gerar relatório
+// Rota para gerar relatório CSV
 app.get('/baixar-relatorio', async (req, res) => {
     if (!req.session.logado) return res.redirect('/login');
 
-    // Busca todos os dados da tabela 'acessos'
     const { data, error } = await supabase.from('acessos').select('*');
 
-    if (error) {
-        return res.status(500).send("Erro ao buscar relatórios.");
-    }
+    if (error) return res.status(500).send("Erro ao buscar relatórios.");
 
     let csv = 'Data e Hora,Endereço IP,Localização,Página Acessada,Tempo de Uso\n';
 
-    // Se houver dados, preenche a planilha
     if (data) {
         data.forEach(acesso => {
-            csv += `"${acesso.data_hora}","${acesso.ip}","${acesso.localizacao}","${acesso.pagina}","${acesso.tempo_uso}"\n`;
+            // Pequena sanitização para evitar quebra do CSV
+            const loc = acesso.localizacao ? acesso.localizacao.replace(/,/g, ' -') : '';
+            csv += `"${acesso.data_hora}","${acesso.ip}","${loc}","${acesso.pagina}","${acesso.tempo_uso}"\n`;
         });
     }
 
@@ -136,7 +143,7 @@ app.get('/baixar-relatorio', async (req, res) => {
     return res.send(csv);
 });
 
-// Middleware de Proteção
+// --- MIDDLEWARE DE PROTEÇÃO DE ROTAS (Gatekeeper) ---
 app.use((req, res, next) => {
     if (req.session.logado) {
         next();
@@ -145,6 +152,7 @@ app.use((req, res, next) => {
     }
 });
 
+// Serve os arquivos estáticos (HTML, CSS, JS) somente se logado (pois está abaixo do gatekeeper)
 app.use(express.static(path.join(__dirname, 'public')));
 
 const PORT = process.env.PORT || 3000;

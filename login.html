@@ -84,6 +84,22 @@
             painel.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`;
         });
 
+        window.onload = () => {
+    // Verifica se tem erro na URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const erro = urlParams.get('erro');
+    const areaCaptcha = document.getElementById('captcha-container'); // Ou o ID onde quer mostrar o erro
+
+    if (erro === 'bloqueado') {
+        alert("⛔ ACESSO BLOQUEADO TEMPORARIAMENTE\n\nMuitas tentativas falhas. Aguarde 15 minutos.");
+        // Opcional: Desabilitar o formulário visualmente
+        document.body.style.opacity = "0.5";
+        document.body.style.pointerEvents = "none";
+    } else if (erro === 'senha') {
+        alert("❌ Usuário ou senha incorretos.");
+    }
+};
+
         // Lógica do CAPTCHA "Jogo das Bolas"
         const btnPreAuth = document.getElementById('btn-pre-auth');
         const btnFinal = document.getElementById('btn-final');
