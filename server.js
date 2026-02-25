@@ -20,7 +20,7 @@ app.use(helmet({
 
 const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, 
-    max: 2, 
+    max: 5, 
     handler: (req, res) => {
         console.log(`⛔ Bloqueio de IP ativado para: ${req.ip}`);
         res.redirect('/login?erro=bloqueado');
