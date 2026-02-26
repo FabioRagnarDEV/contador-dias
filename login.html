@@ -13,16 +13,14 @@
         .saltar-fora { transform: translateZ(50px); }
         #shackle { transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
         .unlocked #shackle { transform: translateY(-6px); }
-        
-        /* Animação de tremor para erro */
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
-        .erro-shake { animation: shake 0.2s ease-in-out 0s 2; }
     </style>
+    <link rel="stylesheet" href="stylo.css">
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body id="body-bg" class="min-h-screen flex items-center justify-center p-4 perspectiva">
     
     <div id="painel-login" class="w-full max-w-md relative z-10 mx-auto preservar-3d">
+        
         <div class="text-center mb-6 sm:mb-8 saltar-fora">
             <div id="icon-bg" class="w-20 h-20 sm:w-24 sm:h-24 rounded-full mx-auto flex items-center justify-center mb-4 sm:mb-6 transition-all">
                 <svg id="lock-icon" xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 sm:h-12 sm:w-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -31,7 +29,14 @@
                 </svg>
             </div>
             <h2 id="titulo-login" class="text-2xl font-black">Acesso Restrito</h2>
-            <p id="subtitulo-login" class="mt-2 text-xs sm:text-sm opacity-80">Aguardnado login e senha</p>
+            <p id="subtitulo-login" class="mt-2 text-xs sm:text-sm opacity-80">Área de Segurança Máxima</p>
+        </div>
+
+        <div id="tela-bloqueio" class="hidden text-center saltar-fora p-6 bg-red-900/50 rounded-xl border-2 border-red-500">
+            <h3 class="text-xl font-bold text-white mb-2">🚫 SE FERROU!</h3>
+            <h4 class="text-xl font-bold text-white mb-2"> Estava tentando burlar, né malandro? SUSPENSO!!</h4>
+            <p class="text-gray-200 mb-4 text-sm">Muitas tentativas falhas detectadas. Por segurança, aguarde:</p>
+            <div id="cronometro" class="text-4xl font-mono font-black text-white animate-pulse">20:00</div>
         </div>
 
         <form id="form-login" action="/fazer-login" method="POST" class="space-y-4 sm:space-y-6">
@@ -46,7 +51,7 @@
 
             <div id="captcha-container" class="flex justify-center pt-2">
                 <div class="cf-turnstile" 
-                    data-sitekey="0x4AAAAAAChuF9-2mkDLwgOu" 
+                    data-sitekey="0x4AAAAAAChuF9-2mkDLwgOu"  
                     data-callback="enableBtn"></div>
             </div>
             
@@ -54,21 +59,36 @@
 
             <div class="saltar-fora pt-2">
                 <button type="submit" id="btn-final" class="hidden w-full font-black py-4 transition-all hover:brightness-110">
-                    Fazer login
+                    Entrar no Sistema
                 </button>
             </div>
         </form>
     </div>
 
     <script>
-        // Design do Painel (Lógica Visual Mantida)
+        const TEMPO_BLOQUEIO_MINUTOS = 20; 
+
         const designs = [
             { body: "bg-slate-950", panel: "bg-slate-900 p-8 rounded-3xl border-2 border-cyan-500 shadow-[0_0_30px_rgba(6,182,212,0.3)] text-cyan-500", iconBg: "bg-cyan-500 text-slate-900", btn: "bg-cyan-500 text-slate-950 rounded-xl", input: "bg-slate-800 border-2 border-slate-700 p-3 rounded-lg text-cyan-400" },
-            { body: "bg-zinc-900", panel: "bg-black p-8 rounded-[2rem] border-4 border-yellow-400 shadow-[10px_10px_0_#FACC15] text-yellow-400", iconBg: "bg-yellow-400 text-black", btn: "bg-yellow-400 text-black border-2 border-black font-black uppercase tracking-widest hover:translate-y-1 hover:shadow-none transition-transform", input: "bg-zinc-800 border-2 border-zinc-700 p-3 rounded text-yellow-400 font-mono" }
+            { body: "bg-zinc-900", panel: "bg-black p-8 rounded-[2rem] border-4 border-yellow-400 shadow-[10px_10px_0_#FACC15] text-yellow-400", iconBg: "bg-yellow-400 text-black", btn: "bg-yellow-400 text-black border-2 border-black font-black uppercase tracking-widest hover:translate-y-1 hover:shadow-none transition-transform", input: "bg-zinc-800 border-2 border-zinc-700 p-3 rounded text-yellow-400 font-mono" },
+
+            { 
+        body: "bg-gradient-to-br from-slate-950 via-indigo-950 to-black",
+
+        panel: "relative bg-white/5 backdrop-blur-2xl p-8 rounded-3xl border border-indigo-500/30 shadow-[0_0_60px_rgba(99,102,241,0.35)] text-indigo-300 before:absolute before:inset-0 before:rounded-3xl before:border before:border-indigo-400/20 before:animate-pulse",
+
+        iconBg: "bg-gradient-to-br from-indigo-400 to-cyan-400 text-black shadow-lg shadow-indigo-500/40",
+
+        btn: "relative overflow-hidden bg-gradient-to-r from-indigo-500 via-cyan-400 to-indigo-500 text-black font-semibold rounded-xl px-6 py-3 shadow-[0_0_25px_rgba(99,102,241,0.6)] hover:scale-105 transition-all duration-300 before:absolute before:inset-0 before:bg-[linear-gradient(120deg,transparent,rgba(255,255,255,0.4),transparent)] before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-700",
+
+        input: "bg-slate-900/70 border border-indigo-500/40 p-3 rounded-xl text-indigo-200 focus:ring-2 focus:ring-cyan-400 focus:outline-none shadow-inner shadow-indigo-500/20"
+    }
+
         ];
 
-        const tema = designs[Math.floor(Math.random() * designs.length)];
         
+
+        const tema = designs[Math.floor(Math.random() * designs.length)];
         document.body.className += " " + tema.body;
         document.getElementById('painel-login').className += " " + tema.panel;
         document.getElementById('icon-bg').className += " " + tema.iconBg;
@@ -76,7 +96,6 @@
         document.getElementById('input-senha').className += " " + tema.input;
         document.getElementById('btn-final').className += " " + tema.btn;
 
-        // Efeito 3D
         const painel = document.getElementById('painel-login');
         document.addEventListener('mousemove', (e) => {
             let x = (window.innerWidth / 2 - e.pageX) / 30;
@@ -84,36 +103,75 @@
             painel.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`;
         });
 
-        // Tratamento de Erros via URL
         window.onload = () => {
+            verificarStatusBloqueio();
+
             const urlParams = new URLSearchParams(window.location.search);
             const erro = urlParams.get('erro');
             
             if (erro) {
-                const divErro = document.getElementById('alerta-erro');
-                divErro.classList.remove('hidden');
-                
-                if (erro === 'bloqueado') divErro.innerText = "⛔ ACESSO BLOQUEADO: Muitas tentativas.";
-                else if (erro === 'senha') divErro.innerText = "❌ Usuário ou senha incorretos.";
-                else if (erro === 'captcha') divErro.innerText = "🤖 Falha na verificação de segurança.";
+                if (erro === 'bloqueado') {
+                    iniciarBloqueioVisual();
+                } else {
+                    const divErro = document.getElementById('alerta-erro');
+                    divErro.classList.remove('hidden');
+                    if (erro === 'senha') divErro.innerText = "❌ Usuário ou senha incorretos.";
+                    else if (erro === 'captcha') divErro.innerText = "🤖 Falha na verificação de segurança.";
+                }
             }
         };
 
-        // Função de Callback do Cloudflare (Ativa o botão)
+        function iniciarBloqueioVisual() {
+            const tempoDesbloqueio = Date.now() + (TEMPO_BLOQUEIO_MINUTOS * 60 * 1000);
+            localStorage.setItem('bloqueio_ate', tempoDesbloqueio);
+            aplicarBloqueio(tempoDesbloqueio);
+        }
+
+        function verificarStatusBloqueio() {
+            const bloqueioAte = localStorage.getItem('bloqueio_ate');
+            if (bloqueioAte) {
+                if (Date.now() < parseInt(bloqueioAte)) {
+                    aplicarBloqueio(parseInt(bloqueioAte));
+                } else {
+                    localStorage.removeItem('bloqueio_ate'); // Já expirou
+                }
+            }
+        }
+
+        function aplicarBloqueio(tempoFinal) {
+            // Esconde o formulário e mostra a tela de bloqueio
+            document.getElementById('form-login').classList.add('hidden');
+            document.getElementById('tela-bloqueio').classList.remove('hidden');
+            document.getElementById('titulo-login').innerText = "Sistema Travado";
+            document.getElementById('subtitulo-login').innerText = "IP temporariamente banido";
+            document.getElementById('icon-bg').className = "w-24 h-24 rounded-full mx-auto flex items-center justify-center mb-6 bg-red-600 text-white";
+
+            // Inicia contagem regressiva
+            const intervalo = setInterval(() => {
+                const agora = Date.now();
+                const restante = tempoFinal - agora;
+
+                if (restante <= 0) {
+                    clearInterval(intervalo);
+                    localStorage.removeItem('bloqueio_ate');
+                    window.location.href = '/login'; 
+                    return;
+                }
+
+                const minutos = Math.floor((restante % (1000 * 60 * 60)) / (1000 * 60));
+                const segundos = Math.floor((restante % (1000 * 60)) / 1000);
+                document.getElementById('cronometro').innerText = 
+                    `${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+
         function enableBtn() {
             const btn = document.getElementById('btn-final');
             const icon = document.getElementById('lock-icon');
-            
             btn.classList.remove('hidden');
             btn.classList.add('animate-bounce');
             icon.classList.add('unlocked'); 
         }
-
-        // Envio do formulário
-        const form = document.getElementById('form-login');
-        form.onsubmit = (e) => {
-             // O envio segue normal para o servidor
-        };
     </script>
 </body>
 </html>
