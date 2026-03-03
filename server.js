@@ -53,6 +53,20 @@ const apenasAdmin = (req, res, next) => {
     }
 };
 
+const requireAuth = (req, res, next) => {
+    if (req.session && req.session.logado) {
+        return next(); // Está logado, pode passar!
+    }
+    
+    // Se não estiver logado:
+    // Verifica se é uma chamada de API (oculta) ou uma página normal
+    if (req.xhr || (req.headers.accept && req.headers.accept.includes('json'))) {
+        return res.status(401).json({ error: 'Acesso negado: Usuário não autenticado.' });
+    } else {
+        return res.redirect('/login');
+    }
+};
+
 // --- ROTAS PÚBLICAS ---
 
 app.get('/login', (req, res) => {
@@ -172,7 +186,6 @@ app.post('/api/admin/criar-usuario', apenasAdmin, async (req, res) => {
             issuer: "PainelPrazos"
         });
 
-        // 4. Salva no Banco (Role padrão: 'user')
         const { error } = await supabase
             .from('usuarios')
             .insert([{ 
@@ -184,7 +197,6 @@ app.post('/api/admin/criar-usuario', apenasAdmin, async (req, res) => {
 
         if (error) throw error;
 
-        // 5. Gera QR Code para enviar ao front
         const qrCodeUrl = await qrcode.toDataURL(secret.otpauth_url);
 
         res.json({ 
@@ -250,7 +262,6 @@ app.get('/baixar-relatorio', async (req, res) => {
     res.attachment('Relatorio_Acessos.csv').send(csv);
 });
 
-// --- GATEKEEPER (Middleware Global) ---
 app.use((req, res, next) => {
     if (req.session.logado) return next();
     res.redirect('/login');
