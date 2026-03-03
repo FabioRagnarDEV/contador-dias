@@ -7,7 +7,7 @@
   <link rel="icon" type="image/png" href="../favicon/calendario.png" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic" crossorigin />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet" />
   <style>
     body { font-family: 'Inter', sans-serif; }
@@ -70,7 +70,7 @@
           Entenda a contagem
         </button>
       </div>
-      <div id="contagem-resultado" class="hidden mt-4 p-4 rounded-lg text-center"></div>
+      <div id="contagem-resultado" class="hidden mt-4 p-5 rounded-lg text-center shadow-inner"></div>
       <div id="mensagem-erro" class="text-center pt-2 text-sm font-bold text-amber-600 min-h-[20px]"></div>
       <div id="resultado" class="text-center text-lg font-bold p-4 rounded-lg transition-all duration-500 opacity-0 transform scale-95"></div>
       <div id="info-legal" class="hidden mt-6 pt-4 border-t border-slate-200 text-sm text-slate-600">
@@ -126,16 +126,13 @@
       </a>
     </div>
   </main>
-  
   <footer class="w-full py-8 mt-4 sm:mt-8 relative z-10 flex flex-col items-center gap-6">
-  
   <a href="/logout" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2.5 px-6 rounded-full shadow-md transition-transform transform hover:scale-105 flex items-center gap-2 text-sm w-max">
     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
     </svg>
     Encerrar Sessão
   </a>
-
   <p class="text-sm text-slate-500">&copy; Todos os direitos reservados.</p>
 </footer>
 
@@ -214,9 +211,16 @@
       const nomeUsuario = localStorage.getItem('nomeUsuario');
       const generoUsuario = localStorage.getItem('generoUsuario');
       const saudacaoEl = document.getElementById('saudacao-usuario');
+      
+      // 🔒 MITIGAÇÃO DE XSS - Saudação do utilizador blindada
       if (nomeUsuario) {
           let boasVindas = generoUsuario === 'M' ? 'Bem-vindo de volta.' : (generoUsuario === 'F' ? 'Bem-vinda de volta.' : 'Bem-vindo(a) de volta.');
-          saudacaoEl.innerHTML = `Olá, <span class="font-bold ${tema.text}">${nomeUsuario}</span>! ${boasVindas}`;
+          saudacaoEl.textContent = 'Olá, ';
+          const spanNome = document.createElement('span');
+          spanNome.className = `font-bold ${tema.text}`;
+          spanNome.textContent = nomeUsuario;
+          saudacaoEl.appendChild(spanNome);
+          saudacaoEl.appendChild(document.createTextNode(`! ${boasVindas}`));
       } else {
           saudacaoEl.textContent = 'Calcule o prazo legal de 7 dias para desistência.';
       }
@@ -243,36 +247,8 @@
         });
       }
     });
-
-    window.addEventListener('DOMContentLoaded', () => {
-    const tempoInicio = Date.now();
-    let nomePagina = window.location.pathname;
-    if (nomePagina === '/' || nomePagina === '/index.html') nomePagina = 'Painel Principal (Home)';
-
-    // Quando o utilizador for fechar a aba ou mudar de página...
-    window.addEventListener('beforeunload', () => {
-      const tempoFim = Date.now();
-      const tempoGastoSegundos = Math.round((tempoFim - tempoInicio) / 1000);
-
-      // Prepara o relatório
-      const relatorio = {
-        pagina: nomePagina,
-        tempoSegundos: tempoGastoSegundos
-      };
-
-      // Envia o relatório para o servidor. 
-      fetch('/api/rastrear', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(relatorio),
-        keepalive: true 
-      });
-    });
-  });
-
   </script>
+  <script src="leiArrependimentoService.js"></script>
   <script src="leiArrependimento.js"></script>
 </body>
 </html>

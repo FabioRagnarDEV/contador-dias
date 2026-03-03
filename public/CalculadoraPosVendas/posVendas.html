@@ -39,6 +39,7 @@
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800">
+  
   <header id="header" class="shadow-md transition-colors duration-500">
     <nav class="container mx-auto px-4 py-3 flex items-center justify-between">
       <h1 class="text-xl sm:text-2xl font-bold text-white drop-shadow-sm">Prazo Pós Vendas</h1>
@@ -54,7 +55,7 @@
   <main class="container mx-auto px-4 py-8 sm:py-12">
     <div class="relative bg-white p-6 sm:p-8 rounded-2xl shadow-xl w-full max-w-3xl mx-auto space-y-6">
       
-      <button id="abrir-instrucoes-btn" class="absolute top-6 right-6 text-white rounded-full h-8 w-8 flex items-center justify-center font-bold text-lg btn-3d transition z-10">?</button>
+      <button id="abrir-instrucoes-btn" class="absolute top-6 right-6 text-white rounded-full h-8 w-8 flex items-center justify-center font-bold text-lg btn-3d transition z-10" aria-label="Abrir manual">?</button>
       
       <div class="text-center">
         <div class="icon-container flex justify-center mb-4">
@@ -94,7 +95,7 @@
           <button id="btn-reset-pvd" class="bg-slate-500 text-white py-2 px-5 rounded-lg hover:bg-slate-600 font-semibold transition btn-3d">Zerar</button>
         </div>
         <div id="erroPVD" class="text-center pt-2 text-sm font-bold text-amber-600 min-h-[20px]"></div>
-        <div id="resultadoPVD" class="text-center mt-2 text-lg font-bold p-4 rounded-lg resultado-box hidden"></div>
+        <div id="resultadoPVD" class="text-center mt-2 text-lg font-bold p-4 rounded-lg resultado-box hidden transition-all"></div>
       </div>
 
       <div id="cpv" class="hidden space-y-4 tab-content">
@@ -112,7 +113,7 @@
           <button id="btn-reset-cpv" class="bg-slate-500 text-white py-2 px-5 rounded-lg hover:bg-slate-600 font-semibold transition btn-3d">Zerar</button>
         </div>
         <div id="erroCPV" class="text-center pt-2 text-sm font-bold text-amber-600 min-h-[20px]"></div>
-        <div id="resultadoCPV" class="text-center mt-2 text-lg font-bold p-4 rounded-lg resultado-box hidden"></div>
+        <div id="resultadoCPV" class="text-center mt-2 text-lg font-bold p-4 rounded-lg resultado-box hidden transition-all"></div>
       </div>
 
       <div id="dv" class="hidden space-y-4 tab-content">
@@ -133,7 +134,7 @@
           <button id="btn-reset-dv" class="bg-slate-500 text-white py-2 px-5 rounded-lg hover:bg-slate-600 font-semibold transition btn-3d">Zerar</button>
         </div>
         <div id="erroDV" class="text-center pt-2 text-sm font-bold text-amber-600 min-h-[20px]"></div>
-        <div id="resultadoDV" class="text-center mt-2 text-lg font-bold p-4 rounded-lg resultado-box hidden"></div>
+        <div id="resultadoDV" class="text-center mt-2 text-lg font-bold p-4 rounded-lg resultado-box hidden transition-all"></div>
       </div>
 
     </div>
@@ -145,20 +146,18 @@
   </main>
 
   <footer class="w-full py-8 mt-4 sm:mt-8 relative z-10 flex flex-col items-center gap-6">
-  
   <a href="/logout" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2.5 px-6 rounded-full shadow-md transition-transform transform hover:scale-105 flex items-center gap-2 text-sm w-max">
     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
     </svg>
     Encerrar Sessão
   </a>
-
   <p class="text-sm text-slate-500">&copy; Todos os direitos reservados.</p>
 </footer>
   
-  <div id="modal-instrucoes" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 transition-opacity duration-300 hidden">
+  <div id="modal-instrucoes" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 transition-opacity duration-300 hidden p-4">
     <div id="modal-instrucoes-box" class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-2xl relative h-full max-h-[90vh] overflow-y-auto">
-      <button id="fechar-instrucoes-btn" class="sticky top-0 right-0 float-right text-slate-400 hover:text-slate-600 transition bg-white/50 backdrop-blur-sm rounded-full p-1">
+      <button id="fechar-instrucoes-btn" class="sticky top-0 right-0 float-right text-slate-400 hover:text-slate-600 transition bg-white/50 backdrop-blur-sm rounded-full p-1" aria-label="Fechar">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
           <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
         </svg>
@@ -243,7 +242,6 @@
       const avisoBox = document.getElementById('aviso-box');
       avisoBox.classList.add(tema.text.replace('600', '800'), tema.border, tema.bg);
       
-      // Adicionado IDs dos novos botões na lista de temas
       ['btn-show-pvd', 'btn-show-cpv', 'btn-show-dv', 'btn-process-pvd', 'btn-process-cpv', 'btn-process-dv', 'abrir-instrucoes-btn'].forEach(id => {
         const btn = document.getElementById(id);
         if (btn) btn.classList.add("bg-gradient-to-br", ...tema.btn);
@@ -251,76 +249,79 @@
       
       document.querySelectorAll('#pvd h3, #cpv h3, #dv h3').forEach(el => el.classList.add(tema.text));
       document.querySelectorAll('input').forEach(el => el.classList.add(tema.focus));
-      document.querySelectorAll('.resultado-box').forEach(el => {
-        el.classList.add(tema.text.replace('600', '800'), tema.bg);
-      });
       
-      // Lógica da Saudação
       const nomeUsuario = localStorage.getItem('nomeUsuario');
       const generoUsuario = localStorage.getItem('generoUsuario');
       const saudacaoEl = document.getElementById('saudacao-usuario');
+      
       if (nomeUsuario) {
         let boasVindas = generoUsuario === 'M' ? 'Bem-vindo de volta.' : (generoUsuario === 'F' ? 'Bem-vinda de volta.' : 'Bem-vindo(a) de volta.');
-        saudacaoEl.innerHTML = `Olá, <span class="font-bold ${tema.text}">${nomeUsuario}</span>! ${boasVindas}`;
+        saudacaoEl.textContent = 'Olá, ';
+        
+        const spanNome = document.createElement('span');
+        spanNome.className = `font-bold ${tema.text}`;
+        spanNome.textContent = nomeUsuario;
+        
+        saudacaoEl.appendChild(spanNome);
+        saudacaoEl.appendChild(document.createTextNode(`! ${boasVindas}`));
       } else {
         saudacaoEl.textContent = 'Acompanhe os prazos de atendimento de forma simples e eficiente.';
       }
       setTimeout(() => saudacaoEl.classList.add('show'), 100);
 
-      // --- Lógica do Modal de Instruções ---
+      
       const modal = document.getElementById('modal-instrucoes');
       const abrirBtn = document.getElementById('abrir-instrucoes-btn');
       const fecharBtn = document.getElementById('fechar-instrucoes-btn');
+      let ultimoFoco = null;
+
+      const capturarTabNoModal = (e) => {
+        if (e.key !== 'Tab') return;
+        const focaveis = modal.querySelectorAll('button:not([disabled]), [tabindex]:not([tabindex="-1"])');
+        if (!focaveis.length) return;
+        const primeiro = focaveis[0];
+        const ultimo = focaveis[focaveis.length - 1];
+        if (e.shiftKey && document.activeElement === primeiro) {
+          e.preventDefault(); ultimo.focus();
+        } else if (!e.shiftKey && document.activeElement === ultimo) {
+          e.preventDefault(); primeiro.focus();
+        }
+      };
 
       if (modal && abrirBtn && fecharBtn) {
         abrirBtn.addEventListener('click', () => {
+          ultimoFoco = document.activeElement;
           modal.classList.remove('hidden');
           setTimeout(() => modal.classList.add('active'), 10);
+          setTimeout(() => fecharBtn.focus(), 20);
+          document.addEventListener('keydown', capturarTabNoModal);
         });
         const fecharModal = () => {
           modal.classList.remove('active');
+          document.removeEventListener('keydown', capturarTabNoModal);
           setTimeout(() => modal.classList.add('hidden'), 300);
+          if (ultimoFoco && typeof ultimoFoco.focus === 'function') ultimoFoco.focus();
         };
         fecharBtn.addEventListener('click', fecharModal);
-        modal.addEventListener('click', (e) => {
-          if (e.target === modal) {
-            fecharModal();
-          }
-        });
+        modal.addEventListener('click', (e) => { if (e.target === modal) fecharModal(); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal.classList.contains('active')) fecharModal(); });
       }
     });
 
+    // Tracking de navegação mantido
     window.addEventListener('DOMContentLoaded', () => {
-    const tempoInicio = Date.now();
-    let nomePagina = window.location.pathname;
-    if (nomePagina === '/' || nomePagina === '/index.html') nomePagina = 'Painel Principal (Home)';
-
-    // Quando o utilizador for fechar a aba ou mudar de página...
-    window.addEventListener('beforeunload', () => {
-      const tempoFim = Date.now();
-      const tempoGastoSegundos = Math.round((tempoFim - tempoInicio) / 1000);
-
-      // Prepara o relatório
-      const relatorio = {
-        pagina: nomePagina,
-        tempoSegundos: tempoGastoSegundos
-      };
-
-      // Envia o relatório para o servidor. 
-      fetch('/api/rastrear', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(relatorio),
-        keepalive: true 
+      const tempoInicio = Date.now();
+      let nomePagina = window.location.pathname;
+      if (nomePagina === '/' || nomePagina === '/index.html') nomePagina = 'Painel Principal (Home)';
+      window.addEventListener('beforeunload', () => {
+        const tempoFim = Date.now();
+        const relatorio = { pagina: nomePagina, tempoSegundos: Math.round((tempoFim - tempoInicio) / 1000) };
+        fetch('/api/rastrear', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(relatorio), keepalive: true }).catch(() => {});
       });
     });
-  });
-
-
   </script>
   
+  <script src="posVendasService.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

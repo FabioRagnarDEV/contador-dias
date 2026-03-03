@@ -14,7 +14,6 @@
         #shackle { transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
         .unlocked #shackle { transform: translateY(-6px); }
     </style>
-    <link rel="stylesheet" href="stylo.css">
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body id="body-bg" class="min-h-screen flex items-center justify-center p-4 perspectiva">
@@ -28,38 +27,53 @@
                     <path id="shackle" d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                 </svg>
             </div>
-            <h2 id="titulo-login" class="text-2xl font-black">Acesso Restrito</h2>
-            <p id="subtitulo-login" class="mt-2 text-xs sm:text-sm opacity-80">Área de Segurança Máxima</p>
+            <h2 id="titulo-login" class="text-2xl font-black transition-all">Acesso Restrito</h2>
+            <p id="subtitulo-login" class="mt-2 text-xs sm:text-sm opacity-80 transition-all">Só para registrados</p>
         </div>
 
         <div id="tela-bloqueio" class="hidden text-center saltar-fora p-6 bg-red-900/50 rounded-xl border-2 border-red-500">
-            <h3 class="text-xl font-bold text-white mb-2">🚫 SE FERROU!</h3>
-            <h4 class="text-xl font-bold text-white mb-2"> Estava tentando burlar, né malandro? SUSPENSO!!</h4>
-            <p class="text-gray-200 mb-4 text-sm">Muitas tentativas falhas detectadas. Por segurança, aguarde:</p>
+            <h3 class="text-xl font-bold text-white mb-2">🚫 BLOQUEADO!</h3>
+            <p class="text-gray-200 mb-4 text-sm">Muitas tentativas falhas. Aguarde:</p>
             <div id="cronometro" class="text-4xl font-mono font-black text-white animate-pulse">20:00</div>
         </div>
 
         <form id="form-login" action="/fazer-login" method="POST" class="space-y-4 sm:space-y-6">
-            <div class="saltar-pouco">
-                <label id="label-user" class="block font-bold mb-1">Usuário</label>
-                <input type="text" name="usuario" id="input-usuario" required class="w-full outline-none transition-all focus:ring-2 ring-offset-2 ring-cyan-500">
-            </div>
-            <div class="saltar-pouco">
-                <label id="label-pass" class="block font-bold mb-1">Senha</label>
-                <input type="password" name="senha" id="input-senha" required class="w-full outline-none transition-all focus:ring-2 ring-offset-2 ring-cyan-500">
+            <input type="hidden" name="etapa" id="input-etapa" value="1">
+
+            <div id="bloco-credenciais" class="space-y-4 sm:space-y-6 transition-all">
+                <div class="saltar-pouco">
+                    <label id="label-user" class="block font-bold mb-1">Usuário</label>
+                    <input type="text" name="usuario" id="input-usuario" class="w-full outline-none transition-all focus:ring-2 ring-offset-2 ring-cyan-500">
+                </div>
+                
+                <div class="saltar-pouco">
+                    <label id="label-pass" class="block font-bold mb-1">Senha</label>
+                    <input type="password" name="senha" id="input-senha" class="w-full outline-none transition-all focus:ring-2 ring-offset-2 ring-cyan-500">
+                </div>
+
+                <div id="captcha-container" class="flex justify-center pt-2">
+                    <div class="cf-turnstile" 
+                        data-sitekey="0x4AAAAAAChuF9-2mkDLwgOu"  
+                        data-callback="enableBtn"></div>
+                </div>
             </div>
 
-            <div id="captcha-container" class="flex justify-center pt-2">
-                <div class="cf-turnstile" 
-                    data-sitekey="0x4AAAAAAChuF9-2mkDLwgOu"  
-                    data-callback="enableBtn"></div>
+            <div id="bloco-2fa" class="hidden space-y-4 sm:space-y-6 saltar-fora">
+                <div class="text-center mb-2">
+                    <p class="font-black text-cyan-400 text-lg mb-1">✅ Senha Correta</p>
+                    <p class="text-sm opacity-80">Abra seu Google Authenticator para continuar</p>
+                </div>
+                <div class="saltar-pouco">
+                    <input type="text" name="token2fa" id="input-2fa" placeholder="000 000" maxlength="7" inputmode="numeric" 
+                           class="w-full outline-none transition-all focus:ring-2 ring-offset-2 ring-cyan-500 text-center font-mono text-2xl tracking-[0.3em] py-4">
+                </div>
             </div>
             
             <div id="alerta-erro" class="hidden mb-6 p-4 rounded-xl text-xs sm:text-sm text-center font-bold saltar-fora bg-red-500 text-white"></div>
 
             <div class="saltar-fora pt-2">
                 <button type="submit" id="btn-final" class="hidden w-full font-black py-4 transition-all hover:brightness-110">
-                    Entrar no Sistema
+                    Verificar Identidade
                 </button>
             </div>
         </form>
@@ -69,31 +83,246 @@
         const TEMPO_BLOQUEIO_MINUTOS = 20; 
 
         const designs = [
-            { body: "bg-slate-950", panel: "bg-slate-900 p-8 rounded-3xl border-2 border-cyan-500 shadow-[0_0_30px_rgba(6,182,212,0.3)] text-cyan-500", iconBg: "bg-cyan-500 text-slate-900", btn: "bg-cyan-500 text-slate-950 rounded-xl", input: "bg-slate-800 border-2 border-slate-700 p-3 rounded-lg text-cyan-400" },
-            { body: "bg-zinc-900", panel: "bg-black p-8 rounded-[2rem] border-4 border-yellow-400 shadow-[10px_10px_0_#FACC15] text-yellow-400", iconBg: "bg-yellow-400 text-black", btn: "bg-yellow-400 text-black border-2 border-black font-black uppercase tracking-widest hover:translate-y-1 hover:shadow-none transition-transform", input: "bg-zinc-800 border-2 border-zinc-700 p-3 rounded text-yellow-400 font-mono" },
+    { 
+        body: "bg-slate-950", 
+        panel: "bg-slate-900 p-8 rounded-3xl border-2 border-cyan-500 shadow-[0_0_30px_rgba(6,182,212,0.3)] text-cyan-500", 
+        iconBg: "bg-cyan-500 text-slate-900", 
+        btn: "bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-xl px-6 py-3 transition-colors", 
+        input: "bg-slate-800 border-2 border-slate-700 p-3 rounded-lg text-cyan-400 focus:border-cyan-500 focus:outline-none" 
+    },
 
-            { 
+    { 
+        body: "bg-zinc-900", 
+        panel: "bg-black p-8 rounded-[2rem] border-4 border-yellow-400 shadow-[10px_10px_0_#FACC15] text-yellow-400", 
+        iconBg: "bg-yellow-400 text-black", 
+        btn: "bg-yellow-400 text-black border-2 border-black font-black uppercase tracking-widest hover:translate-y-1 hover:shadow-none transition-transform px-6 py-3", 
+        input: "bg-zinc-800 border-2 border-zinc-700 p-3 rounded text-yellow-400 font-mono focus:border-yellow-400 focus:outline-none" 
+    },
+
+    { 
         body: "bg-gradient-to-br from-slate-950 via-indigo-950 to-black",
-
         panel: "relative bg-white/5 backdrop-blur-2xl p-8 rounded-3xl border border-indigo-500/30 shadow-[0_0_60px_rgba(99,102,241,0.35)] text-indigo-300 before:absolute before:inset-0 before:rounded-3xl before:border before:border-indigo-400/20 before:animate-pulse",
-
         iconBg: "bg-gradient-to-br from-indigo-400 to-cyan-400 text-black shadow-lg shadow-indigo-500/40",
-
         btn: "relative overflow-hidden bg-gradient-to-r from-indigo-500 via-cyan-400 to-indigo-500 text-black font-semibold rounded-xl px-6 py-3 shadow-[0_0_25px_rgba(99,102,241,0.6)] hover:scale-105 transition-all duration-300 before:absolute before:inset-0 before:bg-[linear-gradient(120deg,transparent,rgba(255,255,255,0.4),transparent)] before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-700",
-
         input: "bg-slate-900/70 border border-indigo-500/40 p-3 rounded-xl text-indigo-200 focus:ring-2 focus:ring-cyan-400 focus:outline-none shadow-inner shadow-indigo-500/20"
+    },
+
+    {
+        body: "bg-slate-50",
+        panel: "bg-white p-8 rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 text-slate-800",
+        iconBg: "bg-blue-600 text-white",
+        btn: "bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg px-6 py-3 transition-colors shadow-sm",
+        input: "bg-slate-50 border border-slate-200 p-3 rounded-lg text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:outline-none transition-all"
+    },
+
+    {
+        body: "bg-emerald-950",
+        panel: "bg-emerald-900/40 p-8 rounded-3xl border border-emerald-800/50 shadow-2xl text-emerald-50 backdrop-blur-sm",
+        iconBg: "bg-emerald-500 text-emerald-950",
+        btn: "bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-bold rounded-full px-6 py-3 transition-colors",
+        input: "bg-emerald-950/50 border border-emerald-700 p-3 rounded-xl text-emerald-100 placeholder-emerald-600 focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:outline-none"
+    },
+
+    {
+        body: "bg-[#0B0914]",
+        panel: "bg-purple-950/30 p-8 rounded-[2.5rem] border border-purple-800/50 shadow-[0_10px_40px_rgba(147,51,234,0.15)] text-purple-100",
+        iconBg: "bg-fuchsia-500 text-white",
+        btn: "bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white font-semibold rounded-2xl px-6 py-3 shadow-lg shadow-purple-500/25 transition-all",
+        input: "bg-purple-900/20 border border-purple-700/50 p-3 rounded-xl text-purple-50 placeholder-purple-400 focus:ring-2 focus:ring-fuchsia-500 focus:border-transparent focus:outline-none"
+    },
+
+    {
+        body: "bg-neutral-950",
+        panel: "bg-neutral-900 p-8 rounded-none border-l-4 border-red-600 shadow-2xl text-neutral-200",
+        iconBg: "bg-red-600 text-white",
+        btn: "bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-wider skew-x-[-10deg] px-8 py-3 transition-colors",
+        input: "bg-neutral-950 border-b-2 border-neutral-700 p-3 text-red-50 placeholder-neutral-600 focus:border-red-600 focus:outline-none transition-colors"
+    },
+
+    {
+        body: "bg-gradient-to-br from-rose-100 to-orange-100",
+        panel: "bg-white/80 backdrop-blur-md p-8 rounded-3xl border border-white shadow-[0_20px_40px_rgba(251,146,60,0.1)] text-slate-700",
+        iconBg: "bg-gradient-to-r from-rose-400 to-orange-400 text-white",
+        btn: "bg-gradient-to-r from-rose-400 to-orange-400 hover:from-rose-500 hover:to-orange-500 text-white font-semibold rounded-full px-6 py-3 shadow-md transition-transform hover:-translate-y-1",
+        input: "bg-white/60 border border-rose-200 p-3 rounded-2xl text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-rose-400 focus:bg-white focus:outline-none transition-all"
+    },
+
+    {
+        body: "bg-slate-100",
+        panel: "bg-blue-950 p-8 rounded-xl shadow-2xl text-blue-50",
+        iconBg: "bg-blue-500 text-white",
+        btn: "bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-md px-6 py-3 transition-colors",
+        input: "bg-blue-900/50 border border-blue-800 p-3 rounded-md text-blue-100 placeholder-blue-400 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+    },
+
+    {
+        body: "bg-black",
+        panel: "bg-black p-8 rounded-sm border border-green-500/30 text-green-500 shadow-[0_0_15px_rgba(34,197,94,0.1)]",
+        iconBg: "bg-green-500/20 text-green-500 border border-green-500",
+        btn: "bg-transparent border border-green-500 text-green-500 hover:bg-green-500 hover:text-black font-mono px-6 py-3 transition-colors",
+        input: "bg-black border border-green-500/50 p-3 rounded-sm text-green-400 font-mono placeholder-green-800 focus:border-green-400 focus:shadow-[0_0_10px_rgba(34,197,94,0.3)] focus:outline-none"
+    },
+
+    {
+        body: "bg-fuchsia-50",
+        panel: "bg-white p-8 rounded-[3rem] border-4 border-pink-100 shadow-xl shadow-pink-100 text-slate-600",
+        iconBg: "bg-pink-400 text-white",
+        btn: "bg-pink-400 hover:bg-pink-500 text-white font-bold rounded-full px-8 py-3 shadow-[0_6px_0_rgba(244,114,182,0.8)] active:shadow-none active:translate-y-1.5 transition-all",
+        input: "bg-pink-50/50 border-2 border-pink-100 p-3 rounded-2xl text-slate-700 placeholder-pink-300 focus:border-pink-400 focus:outline-none transition-colors"
+    },
+
+    {
+        body: "bg-white",
+        panel: "bg-white p-8 border-4 border-black shadow-[8px_8px_0_#000000] text-black",
+        iconBg: "bg-black text-white",
+        btn: "bg-[#0000FF] hover:bg-[#0000CC] text-white font-bold text-lg border-2 border-black rounded px-6 py-3 transition-colors",
+        input: "bg-white border-2 border-black p-3 text-black placeholder-gray-600 focus:ring-4 focus:ring-[#FFFF00] focus:outline-none"
+    },
+
+    {
+        body: "bg-violet-50",
+        panel: "bg-white p-8 rounded-[2rem] shadow-lg shadow-violet-100/50 text-violet-900",
+        iconBg: "bg-violet-200 text-violet-700",
+        btn: "bg-violet-600 hover:bg-violet-500 text-white font-medium rounded-full px-8 py-3 transition-colors shadow-md shadow-violet-200",
+        input: "bg-violet-50/50 border border-violet-200 p-3 rounded-2xl text-violet-800 placeholder-violet-400 focus:border-violet-400 focus:ring-2 focus:ring-violet-100 focus:outline-none transition-all"
+    },
+
+    {
+        body: "bg-[#F4ECD8]",
+        panel: "bg-[#FAF6EC] p-8 rounded-sm border border-[#D4C4A8] shadow-md text-[#5C4D3C]",
+        iconBg: "bg-[#8C7A61] text-[#FAF6EC]",
+        btn: "bg-[#5C4D3C] hover:bg-[#4A3E30] text-[#FAF6EC] font-serif rounded px-6 py-3 transition-colors shadow-sm",
+        input: "bg-transparent border-b-2 border-[#D4C4A8] p-3 text-[#5C4D3C] font-serif placeholder-[#A89A84] focus:border-[#5C4D3C] focus:bg-[#F4ECD8]/50 focus:outline-none transition-colors"
+    },
+
+    {
+        body: "bg-[#09031D]",
+        panel: "bg-[#140836] p-8 rounded-xl border border-pink-500 shadow-[0_0_20px_rgba(236,72,153,0.3)] text-cyan-300",
+        iconBg: "bg-pink-500 text-white shadow-[0_0_10px_rgba(236,72,153,0.8)]",
+        btn: "bg-gradient-to-r from-pink-600 to-purple-600 text-white font-bold tracking-widest uppercase rounded-md px-6 py-3 shadow-[0_0_15px_rgba(236,72,153,0.5)] hover:shadow-[0_0_25px_rgba(34,211,238,0.6)] transition-all",
+        input: "bg-[#09031D] border border-cyan-500/50 p-3 rounded-md text-pink-400 placeholder-purple-800 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 focus:outline-none"
+    },
+
+    {
+        body: "bg-slate-100",
+        panel: "bg-white p-8 rounded-lg shadow-sm border border-slate-200 text-slate-800",
+        iconBg: "bg-blue-900 text-white rounded-md",
+        btn: "bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-md px-8 py-3 shadow-md transition-colors",
+        input: "bg-white border border-slate-300 p-3 rounded-md text-slate-900 placeholder-slate-400 focus:border-blue-900 focus:ring-1 focus:ring-blue-900 focus:outline-none"
+    },
+
+    {
+        body: "bg-zinc-100",
+        panel: "bg-white p-8 border-2 border-zinc-900 text-zinc-900",
+        iconBg: "bg-zinc-200 text-zinc-900 border-2 border-zinc-900",
+        btn: "bg-white hover:bg-zinc-900 hover:text-white text-zinc-900 font-bold border-2 border-zinc-900 px-6 py-3 transition-colors",
+        input: "bg-white border-2 border-zinc-300 p-3 text-zinc-900 placeholder-zinc-400 focus:border-zinc-900 focus:bg-zinc-50 focus:outline-none"
+    },
+
+    {
+        body: "bg-[#F5F5F0]",
+        panel: "bg-white p-8 rounded-3xl shadow-sm border border-[#E0E5D3] text-[#4A5D23]",
+        iconBg: "bg-[#8A9A5B] text-white",
+        btn: "bg-[#8A9A5B] hover:bg-[#788849] text-white font-medium rounded-2xl px-6 py-3 transition-colors shadow-sm",
+        input: "bg-[#F9F9F7] border border-[#E0E5D3] p-3 rounded-xl text-[#4A5D23] placeholder-[#A3B18A] focus:border-[#8A9A5B] focus:bg-white focus:outline-none transition-colors"
+    },
+
+    {
+        body: "bg-[#0a0000]",
+        panel: "bg-[#140000] p-8 rounded-2xl border border-red-900/50 shadow-2xl shadow-red-900/10 text-red-200",
+        iconBg: "bg-red-950 text-red-500 border border-red-900/50",
+        btn: "bg-red-800 hover:bg-red-700 text-white font-semibold tracking-wide rounded-lg px-6 py-3 border border-red-600 transition-colors shadow-[0_0_15px_rgba(153,27,27,0.4)]",
+        input: "bg-[#050000] border border-red-900/50 p-3 rounded-lg text-red-400 placeholder-red-900/60 focus:border-red-600 focus:outline-none focus:shadow-[0_0_10px_rgba(220,38,38,0.2)]"
+    },
+
+    {
+        body: "bg-cyan-50",
+        panel: "bg-white/90 backdrop-blur-sm p-8 rounded-3xl shadow-xl shadow-cyan-100/50 border border-cyan-100 text-cyan-900",
+        iconBg: "bg-cyan-100 text-cyan-600",
+        btn: "bg-gradient-to-r from-cyan-400 to-teal-400 hover:from-cyan-500 hover:to-teal-500 text-white font-bold rounded-xl px-6 py-3 shadow-md shadow-cyan-200 transition-all hover:-translate-y-0.5",
+        input: "bg-white border-2 border-cyan-50 p-3 rounded-xl text-cyan-800 placeholder-cyan-300 focus:border-cyan-300 focus:bg-cyan-50/30 focus:outline-none transition-all"
+    },
+
+    {
+        body: "bg-purple-50",
+        panel: "bg-purple-900 p-8 rounded-[2.5rem] shadow-2xl text-purple-100",
+        iconBg: "bg-purple-400 text-purple-950",
+        btn: "bg-purple-400 hover:bg-purple-300 text-purple-950 font-bold rounded-xl px-6 py-3 transition-colors",
+        input: "bg-purple-950/50 border border-purple-700 p-3 rounded-lg text-purple-100 placeholder-purple-400 focus:border-purple-300 focus:outline-none"
+    },
+    {
+        body: "bg-[#E8DCC4]",
+        panel: "bg-[#D9C5A8] p-8 rounded-lg shadow-inner text-[#5A4628]",
+        iconBg: "bg-[#B89B72] text-white",
+        btn: "bg-[#8B6E45] hover:bg-[#735A38] text-[#F3EFE6] font-semibold rounded-md px-6 py-3 shadow-md",
+        input: "bg-[#E8DCC4]/50 border-2 border-[#B89B72] p-3 rounded-md text-[#5A4628] placeholder-[#8B6E45]/60 focus:border-[#5A4628] focus:outline-none"
+    },
+    {
+        body: "bg-slate-200",
+        panel: "bg-white/60 backdrop-blur-xl p-8 rounded-2xl border border-white shadow-[0_8px_32px_rgba(148,163,184,0.2)] text-slate-700",
+        iconBg: "bg-sky-200 text-sky-800",
+        btn: "bg-sky-500 hover:bg-sky-600 text-white font-medium rounded-full px-8 py-3 transition-all shadow-lg shadow-sky-500/30",
+        input: "bg-white/40 border border-slate-300 p-3 rounded-xl text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-sky-400 focus:outline-none"
+    },
+    {
+        body: "bg-zinc-950",
+        panel: "bg-zinc-900 p-8 rounded-none border-[3px] border-lime-500 shadow-[8px_8px_0_#84CC16] text-zinc-300",
+        iconBg: "bg-lime-500 text-zinc-950",
+        btn: "bg-lime-500 hover:bg-lime-400 text-zinc-950 font-black uppercase tracking-widest px-6 py-3 border-[3px] border-zinc-950 transition-transform hover:-translate-y-1 hover:-translate-x-1",
+        input: "bg-zinc-950 border-2 border-zinc-700 p-3 text-lime-400 placeholder-zinc-600 focus:border-lime-500 focus:outline-none"
+    },
+    {
+        body: "bg-[#121212]",
+        panel: "bg-[#1A1A1A] p-8 rounded-xl border border-yellow-600/30 shadow-2xl text-gray-300",
+        iconBg: "bg-gradient-to-br from-yellow-300 to-yellow-600 text-black",
+        btn: "bg-gradient-to-r from-yellow-600 to-yellow-400 hover:from-yellow-500 hover:to-yellow-300 text-black font-bold uppercase rounded-sm px-6 py-3 shadow-[0_0_15px_rgba(202,138,4,0.2)] transition-colors",
+        input: "bg-[#121212] border-b-2 border-yellow-700/50 p-3 text-yellow-500 placeholder-gray-600 focus:border-yellow-400 focus:outline-none"
+    },
+    {
+        body: "bg-[#3E2723]",
+        panel: "bg-[#4E342E] p-8 rounded-3xl shadow-xl text-[#D7CCC8]",
+        iconBg: "bg-[#A1887F] text-[#3E2723]",
+        btn: "bg-[#8D6E63] hover:bg-[#795548] text-white font-medium rounded-full px-6 py-3 transition-colors shadow-md",
+        input: "bg-[#3E2723]/80 border border-[#795548] p-3 rounded-2xl text-[#EFEBE9] placeholder-[#A1887F] focus:border-[#D7CCC8] focus:outline-none"
+    },
+    {
+        body: "bg-[#030014]",
+        panel: "bg-[#0A0429] p-8 rounded-2xl border border-[#1E1149] shadow-[0_0_40px_rgba(25,10,75,0.8)] text-[#B4A5E5]",
+        iconBg: "bg-[#251368] text-[#E0D8F7]",
+        btn: "bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-lg px-6 py-3 shadow-[0_0_20px_rgba(79,70,229,0.4)] transition-all",
+        input: "bg-[#030014] border border-[#251368] p-3 rounded-lg text-[#E0D8F7] placeholder-[#483785] focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+    },
+    {
+        body: "bg-stone-100",
+        panel: "bg-white p-8 rounded-xl border border-stone-200 shadow-lg text-stone-700",
+        iconBg: "bg-orange-800 text-white",
+        btn: "bg-orange-800 hover:bg-orange-900 text-white font-medium rounded-md px-6 py-3 transition-colors",
+        input: "bg-stone-50 border border-stone-300 p-3 rounded-md text-stone-900 placeholder-stone-400 focus:border-orange-800 focus:outline-none"
+    },
+    {
+        body: "bg-gradient-to-br from-pink-100 to-cyan-100",
+        panel: "bg-white/80 backdrop-blur-md p-8 rounded-3xl shadow-xl border border-white text-slate-600",
+        iconBg: "bg-gradient-to-r from-pink-300 to-cyan-300 text-white",
+        btn: "bg-gradient-to-r from-pink-400 to-cyan-400 hover:from-pink-500 hover:to-cyan-500 text-white font-bold rounded-full px-8 py-3 shadow-md transition-all hover:scale-105",
+        input: "bg-white/50 border-2 border-pink-200 p-3 rounded-2xl text-slate-700 placeholder-slate-400 focus:border-cyan-300 focus:bg-white focus:outline-none transition-all"
+    },
+    {
+        body: "bg-teal-950",
+        panel: "bg-teal-900/50 p-8 rounded-lg border border-teal-800 backdrop-blur-sm text-teal-100",
+        iconBg: "bg-teal-600 text-white",
+        btn: "bg-teal-500 hover:bg-teal-400 text-teal-950 font-bold rounded px-6 py-3 transition-colors",
+        input: "bg-teal-950/50 border border-teal-700 p-3 rounded text-teal-100 placeholder-teal-600 focus:border-teal-400 focus:outline-none"
     }
-
-        ];
-
-        
+];
 
         const tema = designs[Math.floor(Math.random() * designs.length)];
+        
         document.body.className += " " + tema.body;
         document.getElementById('painel-login').className += " " + tema.panel;
         document.getElementById('icon-bg').className += " " + tema.iconBg;
         document.getElementById('input-usuario').className += " " + tema.input;
         document.getElementById('input-senha').className += " " + tema.input;
+        document.getElementById('input-2fa').className += " " + tema.input; 
         document.getElementById('btn-final').className += " " + tema.btn;
 
         const painel = document.getElementById('painel-login');
@@ -108,6 +337,7 @@
 
             const urlParams = new URLSearchParams(window.location.search);
             const erro = urlParams.get('erro');
+            const step = urlParams.get('step'); 
             
             if (erro) {
                 if (erro === 'bloqueado') {
@@ -117,7 +347,36 @@
                     divErro.classList.remove('hidden');
                     if (erro === 'senha') divErro.innerText = "❌ Usuário ou senha incorretos.";
                     else if (erro === 'captcha') divErro.innerText = "🤖 Falha na verificação de segurança.";
+                    else if (erro === '2fa') divErro.innerText = "🔐 Código 2FA Inválido. Volte e tente novamente.";
                 }
+            }
+
+            // CONTROLE DE ETAPAS
+            if (step === '2fa') {
+                // Prepara a tela para a Etapa 2
+                document.getElementById('bloco-credenciais').classList.add('hidden');
+                document.getElementById('bloco-2fa').classList.remove('hidden');
+                document.getElementById('input-etapa').value = '2'; 
+                
+                document.getElementById('input-usuario').removeAttribute('required');
+                document.getElementById('input-senha').removeAttribute('required');
+                document.getElementById('input-2fa').setAttribute('required', 'true');
+                
+                document.getElementById('titulo-login').innerText = "Autenticação Dupla";
+                document.getElementById('subtitulo-login').innerText = "Etapa 2 de 2";
+                
+                // Abrir cadeado
+                document.getElementById('lock-icon').classList.add('unlocked');
+                const btn = document.getElementById('btn-final');
+                btn.innerText = "Entrar no Sistema";
+                btn.classList.remove('hidden');
+                
+                setTimeout(() => document.getElementById('input-2fa').focus(), 100);
+            } else {
+                // Etapa 1 Padrão
+                document.getElementById('input-usuario').setAttribute('required', 'true');
+                document.getElementById('input-senha').setAttribute('required', 'true');
+                document.getElementById('input-2fa').removeAttribute('required');
             }
         };
 
@@ -139,14 +398,12 @@
         }
 
         function aplicarBloqueio(tempoFinal) {
-            // Esconde o formulário e mostra a tela de bloqueio
             document.getElementById('form-login').classList.add('hidden');
             document.getElementById('tela-bloqueio').classList.remove('hidden');
             document.getElementById('titulo-login').innerText = "Sistema Travado";
             document.getElementById('subtitulo-login').innerText = "IP temporariamente banido";
             document.getElementById('icon-bg').className = "w-24 h-24 rounded-full mx-auto flex items-center justify-center mb-6 bg-red-600 text-white";
 
-            // Inicia contagem regressiva
             const intervalo = setInterval(() => {
                 const agora = Date.now();
                 const restante = tempoFinal - agora;
@@ -167,10 +424,8 @@
 
         function enableBtn() {
             const btn = document.getElementById('btn-final');
-            const icon = document.getElementById('lock-icon');
             btn.classList.remove('hidden');
             btn.classList.add('animate-bounce');
-            icon.classList.add('unlocked'); 
         }
     </script>
 </body>
