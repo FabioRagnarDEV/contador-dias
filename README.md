@@ -89,8 +89,6 @@ Uma ferramenta completa para gestão de inadimplência, cálculo de restituiçã
 | **APIs** | **BrasilAPI & IBGE** | Consumo dinâmico de feriados nacionais e probabilidade de gênero |
 | **Infra** | **Render & Cloudflare** | Deploy contínuo, túnel HTTPS (SSL/TLS) e bloqueio de tráfego malicioso |
 
-## 🛠️ Tecnologias Utilizadas
-
 ![NodeJS](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)
 ![Express.js](https://img.shields.io/badge/Express.js-404D59?style=for-the-badge)
 ![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
