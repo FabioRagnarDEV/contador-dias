@@ -81,18 +81,21 @@ Uma ferramenta completa para gestão de inadimplência, cálculo de restituiçã
 
 | Camada | Tecnologia | Finalidade |
 |--------|-------------|-------------|
-![NodeJS](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)
-![Express.js](https://img.shields.io/badge/Express.js-404D59?style=for-the-badge)
 | **Back-end** | **Node.js & Express** | Servidor web rápido, roteamento de API e controle de sessão segura |
-![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
 | **Banco de Dados** | **Supabase (PostgreSQL)** | Armazenamento de usuários, persistência de sessões (`connect-pg-simple`) e logs |
 | **Segurança** | **Bcrypt, Speakeasy, Joi, Helmet** | Hashing de senhas, Autenticação TOTP (2FA), Sanitização de Inputs e proteção de Headers |
-![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
 | **Front-end** | **HTML5 & Vanilla JS (ES6+)** | Estrutura semântica, manipulação segura do DOM (prevenção XSS) e arquitetura SRP |
-![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
 | **Estilização** | **Tailwind CSS** | Design responsivo, moderno e padronizado em todo o ecossistema |
 | **APIs** | **BrasilAPI & IBGE** | Consumo dinâmico de feriados nacionais e probabilidade de gênero |
 | **Infra** | **Render & Cloudflare** | Deploy contínuo, túnel HTTPS (SSL/TLS) e bloqueio de tráfego malicioso |
+
+## 🛠️ Tecnologias Utilizadas
+
+![NodeJS](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)
+![Express.js](https://img.shields.io/badge/Express.js-404D59?style=for-the-badge)
+![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
 
 ---
 
