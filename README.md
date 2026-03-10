@@ -8,11 +8,12 @@ O sistema centraliza diversas calculadoras em uma interface **limpa, responsiva 
 
 ---
 
-## 🛡️ Arquitetura e Segurança
+## 🛡️ Arquitetura e Segurança Avançada (Nível Enterprise)
 
-A aplicação foi recentemente refatorada para uma arquitetura Full-Stack (Node.js + Express + Supabase), seguindo os mais altos padrões de segurança:
+A aplicação foi refatorada para uma arquitetura Full-Stack (Node.js + Express + Supabase), seguindo os mais altos padrões de segurança e resiliência:
 
 - **Autenticação em Duas Etapas (2FA):** O acesso ao painel exige dupla validação. Após a verificação da senha (criptografada em Hash com `bcrypt`), o sistema exige um token TOTP gerado via **Google Authenticator** (`speakeasy`), mitigando riscos de vazamento de credenciais.
+- **Persistência de Sessão Resiliente:** Sessões armazenadas diretamente no banco de dados PostgreSQL (`connect-pg-simple`), garantindo que os usuários permaneçam logados de forma segura (validade de 30 dias) mesmo em caso de reinicializações do servidor em nuvem. Conexão otimizada via IPv4 Connection Pooling com SSL.
 - **Proteção contra Bots e Força Bruta:** Implementação do **Cloudflare Turnstile** (Captcha invisível) e **Rate Limiting** (bloqueio automático de IP por 20 minutos após 5 tentativas falhas de login).
 - **Controle de Acesso Baseado em Função (RBAC):** Sistema rígido de autorização. Apenas usuários com a role `admin` possuem acesso ao painel de provisionamento para gerar novos convites e QR Codes de acesso para a equipe.
 - **Middleware Global de Segurança (`requireAuth`):** Todas as rotas da API e documentos internos são blindadas no servidor. É impossível acessar endpoints diretamente via URL ou ferramentas como Postman sem uma sessão criptografada válida.
@@ -42,8 +43,8 @@ A experiência do utilizador foi o foco principal, resultando em uma interface v
 A porta de entrada do painel, projetada para uma **experiência personalizada**.
 
 - **Saudação Personalizada** → A aplicação solicita o nome do utilizador na primeira visita.
-- **Deteção de Gênero (API IBGE)** → O sistema consulta o nome fornecido e adapta a saudação: *“Bem-vindo”* ou *“Bem-vinda”*.
-- **Persistência Local** → Nome e gênero são salvos para manter a personalização.
+- **Detecção de Gênero (API IBGE)** → O sistema consulta o nome fornecido e adapta a saudação: *“Bem-vindo”* ou *“Bem-vinda”*.
+- **Persistência Local** → Nome e gênero são salvos para manter a personalização em todas as páginas.
 - **Menu 3D Interativo** → As calculadoras são exibidas em *cards* com efeito 3D responsivo ao movimento do mouse.
 
 ---
@@ -80,46 +81,54 @@ Uma ferramenta completa para gestão de inadimplência, cálculo de restituiçã
 
 | Camada | Tecnologia | Finalidade |
 |--------|-------------|-------------|
-| **Back-end** | **Node.js & Express** | Servidor web rápido, roteamento de API e controle de sessão |
-| **Banco de Dados** | **Supabase (PostgreSQL)** | Armazenamento de usuários, logs criptografados e controle de acessos |
+![NodeJS](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)
+![Express.js](https://img.shields.io/badge/Express.js-404D59?style=for-the-badge)
+| **Back-end** | **Node.js & Express** | Servidor web rápido, roteamento de API e controle de sessão segura |
+![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
+| **Banco de Dados** | **Supabase (PostgreSQL)** | Armazenamento de usuários, persistência de sessões (`connect-pg-simple`) e logs |
 | **Segurança** | **Bcrypt, Speakeasy, Joi, Helmet** | Hashing de senhas, Autenticação TOTP (2FA), Sanitização de Inputs e proteção de Headers |
-| **Front-end** | **HTML5 & Vanilla JS (ES6+)** | Estrutura semântica, manipulação segura do DOM (prevenção XSS) e arquitetura modular (Services) |
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
+| **Front-end** | **HTML5 & Vanilla JS (ES6+)** | Estrutura semântica, manipulação segura do DOM (prevenção XSS) e arquitetura SRP |
+![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
 | **Estilização** | **Tailwind CSS** | Design responsivo, moderno e padronizado em todo o ecossistema |
 | **APIs** | **BrasilAPI & IBGE** | Consumo dinâmico de feriados nacionais e probabilidade de gênero |
 | **Infra** | **Render & Cloudflare** | Deploy contínuo, túnel HTTPS (SSL/TLS) e bloqueio de tráfego malicioso |
 
 ---
 
-## 📁 Estrutura do Projeto (Arquitetura Modular)
+## 📁 Estrutura do Projeto (Arquitetura Full-Stack)
 
-O projeto segue um padrão de separação rigorosa entre Interface, Lógica de Negócio e Servidor.
+O projeto segue um padrão de separação rigorosa entre Back-end (Infra/Servidor) e Front-end (Views/Controllers/Services protegidos).
 
 ```text
 PAINEL_CALCULADORAS/
 │
-├── assets/                       # Ícones, imagens e arquivos de áudio
+├── server.js                     # Servidor Node.js (Ponto de entrada, Autenticação, Middlewares)
+├── package.json                  # Gerenciador de dependências
+├── .env                          # Variáveis de ambiente (Segredos e Conexão DB) - Oculto
 │
-├── CalculadoraAtraso/
-│   ├── analiseAtraso.html        # View (HTML)
-│   ├── script.js                 # Controller (Eventos e Manipulação Segura do DOM)
-│   ├── consorcioService.js       # Service (Lógica Financeira e Regras de Negócio)
-│   └── style.css
-│
-├── CalculadoraCreditoEspecie/
-│   ├── creditoEmEspecie.html     # View
-│   ├── script.js                 # Controller
-│   └── creditoService.js         # Service
-│
-├── CalculadoraPosVendas/
-│   ├── posVendas.html            # View
-│   ├── script.js                 # Controller
-│   └── posVendasService.js       # Service (Integração com BrasilAPI e Datas Úteis)
-│
-├── LeiArrependimento/
-│   ├── leiArrependimento.html    # View
-│   ├── leiArrependimento.js      # Controller
-│   └── leiArrependimentoService.js # Service
-│
-├── favicon/
-├── index.html                    # Dashboard Principal
-└── README.md
+├── public/                       # Front-end (Arquivos estáticos servidos dinamicamente)
+│   ├── index.html                # Dashboard Principal e Modal Admin
+│   ├── login.html                # Interface de Autenticação Dupla
+│   ├── assets/                   # Ícones, imagens e arquivos multimídia
+│   ├── favicon/                  # Arquivos de ícone do navegador
+│   │
+│   ├── CalculadoraAtraso/
+│   │   ├── analiseAtraso.html    # View (HTML)
+│   │   ├── script.js             # Controller (Eventos e DOM)
+│   │   └── consorcioService.js   # Service (Lógica de Negócio)
+│   │
+│   ├── CalculadoraCreditoEspecie/
+│   │   ├── creditoEmEspecie.html
+│   │   ├── script.js
+│   │   └── creditoService.js
+│   │
+│   ├── CalculadoraPosVendas/
+│   │   ├── posVendas.html
+│   │   ├── script.js
+│   │   └── posVendasService.js
+│   │
+│   └── LeiArrependimento/
+│       ├── leiArrependimento.html
+│       ├── leiArrependimento.js
+│       └── leiArrependimentoService.js
