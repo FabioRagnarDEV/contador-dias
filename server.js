@@ -7,25 +7,36 @@ const { createClient } = require('@supabase/supabase-js');
 const bcrypt = require('bcrypt');
 const speakeasy = require('speakeasy');
 const qrcode = require('qrcode');
-const Joi = require('joi'); // Biblioteca de validação de inputs
+const Joi = require('joi');
 require('dotenv').config();
+
+const pg = require('pg');
+const pgSession = require('connect-pg-simple')(session);
 
 const app = express();
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
-// --- Middlewares Globais de Segurança e Setup ---
+const pgPool = new pg.Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false }
+});
+
 app.use(helmet({ contentSecurityPolicy: false }));
 app.set('trust proxy', 1);
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.use(session({
+    store: new pgSession({
+        pool: pgPool,
+        tableName: 'session' 
+    }),
     secret: process.env.SESSION_SECRET,
     name: 'sessionId',
     resave: false,
     saveUninitialized: false,
     cookie: { 
-        maxAge: 86400000, 
+        maxAge: 30 * 24 * 60 * 60 * 1000, 
         httpOnly: true, 
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict' 
@@ -40,7 +51,6 @@ const loginLimiter = rateLimit({
     legacyHeaders: false,
 });
 
-// --- Schemas de Validação de Dados (Input Validation) ---
 const schemaCriarUsuario = Joi.object({
     novoUsuario: Joi.string().alphanum().min(3).max(30).required(),
     novaSenha: Joi.string().min(6).max(100).required()
@@ -51,7 +61,6 @@ const schemaRastrear = Joi.object({
     tempoSegundos: Joi.number().integer().min(0).required()
 });
 
-// --- Middlewares de Autorização ---
 const apenasAdmin = (req, res, next) => {
     if (req.session.logado && req.session.isAdmin) return next();
     res.status(403).json({ erro: 'Acesso Negado.' });
@@ -66,7 +75,6 @@ const requireAuth = (req, res, next) => {
     res.redirect('/login');
 };
 
-// --- Rotas Públicas (Autenticação) ---
 app.get('/login', (req, res) => {
     if (req.session.logado) return res.redirect('/');
     res.sendFile(path.join(__dirname, 'login.html'));
@@ -76,7 +84,6 @@ app.post('/fazer-login', loginLimiter, async (req, res, next) => {
     try {
         const { etapa, usuario, senha, token2fa, 'cf-turnstile-response': tokenCaptcha } = req.body;
 
-        // Etapa 1: Credenciais
         if (etapa === '1') {
             if (!tokenCaptcha) return res.redirect('/login?erro=captcha');
             
@@ -111,7 +118,6 @@ app.post('/fazer-login', loginLimiter, async (req, res, next) => {
             return res.redirect('/login?step=2fa');
         }
 
-        // Etapa 2: TOTP (2FA)
         if (etapa === '2') {
             if (!req.session.preAuthUser) return res.redirect('/login');
 
@@ -144,10 +150,8 @@ app.get('/logout', (req, res) => {
     req.session.destroy(() => res.redirect('/login'));
 });
 
-// --- Rotas de Administração ---
 app.post('/api/admin/criar-usuario', apenasAdmin, async (req, res, next) => {
     try {
-        // Validação estrita do payload (Input Validation)
         const { error, value } = schemaCriarUsuario.validate(req.body);
         if (error) return res.status(400).json({ erro: 'Dados inválidos.', detalhes: error.details });
 
@@ -183,14 +187,12 @@ app.post('/api/admin/criar-usuario', apenasAdmin, async (req, res, next) => {
     }
 });
 
-// --- Rotas Privadas (Protegidas pelo requireAuth) ---
 app.get('/api/meus-dados', requireAuth, (req, res) => {
     res.json({ usuario: req.session.usuarioNome, isAdmin: req.session.isAdmin });
 });
 
 app.post('/api/rastrear', requireAuth, async (req, res, next) => {
     try {
-        // Validação estrita do payload (Input Validation)
         const { error, value } = schemaRastrear.validate(req.body);
         if (error) return res.status(400).json({ erro: 'Dados de rastreio inválidos.' });
 
@@ -239,7 +241,6 @@ app.get('/baixar-relatorio', requireAuth, async (req, res, next) => {
     }
 });
 
-// --- Proteção Global para Arquivos Estáticos ---
 app.use((req, res, next) => {
     if (req.session.logado) return next();
     res.redirect('/login');
@@ -248,15 +249,13 @@ app.use((req, res, next) => {
 app.use(express.static(path.join(__dirname, 'public')));
 app.use((req, res) => res.redirect('/'));
 
-// --- Middleware Global de Tratamento de Erros ---
 app.use((err, req, res, next) => {
     console.error('Erro interno detectado:', err.message); 
     
-    // Retorna mensagem genérica para não vazar a stacktrace do servidor
     if (req.xhr || (req.headers.accept && req.headers.accept.includes('json'))) {
-        res.status(500).json({ error: 'Erro interno ao processar a solicitação. Caso persista, acione o suporte.' });
+        res.status(500).json({ error: 'Erro interno ao processar a solicitação.' });
     } else {
-        res.status(500).send('Erro interno do servidor. Caso persista, acione o suporte.');
+        res.status(500).send('Erro interno do servidor.');
     }
 });
 
