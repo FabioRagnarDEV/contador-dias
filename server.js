@@ -75,6 +75,10 @@ const requireAuth = (req, res, next) => {
     res.redirect('/login');
 };
 
+app.get('/ping', (req, res) => {
+    res.status(200).send('pong');
+});
+
 app.get('/login', (req, res) => {
     if (req.session.logado) return res.redirect('/');
     res.sendFile(path.join(__dirname, 'login.html'));
