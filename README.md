@@ -8,7 +8,7 @@ O sistema centraliza diversas calculadoras em uma interface **limpa, responsiva 
 
 ---
 
-## 🛡️ Arquitetura e Segurança Avançada (Nível Enterprise)
+## 🛡️ Arquitetura e Segurança
 
 A aplicação foi refatorada para uma arquitetura Full-Stack (Node.js + Express + Supabase), seguindo os mais altos padrões de segurança e resiliência:
 
@@ -23,7 +23,7 @@ A aplicação foi refatorada para uma arquitetura Full-Stack (Node.js + Express 
 
 ---
 
-## ✨ Funcionalidades Principais (UX/UI)
+## ✨ Funcionalidades Principais
 
 ### 🎨 Sistema de Temas Aleatórios e Sincronizados
 A experiência do utilizador foi o foco principal, resultando em uma interface visualmente cativante e tecnicamente consistente.
