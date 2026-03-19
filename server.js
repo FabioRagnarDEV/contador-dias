@@ -52,7 +52,7 @@ const loginLimiter = rateLimit({
 });
 
 const schemaCriarUsuario = Joi.object({
-    novoUsuario: Joi.string().alphanum().min(3).max(30).required(),
+    novoUsuario: Joi.string().pattern(/^[a-zA-Z0-9._\-@]+$/).min(3).max(50).required(),
     novaSenha: Joi.string().min(6).max(100).required()
 });
 
