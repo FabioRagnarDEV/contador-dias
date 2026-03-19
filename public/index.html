@@ -183,26 +183,59 @@
     <div class="bg-slate-900 border-2 border-slate-700 rounded-2xl w-full max-w-lg shadow-2xl transform transition-all scale-100 p-6">
         
         <div class="flex justify-between items-center mb-6">
-            <h3 class="text-xl font-bold text-white">👮 Novo Usuário</h3>
+            <h3 id="admin-modal-title" class="text-xl font-bold text-white">👮 Novo Usuário</h3>
             <button onclick="fecharModalAdmin()" class="text-slate-400 hover:text-white text-2xl">&times;</button>
         </div>
 
-        <div id="step-form">
-            <input type="text" id="new-user" placeholder="Nome de Usuário" class="w-full bg-slate-800 text-white p-3 rounded-lg mb-4 border border-slate-700 focus:border-cyan-500 outline-none">
-            <input type="text" id="new-pass" placeholder="Senha Inicial" class="w-full bg-slate-800 text-white p-3 rounded-lg mb-6 border border-slate-700 focus:border-cyan-500 outline-none">
-            <button onclick="criarUsuario()" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 rounded-xl transition-all shadow-[0_0_15px_rgba(8,145,178,0.4)]">
-                Gerar Acesso
-            </button>
+        <div id="view-criar">
+            <div id="step-form">
+                <input type="text" id="new-user" placeholder="Nome de Usuário" class="w-full bg-slate-800 text-white p-3 rounded-lg mb-4 border border-slate-700 focus:border-cyan-500 outline-none">
+                <input type="text" id="new-pass" placeholder="Senha Inicial" class="w-full bg-slate-800 text-white p-3 rounded-lg mb-6 border border-slate-700 focus:border-cyan-500 outline-none">
+                <button onclick="criarUsuario()" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 rounded-xl transition-all shadow-[0_0_15px_rgba(8,145,178,0.4)]">
+                    Gerar Acesso
+                </button>
+            </div>
+
+            <div id="step-result" class="hidden text-center">
+                <div class="bg-white p-4 rounded-xl inline-block mb-4">
+                    <img id="qr-img" src="" alt="QR Code" class="w-48 h-48">
+                </div>
+                <p class="text-yellow-400 font-mono text-sm mb-4 bg-slate-800 p-2 rounded break-all" id="secret-text"></p>
+                <p class="text-slate-300 text-sm mb-6">Peça para o usuário escanear agora. <br>Este código não aparecerá novamente.</p>
+                <button onclick="resetModal()" class="w-full bg-slate-700 hover:bg-slate-600 text-white py-3 rounded-xl">
+                    Cadastrar Outro
+                </button>
+            </div>
+
+            <div class="text-right mt-6">
+                <button onclick="mostrarViewReset()" class="text-xs text-slate-500 hover:text-red-400 transition-colors underline">
+                    Opções Avançadas: Resetar Usuário
+                </button>
+            </div>
         </div>
 
-        <div id="step-result" class="hidden text-center">
-            <div class="bg-white p-4 rounded-xl inline-block mb-4">
-                <img id="qr-img" src="" alt="QR Code" class="w-48 h-48">
+        <div id="view-reset" class="hidden">
+            <div id="reset-form">
+                <p class="text-sm text-red-400 mb-4 bg-red-900/20 p-3 rounded border border-red-800/50">
+                    ⚠️ Atenção: Isso invalidará a senha e o QR Code atual do funcionário.
+                </p>
+                <input type="text" id="reset-user-target" placeholder="Usuário do Funcionário" class="w-full bg-slate-800 text-white p-3 rounded-lg mb-4 border border-slate-700 focus:border-red-500 outline-none">
+                <input type="text" id="reset-new-pass" placeholder="Nova Senha Temporária" class="w-full bg-slate-800 text-white p-3 rounded-lg mb-6 border border-slate-700 focus:border-red-500 outline-none">
+                <button onclick="resetarUsuario()" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-xl transition-all shadow-[0_0_15px_rgba(220,38,38,0.4)]">
+                    Resetar e Gerar QR Code
+                </button>
             </div>
-            <p class="text-yellow-400 font-mono text-sm mb-4 bg-slate-800 p-2 rounded break-all" id="secret-text"></p>
-            <p class="text-slate-300 text-sm mb-6">Peça para o usuário escanear agora. <br>Este código não aparecerá novamente.</p>
-            <button onclick="resetModal()" class="w-full bg-slate-700 hover:bg-slate-600 text-white py-3 rounded-xl">
-                Cadastrar Outro
+
+            <div id="reset-result" class="hidden text-center">
+                <h4 class="text-green-400 font-bold mb-4">✅ Acesso Resetado!</h4>
+                <div class="bg-white p-4 rounded-xl inline-block mb-4">
+                    <img id="reset-qr-img" src="" alt="Novo QR Code" class="w-48 h-48">
+                </div>
+                <p class="text-slate-300 text-sm mb-6">Envie este novo QR Code e a nova senha para o funcionário.</p>
+            </div>
+
+            <button onclick="mostrarViewCriar()" class="w-full text-slate-400 hover:text-white mt-6 text-sm">
+                &larr; Voltar para Novo Usuário
             </button>
         </div>
 
@@ -227,9 +260,9 @@
         } catch(e) {}
     });
 
-    // Estas funções precisam estar FORA do DOMContentLoaded para o HTML vê-las
     function abrirModalAdmin() {
         document.getElementById('modal-admin').classList.remove('hidden');
+        mostrarViewCriar(); // Garante que abra na visão padrão
     }
 
     function fecharModalAdmin() {
@@ -237,13 +270,40 @@
         resetModal();
     }
 
+    // --- CONTROLE DAS GAVETAS (CRIAR VS RESET) ---
+    function mostrarViewReset() {
+        document.getElementById('view-criar').classList.add('hidden');
+        document.getElementById('view-reset').classList.remove('hidden');
+        document.getElementById('admin-modal-title').innerHTML = "🔄 Resetar Acesso";
+        document.getElementById('admin-modal-title').classList.replace('text-white', 'text-red-400');
+        
+        document.getElementById('reset-form').classList.remove('hidden');
+        document.getElementById('reset-result').classList.add('hidden');
+        document.getElementById('reset-user-target').value = '';
+        document.getElementById('reset-new-pass').value = '';
+    }
+
+    function mostrarViewCriar() {
+        document.getElementById('view-reset').classList.add('hidden');
+        document.getElementById('view-criar').classList.remove('hidden');
+        document.getElementById('admin-modal-title').innerHTML = "👮 Novo Usuário";
+        document.getElementById('admin-modal-title').classList.replace('text-red-400', 'text-white');
+        resetModal();
+    }
+
     function resetModal() {
+        // Reseta aba de Criar
         document.getElementById('step-form').classList.remove('hidden');
         document.getElementById('step-result').classList.add('hidden');
         document.getElementById('new-user').value = '';
         document.getElementById('new-pass').value = '';
+        
+        // Reseta aba de Reset
+        document.getElementById('reset-form').classList.remove('hidden');
+        document.getElementById('reset-result').classList.add('hidden');
     }
 
+    // --- AÇÃO: CRIAR USUÁRIO ---
     async function criarUsuario() {
         const usuario = document.getElementById('new-user').value;
         const senha = document.getElementById('new-pass').value;
@@ -271,6 +331,55 @@
             document.getElementById('secret-text').innerText = dados.secretText;
             document.getElementById('step-form').classList.add('hidden');
             document.getElementById('step-result').classList.remove('hidden');
+
+        } catch (erro) {
+            alert("Erro: " + erro.message);
+        } finally {
+            btn.innerText = txtOriginal;
+            btn.disabled = false;
+        }
+    }
+
+    // --- AÇÃO: RESETAR USUÁRIO ---
+    async function resetarUsuario() {
+        const usuarioTarget = document.getElementById('reset-user-target').value.trim();
+        const novaSenha = document.getElementById('reset-new-pass').value.trim();
+
+        if(!usuarioTarget || !novaSenha) return alert("Preencha o usuário e a nova senha!");
+
+        if (!confirm(`CUIDADO: Tem certeza que deseja invalidar o acesso atual de "${usuarioTarget}" e gerar um novo QR Code?`)) {
+            return;
+        }
+
+        const btn = document.querySelector('#reset-form button');
+        const txtOriginal = btn.innerText;
+        btn.innerText = "Resetando...";
+        btn.disabled = true;
+
+        try {
+            // 👇 ESTA É A LINHA QUE MUDOU (Agora com /api/ na frente!)
+            const res = await fetch('/api/admin/resetar-usuario', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ usuarioTarget, novaSenha })
+            });
+
+            // Se o servidor devolver HTML em vez de JSON por algum motivo de rota, 
+            // isso aqui vai capturar o erro e nos avisar de forma amigável:
+            const textResponse = await res.text();
+            let dados;
+            try {
+                dados = JSON.parse(textResponse);
+            } catch (e) {
+                throw new Error("O servidor não retornou JSON. Verifique se você está logado e se a rota está correta.");
+            }
+
+            if (!res.ok) throw new Error(dados.erro || "Erro ao resetar");
+
+            // Sucesso: Mostra Novo QR Code
+            document.getElementById('reset-qr-img').src = dados.qrCode;
+            document.getElementById('reset-form').classList.add('hidden');
+            document.getElementById('reset-result').classList.remove('hidden');
 
         } catch (erro) {
             alert("Erro: " + erro.message);

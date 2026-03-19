@@ -61,6 +61,7 @@ const schemaRastrear = Joi.object({
     tempoSegundos: Joi.number().integer().min(0).required()
 });
 
+// Middlewares de Proteção
 const apenasAdmin = (req, res, next) => {
     if (req.session.logado && req.session.isAdmin) return next();
     res.status(403).json({ erro: 'Acesso Negado.' });
@@ -75,6 +76,7 @@ const requireAuth = (req, res, next) => {
     res.redirect('/login');
 };
 
+// --- ROTAS PÚBLICAS ---
 app.get('/ping', (req, res) => {
     res.status(200).send('pong');
 });
@@ -154,6 +156,7 @@ app.get('/logout', (req, res) => {
     req.session.destroy(() => res.redirect('/login'));
 });
 
+// --- ROTAS DE ADMINISTRAÇÃO ---
 app.post('/api/admin/criar-usuario', apenasAdmin, async (req, res, next) => {
     try {
         const { error, value } = schemaCriarUsuario.validate(req.body);
@@ -191,8 +194,46 @@ app.post('/api/admin/criar-usuario', apenasAdmin, async (req, res, next) => {
     }
 });
 
+app.post('/api/admin/resetar-usuario', apenasAdmin, async (req, res) => {
+    const { usuarioTarget, novaSenha } = req.body;
+
+    if (!usuarioTarget || !novaSenha) {
+        return res.status(400).json({ erro: 'Usuário e nova senha são obrigatórios.' });
+    }
+
+    try {
+        const salt = await bcrypt.genSalt(10);
+        const novaSenhaHash = await bcrypt.hash(novaSenha, salt);
+
+        const novoSecret = speakeasy.generateSecret({ name: `Painel Prazos (${usuarioTarget})` });
+        const { error } = await supabase
+            .from('usuarios')
+            .update({ 
+                senha_hash: novaSenhaHash,
+                secret_2fa: novoSecret.base32 
+            })
+            .eq('usuario', usuarioTarget);
+
+        if (error) throw error;
+
+        const qrCodeUrl = await qrcode.toDataURL(novoSecret.otpauth_url);
+
+        res.json({ 
+            sucesso: true, 
+            mensagem: 'Usuário resetado com sucesso!',
+            qrCode: qrCodeUrl 
+        });
+
+    } catch (error) {
+        console.error('Erro ao resetar usuário:', error);
+        res.status(500).json({ erro: 'Erro interno ao resetar o acesso.' });
+    }
+});
+
+// --- ROTAS DO USUÁRIO LOGADO ---
 app.get('/api/meus-dados', requireAuth, (req, res) => {
-    res.json({ usuario: req.session.usuarioNome, isAdmin: req.session.isAdmin });
+    // Agora usando um return para evitar travamentos
+    return res.json({ usuario: req.session.usuarioNome, isAdmin: req.session.isAdmin });
 });
 
 app.post('/api/rastrear', requireAuth, async (req, res, next) => {
@@ -228,7 +269,7 @@ app.post('/api/rastrear', requireAuth, async (req, res, next) => {
     }
 });
 
-app.get('/baixar-relatorio', requireAuth, async (req, res, next) => {
+app.get('/baixar-relatorio', apenasAdmin, async (req, res, next) => {
     try {
         const { data } = await supabase.from('acessos').select('*');
         let csv = 'Data,IP,Localizacao,Pagina,Tempo\n';
@@ -245,14 +286,21 @@ app.get('/baixar-relatorio', requireAuth, async (req, res, next) => {
     }
 });
 
+// --- ROTEAMENTO FINAL E ARQUIVOS ESTÁTICOS ---
+
+// Se o usuário não está logado, bloqueia o acesso aos arquivos a partir daqui
 app.use((req, res, next) => {
     if (req.session.logado) return next();
     res.redirect('/login');
 });
 
+// Serve os arquivos estáticos (HTML das calculadoras, imagens, etc)
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Qualquer outra rota não encontrada cai aqui e volta pra Home
 app.use((req, res) => res.redirect('/'));
 
+// --- TRATAMENTO GLOBAL DE ERROS ---
 app.use((err, req, res, next) => {
     console.error('Erro interno detectado:', err.message); 
     

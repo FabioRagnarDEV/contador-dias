@@ -6,6 +6,9 @@
     <title>Acesso Restrito - Painel de Prazos</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <style>
         body { font-family: 'Inter', sans-serif; transition: background 0.8s ease; overflow-x: hidden; }
         .perspectiva { perspective: 1000px; }
@@ -49,6 +52,12 @@
                 <div class="saltar-pouco">
                     <label id="label-pass" class="block font-bold mb-1">Senha</label>
                     <input type="password" name="senha" id="input-senha" class="w-full outline-none transition-all focus:ring-2 ring-offset-2 ring-cyan-500">
+                    
+                    <div class="text-right mt-2">
+                        <a href="#" id="btn-esqueci-senha" class="text-xs sm:text-sm font-semibold opacity-70 hover:opacity-100 transition-opacity" style="color: inherit;">
+                            Esqueci minha senha
+                        </a>
+                    </div>
                 </div>
 
                 <div id="captcha-container" class="flex justify-center pt-2">
@@ -353,7 +362,6 @@
 
             // CONTROLE DE ETAPAS
             if (step === '2fa') {
-                // Prepara a tela para a Etapa 2
                 document.getElementById('bloco-credenciais').classList.add('hidden');
                 document.getElementById('bloco-2fa').classList.remove('hidden');
                 document.getElementById('input-etapa').value = '2'; 
@@ -365,7 +373,6 @@
                 document.getElementById('titulo-login').innerText = "Autenticação Dupla";
                 document.getElementById('subtitulo-login').innerText = "Etapa 2 de 2";
                 
-                // Abrir cadeado
                 document.getElementById('lock-icon').classList.add('unlocked');
                 const btn = document.getElementById('btn-final');
                 btn.innerText = "Entrar no Sistema";
@@ -373,12 +380,24 @@
                 
                 setTimeout(() => document.getElementById('input-2fa').focus(), 100);
             } else {
-                // Etapa 1 Padrão
                 document.getElementById('input-usuario').setAttribute('required', 'true');
                 document.getElementById('input-senha').setAttribute('required', 'true');
                 document.getElementById('input-2fa').removeAttribute('required');
             }
         };
+
+        document.getElementById('btn-esqueci-senha').addEventListener('click', function(e) {
+            e.preventDefault(); 
+            
+            Swal.fire({
+                icon: 'info',
+                title: 'Aviso Importante!',
+                html: '<p style="font-size: 15px;">Para garantir a proteção dos dados, a redefinição de senha e do token deve ser solicitada diretamente ao Administrador do sistema.</p><br><p style="font-size: 14px; font-weight: bold;">Por favor, contate o administrador.</p>',
+                confirmButtonText: 'Entendi',
+                confirmButtonColor: '#3085d6',
+                background: document.body.style.backgroundColor || '#fff', 
+            });
+        });
 
         function iniciarBloqueioVisual() {
             const tempoDesbloqueio = Date.now() + (TEMPO_BLOQUEIO_MINUTOS * 60 * 1000);
