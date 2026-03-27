@@ -288,7 +288,7 @@ app.get('/baixar-relatorio', apenasAdmin, async (req, res, next) => {
 
 // --- ROTEAMENTO FINAL E ARQUIVOS ESTÁTICOS ---
 
-// Se o usuário não está logado, bloqueia o acesso aos arquivos a partir daqui
+app.use('/assets', express.static(path.join(__dirname, 'public/assets')));
 app.use((req, res, next) => {
     if (req.session.logado) return next();
     res.redirect('/login');

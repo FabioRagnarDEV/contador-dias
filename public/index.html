@@ -22,13 +22,10 @@
     #modal-box { transform: perspective(1000px) rotateX(-10deg) scale(0.9); opacity: 0; }
     #modal-overlay.active #modal-box { transform: perspective(1000px) rotateX(0) scale(1); opacity: 1; transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1); }
     
-    /* Canvas de Partículas (Fundo) */
     #particles { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
     
-    /* Canvas de Fogos (Frente - Celebração) */
     #fireworks-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 100; pointer-events: none; display: none; }
     
-    /* Overlay de Celebração */
     #celebration-overlay { 
       position: fixed; inset: 0; z-index: 90; 
       background: rgba(0,0,0,0.9); /* Fundo mais escuro para contraste */
@@ -43,7 +40,6 @@
     }
     .badge-festivo { animation: pulse-festivo 2s infinite; }
     
-    /* Animação do Texto de Celebração */
     @keyframes text-pop {
       0% { transform: scale(0.5); opacity: 0; }
       50% { transform: scale(1.2); opacity: 1; }
@@ -357,15 +353,12 @@
         btn.disabled = true;
 
         try {
-            // 👇 ESTA É A LINHA QUE MUDOU (Agora com /api/ na frente!)
             const res = await fetch('/api/admin/resetar-usuario', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ usuarioTarget, novaSenha })
             });
 
-            // Se o servidor devolver HTML em vez de JSON por algum motivo de rota, 
-            // isso aqui vai capturar o erro e nos avisar de forma amigável:
             const textResponse = await res.text();
             let dados;
             try {
@@ -405,15 +398,13 @@
       const horaAtualEl = document.getElementById('hora-atual');
       const countdownBadge = document.getElementById('countdown-badge');
       
-      // Elementos de Celebração
       const celebrationOverlay = document.getElementById('celebration-overlay');
       const celebrationMessage = document.getElementById('celebration-message');
       const fireworksCanvas = document.getElementById('fireworks-canvas');
 
-      // Estado da Celebração (para não disparar várias vezes no mesmo minuto)
       let celebrationActive = false;
 
-      // Paleta de temas padrão
+      // Paleta de temas
       const paletaPadrao = [
         { name: "Oceanic Teal", header: ["from-cyan-500", "to-teal-500"], btn: ["from-cyan-600", "to-teal-600"], text: "text-cyan-600", part: "rgba(6, 182, 212, 0.3)", focus: "focus:ring-cyan-500", border: "border-cyan-500", bg: "bg-cyan-50", hover: "hover:text-cyan-800" },
         { name: "Sunset Orange", header: ["from-amber-500", "to-orange-600"], btn: ["from-amber-600", "to-orange-700"], text: "text-amber-600", part: "rgba(245, 158, 11, 0.3)", focus: "focus:ring-amber-500", border: "border-amber-500", bg: "bg-amber-50", hover: "hover:text-amber-800" },
@@ -546,7 +537,7 @@
       }
 
       // ==========================================
-      // LÓGICA DE FOGOS DE ARTIFÍCIO
+         //FOGOS DE ARTIFÍCIO
       // ==========================================
       let fireworksCtx = fireworksCanvas.getContext('2d');
       let fireworks = [];
@@ -617,8 +608,7 @@
         animationId = requestAnimationFrame(animateFireworks);
         fireworksCtx.fillStyle = 'rgba(0, 0, 0, 0.1)'; // Rastro
         fireworksCtx.fillRect(0, 0, fireworksCanvas.width, fireworksCanvas.height);
-        
-        // Randomly create fireworks
+          
         if (Math.random() < 0.15) { // Densidade dos fogos
              const x = Math.random() * fireworksCanvas.width;
              const y = Math.random() * fireworksCanvas.height / 2;
