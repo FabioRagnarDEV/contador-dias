@@ -59,9 +59,9 @@ Calcula o prazo para um consorciado contemplado receber o crédito em dinheiro o
 
 ### 📌 **Direito de Arrependimento**
 Verifica se o cliente está dentro do prazo legal de 7 dias para desistir do contrato.
-- **Lógica:** Conta 7 dias corridos a partir do pagamento da 1ª parcela.
+- **Lógica:** Conta 7 dias corridos a partir do pagamento da alocação da cota.
 - **Segurança UX:** Alertas automáticos caso o 7º dia caia em um final de semana.
-- **Extras:** Mostra contagem projetada dia a dia e cita o **Art. 49 do CDC** e Cláusula 53.
+- **Extras:** Mostra contagem projetada dia a dia e cita o **Art. 49 do CDC** e Cláusula 44.
 
 ### 📌 **Pós-Vendas**
 Gerencia prazos do setor de pós-vendas de forma prática e automatizada, desconsiderando fins de semana e feriados nacionais.
