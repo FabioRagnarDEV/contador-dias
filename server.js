@@ -8,7 +8,10 @@ const bcrypt = require('bcrypt');
 const speakeasy = require('speakeasy');
 const qrcode = require('qrcode');
 const Joi = require('joi');
+const hpp = require('hpp');
 require('dotenv').config();
+
+const { logger, trafficAnalyzer, monitoringMiddleware, registerMonitoringRoutes } = require('./monitoring');
 
 const pg = require('pg');
 const pgSession = require('connect-pg-simple')(session);
@@ -21,10 +24,26 @@ const pgPool = new pg.Pool({
     ssl: { rejectUnauthorized: false }
 });
 
-app.use(helmet({ contentSecurityPolicy: false }));
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://cdn.tailwindcss.com", "https://challenges.cloudflare.com", "https://cdn.jsdelivr.net"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+            fontSrc: ["'self'", "https://fonts.gstatic.com"],
+            imgSrc: ["'self'", "data:", "https:"],
+            frameSrc: ["'self'", "https://challenges.cloudflare.com"],
+            connectSrc: ["'self'", "https://servicodados.ibge.gov.br", "http://ip-api.com", "https://challenges.cloudflare.com"]
+        }
+    },
+    crossOriginEmbedderPolicy: false
+}));
+
 app.set('trust proxy', 1);
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+app.use(express.json({ limit: '10kb' }));
+app.use(hpp());
 
 app.use(session({
     store: new pgSession({
@@ -43,13 +62,26 @@ app.use(session({
     }
 }));
 
+app.use(monitoringMiddleware);
+
 const loginLimiter = rateLimit({
     windowMs: 20 * 60 * 1000,
     max: 5,
-    handler: (req, res) => res.redirect('/login?erro=bloqueado'),
+    handler: (req, res) => {
+        logger.warn('Rate limit exceeded on login', { ip: req.ip });
+        trafficAnalyzer.recordFailedLogin(req.ip, req.body?.usuario || 'desconhecido');
+        res.redirect('/login?erro=bloqueado');
+    },
     standardHeaders: true,
     legacyHeaders: false,
 });
+
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 200,
+    message: { error: 'Muitas requisições. Tente novamente mais tarde.' }
+});
+app.use('/api/', apiLimiter);
 
 const schemaCriarUsuario = Joi.object({
     novoUsuario: Joi.string().pattern(/^[a-zA-Z0-9._\-@]+$/).min(3).max(50).required(),
@@ -61,7 +93,6 @@ const schemaRastrear = Joi.object({
     tempoSegundos: Joi.number().integer().min(0).required()
 });
 
-// Middlewares de Proteção
 const apenasAdmin = (req, res, next) => {
     if (req.session.logado && req.session.isAdmin) return next();
     res.status(403).json({ erro: 'Acesso Negado.' });
@@ -76,7 +107,6 @@ const requireAuth = (req, res, next) => {
     res.redirect('/login');
 };
 
-// --- ROTAS PÚBLICAS ---
 app.get('/ping', (req, res) => {
     res.status(200).send('pong');
 });
@@ -118,7 +148,11 @@ app.post('/fazer-login', loginLimiter, async (req, res, next) => {
 
             const userDB = users[0];
             const senhaCorreta = await bcrypt.compare(senha, userDB.senha_hash);
-            if (!senhaCorreta) return res.redirect('/login?erro=senha');
+            if (!senhaCorreta) {
+                trafficAnalyzer.recordFailedLogin(req.ip, usuario);
+                logger.auth('LOGIN_FALHOU', req, { usuario, motivo: 'senha_incorreta' });
+                return res.redirect('/login?erro=senha');
+            }
 
             req.session.preAuthUser = userDB;
             return res.redirect('/login?step=2fa');
@@ -140,9 +174,12 @@ app.post('/fazer-login', loginLimiter, async (req, res, next) => {
                 req.session.usuarioNome = userDB.usuario;
                 req.session.isAdmin = (userDB.role === 'admin'); 
                 req.session.preAuthUser = null; 
+                logger.auth('LOGIN_SUCESSO', req, { usuario: userDB.usuario });
                 return res.redirect('/');
             } else {
                 req.session.preAuthUser = null; 
+                trafficAnalyzer.recordFailedLogin(req.ip, userDB.usuario);
+                logger.auth('2FA_FALHOU', req, { usuario: userDB.usuario });
                 return res.redirect('/login?erro=2fa');
             }
         }
@@ -156,7 +193,6 @@ app.get('/logout', (req, res) => {
     req.session.destroy(() => res.redirect('/login'));
 });
 
-// --- ROTAS DE ADMINISTRAÇÃO ---
 app.post('/api/admin/criar-usuario', apenasAdmin, async (req, res, next) => {
     try {
         const { error, value } = schemaCriarUsuario.validate(req.body);
@@ -194,7 +230,7 @@ app.post('/api/admin/criar-usuario', apenasAdmin, async (req, res, next) => {
     }
 });
 
-app.post('/api/admin/resetar-usuario', apenasAdmin, async (req, res) => {
+app.post('/api/admin/resetar-usuario', apenasAdmin, async (req, res, next) => {
     const { usuarioTarget, novaSenha } = req.body;
 
     if (!usuarioTarget || !novaSenha) {
@@ -225,14 +261,13 @@ app.post('/api/admin/resetar-usuario', apenasAdmin, async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Erro ao resetar usuário:', error);
-        res.status(500).json({ erro: 'Erro interno ao resetar o acesso.' });
+        next(error);
     }
 });
 
-// --- ROTAS DO USUÁRIO LOGADO ---
+registerMonitoringRoutes(app, apenasAdmin);
+
 app.get('/api/meus-dados', requireAuth, (req, res) => {
-    // Agora usando um return para evitar travamentos
     return res.json({ usuario: req.session.usuarioNome, isAdmin: req.session.isAdmin });
 });
 
@@ -286,30 +321,44 @@ app.get('/baixar-relatorio', apenasAdmin, async (req, res, next) => {
     }
 });
 
-// --- ROTEAMENTO FINAL E ARQUIVOS ESTÁTICOS ---
-
 app.use('/assets', express.static(path.join(__dirname, 'public/assets')));
 app.use((req, res, next) => {
     if (req.session.logado) return next();
     res.redirect('/login');
 });
 
-// Serve os arquivos estáticos (HTML das calculadoras, imagens, etc)
 app.use(express.static(path.join(__dirname, 'public')));
-
-// Qualquer outra rota não encontrada cai aqui e volta pra Home
 app.use((req, res) => res.redirect('/'));
 
-// --- TRATAMENTO GLOBAL DE ERROS ---
 app.use((err, req, res, next) => {
-    console.error('Erro interno detectado:', err.message); 
+    const errorMessage = err.message || 'Erro Desconhecido';
+    
+    // Log via sistema de monitoramento
+    logger.error('Erro interno do servidor', {
+        route: `${req.method} ${req.originalUrl}`,
+        ip: req.ip,
+        message: errorMessage,
+        stack: process.env.NODE_ENV !== 'production' ? err.stack : undefined
+    });
+
+    // Alertar sobre erros do servidor
+    const { alertSystem } = require('./monitoring');
+    alertSystem.trigger('SERVER_ERROR', {
+        ip: req.ip,
+        route: `${req.method} ${req.originalUrl}`,
+        error: errorMessage
+    });
     
     if (req.xhr || (req.headers.accept && req.headers.accept.includes('json'))) {
-        res.status(500).json({ error: 'Erro interno ao processar a solicitação.' });
+        res.status(500).json({ error: 'Erro interno no servidor. A equipe já foi notificada.' });
     } else {
-        res.status(500).send('Erro interno do servidor.');
+        res.status(500).send('Erro interno do servidor. Volte à página inicial e tente novamente.');
     }
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+app.listen(PORT, () => {
+    logger.info('Server started on port ' + PORT);
+    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`🛡️ Monitoramento ativo em /monitoramento`);
+});
