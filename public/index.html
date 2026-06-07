@@ -28,7 +28,7 @@
     
     #celebration-overlay { 
       position: fixed; inset: 0; z-index: 90; 
-      background: rgba(0,0,0,0.9); /* Fundo mais escuro para contraste */
+      background: rgba(0,0,0,0.9);
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       opacity: 0; pointer-events: none; transition: opacity 1s ease;
     }
@@ -162,9 +162,8 @@
   </div>
 
   <a id="chatbot-btn" 
-  href="https://embra-assist.embracon.online/embracon/assistants/asst_qdvvc0hr0ankzox0n9g9ke6w/chat/con_d28t18lkvmvttd8z4uxbqdgh" 
-  target="_blank" 
-  rel="noopener noreferrer" 
+  data-dest="https://embra-assist.embracon.online/embracon/assistants/asst_qdvvc0hr0ankzox0n9g9ke6w/chat/con_d28t18lkvmvttd8z4uxbqdgh"
+  href="javascript:void(0)"
   class="fixed bottom-6 right-6 z-50 w-16 h-16 flex items-center justify-center rounded-full text-white shadow-xl transition-transform hover:scale-110 btn-3d"
   title="Pergunte ao ta na mão">
   <img src="assets/avatar.png" alt="Assistente Virtual" class="w-12 h-12 rounded-full object-cover">
@@ -175,12 +174,6 @@
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
     </svg>
 </button>
-
-<a id="btn-monitoramento" href="/monitoramento" class="hidden fixed bottom-4 left-20 bg-slate-800 text-white p-3 rounded-full shadow-lg border border-slate-600 hover:bg-slate-700 hover:scale-110 transition-all z-50" title="Monitoramento e Segurança">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-    </svg>
-</a>
 
 <div id="modal-admin" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-slate-900 border-2 border-slate-700 rounded-2xl w-full max-w-lg shadow-2xl transform transition-all scale-100 p-6">
@@ -246,19 +239,26 @@
 </div>
   
   <script>
-    // ===============================================
-    // 1. LÓGICA DE ADMINISTRAÇÃO (GLOBAL)
-    // ===============================================
-    
-    // Verifica se é admin assim que a página carrega
+    // 1. LÓGICA DE ADMINISTRAÇÃO
+    let _csrfToken = null;
+
+    async function getCsrfToken() {
+        if (_csrfToken) return _csrfToken;
+        const res = await fetch('/api/meus-dados');
+        if (!res.ok) throw new Error('Não autenticado');
+        const dados = await res.json();
+        _csrfToken = dados.csrfToken;
+        return _csrfToken;
+    }
+
     window.addEventListener('load', async () => {
         try {
             const res = await fetch('/api/meus-dados');
             if (res.ok) {
                 const dados = await res.json();
+                _csrfToken = dados.csrfToken;
                 if (dados.isAdmin) {
                     document.getElementById('btn-admin').classList.remove('hidden');
-                    document.getElementById('btn-monitoramento').classList.remove('hidden');
                 }
             }
         } catch(e) {}
@@ -274,7 +274,7 @@
         resetModal();
     }
 
-    // --- CONTROLE DAS GAVETAS (CRIAR VS RESET) ---
+    // Controle das views: criar vs reset
     function mostrarViewReset() {
         document.getElementById('view-criar').classList.add('hidden');
         document.getElementById('view-reset').classList.remove('hidden');
@@ -300,18 +300,16 @@
     }
 
     function resetModal() {
-        // Reseta aba de Criar
         document.getElementById('step-form').classList.remove('hidden');
         document.getElementById('step-result').classList.add('hidden');
         document.getElementById('new-user').value = '';
         document.getElementById('new-pass').value = '';
         
-        // Reseta aba de Reset
         document.getElementById('reset-form').classList.remove('hidden');
         document.getElementById('reset-result').classList.add('hidden');
     }
 
-    // --- AÇÃO: CRIAR USUÁRIO ---
+    // Ação: criar usuário
     async function criarUsuario() {
         const usuario = document.getElementById('new-user').value;
         const senha = document.getElementById('new-pass').value;
@@ -324,9 +322,10 @@
         btn.disabled = true;
 
         try {
+            const csrfToken = await getCsrfToken();
             const res = await fetch('/api/admin/criar-usuario', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
                 body: JSON.stringify({ novoUsuario: usuario, novaSenha: senha })
             });
 
@@ -334,7 +333,6 @@
 
             if (!res.ok) throw new Error(dados.erro || "Erro ao criar");
 
-            // Sucesso: Mostra QR Code
             document.getElementById('qr-img').src = dados.qrCode;
             document.getElementById('secret-text').innerText = dados.secretText;
             document.getElementById('step-form').classList.add('hidden');
@@ -348,7 +346,6 @@
         }
     }
 
-    // --- AÇÃO: RESETAR USUÁRIO ---
     async function resetarUsuario() {
         const usuarioTarget = document.getElementById('reset-user-target').value.trim();
         const novaSenha = document.getElementById('reset-new-pass').value.trim();
@@ -365,9 +362,10 @@
         btn.disabled = true;
 
         try {
+            const csrfToken = await getCsrfToken();
             const res = await fetch('/api/admin/resetar-usuario', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
                 body: JSON.stringify({ usuarioTarget, novaSenha })
             });
 
@@ -381,7 +379,6 @@
 
             if (!res.ok) throw new Error(dados.erro || "Erro ao resetar");
 
-            // Sucesso: Mostra Novo QR Code
             document.getElementById('reset-qr-img').src = dados.qrCode;
             document.getElementById('reset-form').classList.add('hidden');
             document.getElementById('reset-result').classList.remove('hidden');
@@ -394,7 +391,7 @@
         }
     }
 
-    // Event Listeners do Painel Admin
+    // Event listeners do painel admin
     document.getElementById('btn-admin').addEventListener('click', abrirModalAdmin);
     document.getElementById('btn-fechar-admin').addEventListener('click', fecharModalAdmin);
     document.getElementById('btn-opcoes-avancadas').addEventListener('click', mostrarViewReset);
@@ -403,12 +400,15 @@
     document.getElementById('btn-resetar-usuario').addEventListener('click', resetarUsuario);
     document.getElementById('btn-voltar-criar').addEventListener('click', mostrarViewCriar);
 
-    // ===============================================
-    // 2. LÓGICA DO PAINEL E EFEITOS
-    // ===============================================
+    
+    document.getElementById('chatbot-btn').addEventListener('click', function(e) {
+        e.preventDefault();
+        const dest = this.getAttribute('data-dest');
+        if (dest) window.open(dest, '_blank', 'noopener,noreferrer');
+    });
 
+    // 2. LÓGICA DO PAINEL E EFEITOS
     document.addEventListener('DOMContentLoaded', () => {
-      // Elementos do DOM
       const saudacaoEl = document.getElementById('saudacao');
       const modalOverlay = document.getElementById('modal-overlay');
       const nameInput = document.getElementById('name-input');
@@ -459,7 +459,7 @@
         {
           nome: "Natal",
           dia: 25,
-          mes: 11, // Dezembro
+          mes: 11,
           msgCelebra: "Feliz Natal!!! 🎄",
           tema: { 
             name: "Especial Natal", 
@@ -476,7 +476,7 @@
         {
           nome: "Ano Novo",
           dia: 1,
-          mes: 0, // Janeiro
+          mes: 0,
           msgCelebra: "Um próspero ano novo!!! 🥂",
           tema: { 
             name: "Especial Ano Novo", 
@@ -492,7 +492,7 @@
         }
       ];
 
-      // --- LÓGICA DE DATA COMEMORATIVA ---
+      // Lógica de data comemorativa
       function calcularProximoEvento() {
         const hoje = new Date();
         const anoAtual = hoje.getFullYear();
@@ -517,7 +517,7 @@
         return { evento: proximoEvento, dias: diasRestantes };
       }
 
-      // 1. Definição do Tema Inicial
+      // Definição do tema inicial
       const resultadoEvento = calcularProximoEvento();
       let tema;
 
@@ -558,7 +558,7 @@
       }
 
       // ==========================================
-         //FOGOS DE ARTIFÍCIO
+      // FOGOS DE ARTIFÍCIO
       // ==========================================
       let fireworksCtx = fireworksCanvas.getContext('2d');
       let fireworks = [];
@@ -627,10 +627,10 @@
       function animateFireworks() {
         if (!celebrationActive) return;
         animationId = requestAnimationFrame(animateFireworks);
-        fireworksCtx.fillStyle = 'rgba(0, 0, 0, 0.1)'; // Rastro
+        fireworksCtx.fillStyle = 'rgba(0, 0, 0, 0.1)';
         fireworksCtx.fillRect(0, 0, fireworksCanvas.width, fireworksCanvas.height);
           
-        if (Math.random() < 0.15) { // Densidade dos fogos
+        if (Math.random() < 0.15) {
              const x = Math.random() * fireworksCanvas.width;
              const y = Math.random() * fireworksCanvas.height / 2;
              const colors = ['#ff0043', '#14fc56', '#1e90ff', '#ffe100', '#ffffff'];
@@ -649,33 +649,28 @@
         if (celebrationActive) return;
         celebrationActive = true;
         
-        // Ativa UI
         celebrationMessage.textContent = message;
         celebrationMessage.classList.add('celebration-text');
         celebrationOverlay.classList.add('active');
         fireworksCanvas.style.display = 'block';
 
-        // Inicia Loop
         animateFireworks();
 
-        // Para após 15 segundos
         setTimeout(() => {
           celebrationActive = false;
           celebrationOverlay.classList.remove('active');
           fireworksCanvas.style.display = 'none';
           cancelAnimationFrame(animationId);
-          fireworks = []; // Limpa memória
+          fireworks = [];
           fireworksCtx.clearRect(0, 0, fireworksCanvas.width, fireworksCanvas.height);
         }, 15000); 
       }
 
-      // ==========================================
-      // RELÓGIO & CHECAGEM DE EVENTOS
-      // ==========================================
+      // RELÓGIO E CHECAGEM DE EVENTOS
       function atualizarRelogio() {
         const agora = new Date();
         const dia = String(agora.getDate()).padStart(2, '0');
-        const mes = String(agora.getMonth() + 1).padStart(2, '0'); // 0-11
+        const mes = String(agora.getMonth() + 1).padStart(2, '0');
         const ano = agora.getFullYear();
         const dataFormatada = `${dia}/${mes}/${ano}`;
         const horas = String(agora.getHours()).padStart(2, '0');
@@ -686,20 +681,16 @@
         dataAtualEl.textContent = dataFormatada;
         horaAtualEl.textContent = horaFormatada;
 
-        // Checagem de Meia-Noite (Virada)
         if (horas === '00' && minutos === '00' && segundos === '00') {
-           // Verifica Natal (25/12)
            if (dia === '25' && mes === '12') {
                startCelebration("Feliz Natal!!! 🎄");
            }
-           // Verifica Ano Novo (01/01)
            else if (dia === '01' && mes === '01') {
                startCelebration("Um próspero ano novo!!! 🥂");
            }
         }
       }
 
-      // IBGE Gender Logic
       async function getGender(name) {
         try {
           const [resM, resF] = await Promise.all([
@@ -766,7 +757,6 @@
       
       main();
 
-      // Partículas de Fundo (Bolhas)
       const canvas = document.getElementById("particles");
       const ctx = canvas.getContext("2d");
       let particles = [];
@@ -816,32 +806,6 @@
 
       atualizarRelogio();
       setInterval(atualizarRelogio, 1000);
-
-      const tempoInicio = Date.now();
-      let nomePagina = window.location.pathname;
-      if (nomePagina === '/' || nomePagina === '/index.html') nomePagina = 'Painel Principal (Home)';
-
-      // Quando o utilizador for fechar a aba ou mudar de página...
-      window.addEventListener('beforeunload', () => {
-        const tempoFim = Date.now();
-        const tempoGastoSegundos = Math.round((tempoFim - tempoInicio) / 1000);
-
-        // Prepara o relatório
-        const relatorio = {
-          pagina: nomePagina,
-          tempoSegundos: tempoGastoSegundos
-        };
-
-        // Envia o relatório para o servidor. 
-        fetch('/api/rastrear', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(relatorio),
-          keepalive: true 
-        });
-      });
 
     });
   </script>

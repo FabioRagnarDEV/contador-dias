@@ -6,9 +6,7 @@
     <title>Acesso Restrito - Painel de Prazos</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
-    
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
     <style>
         body { font-family: 'Inter', sans-serif; transition: background 0.8s ease; overflow-x: hidden; }
         #shackle { transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
@@ -17,9 +15,9 @@
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body id="body-bg" class="min-h-screen flex items-center justify-center p-4 bg-cover bg-center bg-no-repeat bg-fixed" style="background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(4, 9, 20, 0.8)), url('/assets/login.jpg');">
-    
+
     <div id="painel-login" class="w-full max-w-md relative z-10 mx-auto bg-white/10 backdrop-blur-xl p-8 rounded-3xl border border-white/20 shadow-[0_0_50px_rgba(0,0,0,0.5)] text-white">
-        
+
         <div class="text-center mb-6 sm:mb-8">
             <div id="icon-bg" class="w-20 h-20 sm:w-24 sm:h-24 rounded-full mx-auto flex items-center justify-center mb-4 sm:mb-6 transition-all">
                 <svg id="lock-icon" xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 sm:h-12 sm:w-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -45,21 +43,18 @@
                     <label id="label-user" class="block font-bold mb-1">Usuário</label>
                     <input type="text" name="usuario" id="input-usuario" class="w-full outline-none transition-all focus:ring-2 ring-offset-2 ring-cyan-500">
                 </div>
-                
                 <div>
                     <label id="label-pass" class="block font-bold mb-1">Senha</label>
                     <input type="password" name="senha" id="input-senha" class="w-full outline-none transition-all focus:ring-2 ring-offset-2 ring-cyan-500">
-                    
                     <div class="text-right mt-2">
                         <a href="#" id="btn-esqueci-senha" class="text-xs sm:text-sm font-semibold opacity-70 hover:opacity-100 transition-opacity" style="color: inherit;">
                             Esqueci minha senha
                         </a>
                     </div>
                 </div>
-
                 <div id="captcha-container" class="flex justify-center pt-2">
-                    <div class="cf-turnstile" 
-                        data-sitekey="0x4AAAAAAChuF9-2mkDLwgOu"  
+                    <div class="cf-turnstile"
+                        data-sitekey="0x4AAAAAAChuF9-2mkDLwgOu"
                         data-callback="enableBtn"></div>
                 </div>
             </div>
@@ -70,11 +65,11 @@
                     <p class="text-sm opacity-80">Abra seu Google Authenticator para continuar</p>
                 </div>
                 <div>
-                    <input type="text" name="token2fa" id="input-2fa" placeholder="000 000" maxlength="7" inputmode="numeric" 
+                    <input type="text" name="token2fa" id="input-2fa" placeholder="000 000" maxlength="7" inputmode="numeric"
                            class="w-full outline-none transition-all focus:ring-2 ring-offset-2 ring-cyan-500 text-center font-mono text-2xl tracking-[0.3em] py-4">
                 </div>
             </div>
-            
+
             <div id="alerta-erro" class="hidden mb-6 p-4 rounded-xl text-xs sm:text-sm text-center font-bold bg-red-500 text-white"></div>
 
             <div class="pt-2">
@@ -86,8 +81,9 @@
     </div>
 
     <script>
-        const TEMPO_BLOQUEIO_MINUTOS = 20; 
+        const TEMPO_BLOQUEIO_MINUTOS = 20;
 
+        // Temas visuais aleatórios
         const designs = [
             { iconBg: "bg-cyan-500 text-slate-900", btn: "bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-xl px-6 py-3 transition-colors", input: "bg-slate-900/60 border border-slate-700/50 p-3 rounded-lg text-cyan-400 focus:border-cyan-500 focus:outline-none" },
             { iconBg: "bg-yellow-400 text-black", btn: "bg-yellow-400 text-black border border-black/50 font-black uppercase tracking-widest hover:translate-y-1 transition-transform px-6 py-3 rounded-lg", input: "bg-zinc-900/60 border border-zinc-700/50 p-3 rounded-lg text-yellow-400 font-mono focus:border-yellow-400 focus:outline-none" },
@@ -101,52 +97,45 @@
         ];
 
         const tema = designs[Math.floor(Math.random() * designs.length)];
-        
-        document.getElementById('icon-bg').className += " " + tema.iconBg;
-        document.getElementById('input-usuario').className += " " + tema.input;
-        document.getElementById('input-senha').className += " " + tema.input;
-        document.getElementById('input-2fa').className += " " + tema.input; 
-        document.getElementById('btn-final').className += " " + tema.btn;
+        document.getElementById('icon-bg').className += ' ' + tema.iconBg;
+        document.getElementById('input-usuario').className += ' ' + tema.input;
+        document.getElementById('input-senha').className += ' ' + tema.input;
+        document.getElementById('input-2fa').className += ' ' + tema.input;
+        document.getElementById('btn-final').className += ' ' + tema.btn;
 
-        const painel = document.getElementById('painel-login');
-
+    
         window.onload = () => {
             verificarStatusBloqueio();
 
             const urlParams = new URLSearchParams(window.location.search);
             const erro = urlParams.get('erro');
-            const step = urlParams.get('step'); 
-            
+            const step = urlParams.get('step');
+
             if (erro) {
                 if (erro === 'bloqueado') {
                     iniciarBloqueioVisual();
                 } else {
                     const divErro = document.getElementById('alerta-erro');
                     divErro.classList.remove('hidden');
-                    if (erro === 'senha') divErro.innerText = "❌ Usuário ou senha incorretos.";
-                    else if (erro === 'captcha') divErro.innerText = "🤖 Falha na verificação de segurança.";
-                    else if (erro === '2fa') divErro.innerText = "🔐 Código 2FA Inválido. Volte e tente novamente.";
+                    if (erro === 'senha') divErro.innerText = '❌ Usuário ou senha incorretos.';
+                    else if (erro === 'captcha') divErro.innerText = '🤖 Falha na verificação de segurança.';
+                    else if (erro === '2fa') divErro.innerText = '🔐 Código 2FA Inválido. Volte e tente novamente.';
                 }
             }
 
-            // CONTROLE DE ETAPAS
             if (step === '2fa') {
                 document.getElementById('bloco-credenciais').classList.add('hidden');
                 document.getElementById('bloco-2fa').classList.remove('hidden');
-                document.getElementById('input-etapa').value = '2'; 
-                
+                document.getElementById('input-etapa').value = '2';
                 document.getElementById('input-usuario').removeAttribute('required');
                 document.getElementById('input-senha').removeAttribute('required');
                 document.getElementById('input-2fa').setAttribute('required', 'true');
-                
-                document.getElementById('titulo-login').innerText = "Autenticação Dupla";
-                document.getElementById('subtitulo-login').innerText = "Etapa 2 de 2";
-                
+                document.getElementById('titulo-login').innerText = 'Autenticação Dupla';
+                document.getElementById('subtitulo-login').innerText = 'Etapa 2 de 2';
                 document.getElementById('lock-icon').classList.add('unlocked');
                 const btn = document.getElementById('btn-final');
-                btn.innerText = "Entrar no Sistema";
+                btn.innerText = 'Entrar no Sistema';
                 btn.classList.remove('hidden');
-                
                 setTimeout(() => document.getElementById('input-2fa').focus(), 100);
             } else {
                 document.getElementById('input-usuario').setAttribute('required', 'true');
@@ -156,18 +145,18 @@
         };
 
         document.getElementById('btn-esqueci-senha').addEventListener('click', function(e) {
-            e.preventDefault(); 
-            
+            e.preventDefault();
             Swal.fire({
                 icon: 'info',
                 title: 'Aviso Importante!',
                 html: '<p style="font-size: 15px;">Para garantir a proteção dos dados, a redefinição de senha e do token deve ser solicitada diretamente ao Administrador do sistema.</p><br><p style="font-size: 14px; font-weight: bold;">Por favor, contate o administrador.</p>',
                 confirmButtonText: 'Entendi',
                 confirmButtonColor: '#3085d6',
-                background: document.body.style.backgroundColor || '#fff', 
+                background: document.body.style.backgroundColor || '#fff',
             });
         });
 
+    
         function iniciarBloqueioVisual() {
             const tempoDesbloqueio = Date.now() + (TEMPO_BLOQUEIO_MINUTOS * 60 * 1000);
             localStorage.setItem('bloqueio_ate', tempoDesbloqueio);
@@ -180,7 +169,7 @@
                 if (Date.now() < parseInt(bloqueioAte)) {
                     aplicarBloqueio(parseInt(bloqueioAte));
                 } else {
-                    localStorage.removeItem('bloqueio_ate'); // Já expirou
+                    localStorage.removeItem('bloqueio_ate');
                 }
             }
         }
@@ -188,24 +177,21 @@
         function aplicarBloqueio(tempoFinal) {
             document.getElementById('form-login').classList.add('hidden');
             document.getElementById('tela-bloqueio').classList.remove('hidden');
-            document.getElementById('titulo-login').innerText = "Sistema Travado";
-            document.getElementById('subtitulo-login').innerText = "IP temporariamente banido";
-            document.getElementById('icon-bg').className = "w-24 h-24 rounded-full mx-auto flex items-center justify-center mb-6 bg-red-600 text-white";
+            document.getElementById('titulo-login').innerText = 'Sistema Travado';
+            document.getElementById('subtitulo-login').innerText = 'IP temporariamente banido';
+            document.getElementById('icon-bg').className = 'w-24 h-24 rounded-full mx-auto flex items-center justify-center mb-6 bg-red-600 text-white';
 
             const intervalo = setInterval(() => {
-                const agora = Date.now();
-                const restante = tempoFinal - agora;
-
+                const restante = tempoFinal - Date.now();
                 if (restante <= 0) {
                     clearInterval(intervalo);
                     localStorage.removeItem('bloqueio_ate');
-                    window.location.href = '/login'; 
+                    window.location.href = '/login';
                     return;
                 }
-
                 const minutos = Math.floor((restante % (1000 * 60 * 60)) / (1000 * 60));
                 const segundos = Math.floor((restante % (1000 * 60)) / 1000);
-                document.getElementById('cronometro').innerText = 
+                document.getElementById('cronometro').innerText =
                     `${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
             }, 1000);
         }

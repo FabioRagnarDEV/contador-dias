@@ -394,15 +394,6 @@
     });
 
     window.addEventListener('DOMContentLoaded', () => {
-    const tempoInicio = Date.now();
-    let nomePagina = window.location.pathname;
-    if (nomePagina === '/' || nomePagina === '/index.html') nomePagina = 'Painel Principal (Home)';
-
-    window.addEventListener('beforeunload', () => {
-      const tempoFim = Date.now();
-      const relatorio = { pagina: nomePagina, tempoSegundos: Math.round((tempoFim - tempoInicio) / 1000) };
-      fetch('/api/rastrear', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(relatorio), keepalive: true });
-    });
   });
   </script>
   

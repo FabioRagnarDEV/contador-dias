@@ -228,11 +228,7 @@
 
             <div class="dev-grid">
                 <div>
-                    <label class="dev-label">Grupo / Cota</label>
-                    <input type="text" id="dev-grupoCota" placeholder="0000/00" class="dev-input">
-                </div>
-                <div>
-                    <label class="dev-label">Crédito Contratado (Base)</label>
+                    <label class="dev-label">Crédito Atualizado</label>
                     <input type="text" id="dev-credito" placeholder="0,00" class="dev-input">
                 </div>
                 <div>
@@ -524,31 +520,6 @@
     });
 
     window.addEventListener('DOMContentLoaded', () => {
-    const tempoInicio = Date.now();
-    let nomePagina = window.location.pathname;
-    if (nomePagina === '/' || nomePagina === '/index.html') nomePagina = 'Painel Principal (Home)';
-
-    // Quando o utilizador for fechar a aba ou mudar de página...
-    window.addEventListener('beforeunload', () => {
-      const tempoFim = Date.now();
-      const tempoGastoSegundos = Math.round((tempoFim - tempoInicio) / 1000);
-
-      // Prepara o relatório
-      const relatorio = {
-        pagina: nomePagina,
-        tempoSegundos: tempoGastoSegundos
-      };
-
-      // Envia o relatório para o servidor. 
-      fetch('/api/rastrear', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(relatorio),
-        keepalive: true 
-      });
-    });
   });
 
   </script>
