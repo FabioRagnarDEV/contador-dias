@@ -141,6 +141,10 @@ function verificarCsrf(req, res, next) {
     next();
 }
 
+app.get('/ping', (req, res) => {
+    res.status(200).send('pong');
+});
+
 app.get('/login', (req, res) => {
     if (req.session.logado) return res.redirect('/');
     const csrfToken = gerarCsrfToken(req);
