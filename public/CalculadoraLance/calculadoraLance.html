@@ -23,6 +23,8 @@
     #modal-instrucoes.active #modal-instrucoes-box { transform: scale(1); opacity: 1; }
     .resultado-card { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
     .barra-progresso { transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
+    #modal-legal-box { transform: scale(0.95); opacity: 0; transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1); }
+    #modal-legal.active #modal-legal-box { transform: scale(1); opacity: 1; }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800">
@@ -67,7 +69,7 @@
           <input type="number" id="total-contemplados" min="1" class="w-full border border-slate-300 rounded-lg p-3 focus:outline-none focus:ring-2" placeholder="Ex: 10" />
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>
             <label for="lance-livre" class="block mb-1 font-medium text-slate-700 text-sm">
               🟢 Lance Livre
@@ -85,6 +87,12 @@
               🟠 Lance Fixo 25%
             </label>
             <input type="number" id="lance-fixo-25" min="0" class="w-full border border-slate-300 rounded-lg p-3 focus:outline-none focus:ring-2" placeholder="Qtd." />
+          </div>
+          <div>
+            <label for="sorteio" class="block mb-1 font-medium text-slate-700 text-sm">
+              🟣 Sorteio
+            </label>
+            <input type="number" id="sorteio" min="0" class="w-full border border-slate-300 rounded-lg p-3 focus:outline-none focus:ring-2" placeholder="Qtd." />
           </div>
         </div>
 
@@ -147,6 +155,19 @@
               </div>
               <p id="desc-fixo25" class="text-xs text-slate-500 mt-1"></p>
             </div>
+
+            <div>
+              <div class="flex justify-between items-center mb-1">
+                <span class="flex items-center gap-2 text-sm font-medium text-slate-700">
+                  <span class="w-3 h-3 rounded-full bg-purple-500 inline-block"></span> Sorteio
+                </span>
+                <span id="pct-sorteio" class="text-sm font-bold text-purple-600">0%</span>
+              </div>
+              <div class="w-full bg-slate-200 rounded-full h-3">
+                <div id="barra-sorteio" class="barra-progresso bg-purple-500 h-3 rounded-full" style="width:0%"></div>
+              </div>
+              <p id="desc-sorteio" class="text-xs text-slate-500 mt-1"></p>
+            </div>
           </div>
 
           <div id="resumo-total" class="pt-3 border-t border-slate-200 flex justify-between items-center">
@@ -166,8 +187,8 @@
       </div>
     </div>
 
-    <div class="text-center">
-      <a href="../index.html" class="mt-8 inline-block text-slate-600 font-semibold transition hover:underline">
+    <div class="text-center mt-6">
+      <a href="../index.html" class="mt-2 inline-block text-slate-600 font-semibold transition hover:underline">
         &larr; Voltar ao Menu Principal
       </a>
     </div>
@@ -183,8 +204,43 @@
     <p class="text-sm text-slate-500">&copy; Todos os direitos reservados.</p>
   </footer>
 
-  <div id="modal-instrucoes" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 transition-opacity duration-300 hidden p-4">
-    <div id="modal-instrucoes-box" class="bg-white p-6 sm:p-8 rounded-xl shadow-2xl w-full max-w-xl relative max-h-[90vh] overflow-y-auto">
+  <div id="modal-legal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 transition-opacity duration-300 hidden p-4">
+    <div id="modal-legal-box" class="bg-white p-6 sm:p-8 rounded-xl shadow-2xl w-full max-w-lg relative max-h-[90vh] overflow-y-auto">
+      <button id="fechar-legal-btn" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition" aria-label="Fechar">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+        </svg>
+      </button>
+
+      <div class="flex items-center gap-3 mb-6 border-b pb-4">
+        <div class="p-2 bg-amber-50 rounded-lg text-amber-600 flex-shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-7 h-7">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+          </svg>
+        </div>
+        <h3 class="text-lg font-bold text-slate-900">Informações legais sobre oferta e contemplação por lance</h3>
+      </div>
+
+      <div class="space-y-4 text-sm text-slate-600 leading-relaxed">
+        <p>Os lances são oferecidos em percentual sobre o crédito contratado e seguem as regras do regulamento do grupo <span class="font-semibold text-slate-700">(Cláusula 19)</span>.</p>
+        <p>A contemplação por lance depende da modalidade ofertada, da ordem definida na assembleia inaugural, dos critérios de desempate e da disponibilidade de saldo do grupo <span class="font-semibold text-slate-700">(Cláusulas 19.1, 19.1.1, 19.1.2 e 20)</span>.</p>
+        <p>Após a contemplação, é necessário efetuar o pagamento do lance dentro do prazo previsto no regulamento <span class="font-semibold text-slate-700">(Cláusula 21)</span>.</p>
+        <p>
+          <a href="https://www.embracon.com.br/docs/regulamentos/Condi%C3%A7%C3%B5es%20Gerais%20-%20Embracon.pdf"
+             target="_blank"
+             rel="noopener noreferrer"
+             class="inline-flex items-center gap-1.5 font-semibold text-blue-600 hover:text-blue-800 hover:underline transition-colors">
+            Consulte o regulamento completo
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+            </svg>
+          </a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-instrucoes" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 transition-opacity duration-300 hidden p-4">    <div id="modal-instrucoes-box" class="bg-white p-6 sm:p-8 rounded-xl shadow-2xl w-full max-w-xl relative max-h-[90vh] overflow-y-auto">
       <button id="fechar-instrucoes-btn" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition" aria-label="Fechar manual">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
           <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
@@ -230,6 +286,15 @@
         <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 text-xs text-amber-800">
           <strong>Atenção:</strong> Se a soma das modalidades não coincidir com o total informado, a ferramenta exibirá um aviso. Os percentuais são calculados sempre em relação ao total informado no primeiro campo.
         </div>
+
+        <div class="pt-2 border-t border-slate-100">
+          <button id="btn-legal-from-manual" class="w-full inline-flex items-center justify-center gap-2 text-xs text-slate-500 hover:text-slate-700 border border-slate-200 hover:border-slate-400 bg-slate-50 hover:bg-white px-4 py-2.5 rounded-lg transition-all">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+            </svg>
+            Informações legais sobre oferta e contemplação por lance
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -266,9 +331,10 @@
       setTimeout(() => saudacaoEl.classList.add("show"), 100);
 
       const CORES = {
-        livre:  "#10b981",
-        fixo50: "#3b82f6",
-        fixo25: "#f97316"
+        livre:    "#10b981",
+        fixo50:   "#3b82f6",
+        fixo25:   "#f97316",
+        sorteio:  "#a855f7"
       };
 
       function renderizarDonut(dados) {
@@ -356,38 +422,43 @@
       function calcular() {
         erroEl.textContent = "";
 
-        const total  = parseInt(document.getElementById("total-contemplados").value);
-        const livre  = parseInt(document.getElementById("lance-livre").value)   || 0;
-        const fixo50 = parseInt(document.getElementById("lance-fixo-50").value) || 0;
-        const fixo25 = parseInt(document.getElementById("lance-fixo-25").value) || 0;
+        const total   = parseInt(document.getElementById("total-contemplados").value);
+        const livre   = parseInt(document.getElementById("lance-livre").value)   || 0;
+        const fixo50  = parseInt(document.getElementById("lance-fixo-50").value) || 0;
+        const fixo25  = parseInt(document.getElementById("lance-fixo-25").value) || 0;
+        const sorteio = parseInt(document.getElementById("sorteio").value)        || 0;
 
         if (!total || total < 1) {
           erroEl.textContent = "Informe o total de contemplados na assembleia.";
           return;
         }
 
-        const pctLivre  = (livre  / total) * 100;
-        const pctFixo50 = (fixo50 / total) * 100;
-        const pctFixo25 = (fixo25 / total) * 100;
+        const pctLivre   = (livre   / total) * 100;
+        const pctFixo50  = (fixo50  / total) * 100;
+        const pctFixo25  = (fixo25  / total) * 100;
+        const pctSorteio = (sorteio / total) * 100;
 
         const fmt = v => v % 1 === 0 ? v.toFixed(0) + "%" : v.toFixed(2) + "%";
 
-        document.getElementById("pct-livre").textContent   = fmt(pctLivre);
-        document.getElementById("pct-fixo50").textContent  = fmt(pctFixo50);
-        document.getElementById("pct-fixo25").textContent  = fmt(pctFixo25);
+        document.getElementById("pct-livre").textContent    = fmt(pctLivre);
+        document.getElementById("pct-fixo50").textContent   = fmt(pctFixo50);
+        document.getElementById("pct-fixo25").textContent   = fmt(pctFixo25);
+        document.getElementById("pct-sorteio").textContent  = fmt(pctSorteio);
 
         setTimeout(() => {
-          document.getElementById("barra-livre").style.width   = Math.min(pctLivre, 100)  + "%";
-          document.getElementById("barra-fixo50").style.width  = Math.min(pctFixo50, 100) + "%";
-          document.getElementById("barra-fixo25").style.width  = Math.min(pctFixo25, 100) + "%";
+          document.getElementById("barra-livre").style.width    = Math.min(pctLivre, 100)   + "%";
+          document.getElementById("barra-fixo50").style.width   = Math.min(pctFixo50, 100)  + "%";
+          document.getElementById("barra-fixo25").style.width   = Math.min(pctFixo25, 100)  + "%";
+          document.getElementById("barra-sorteio").style.width  = Math.min(pctSorteio, 100) + "%";
         }, 50);
 
-        document.getElementById("desc-livre").textContent   = `${livre} contemplado(s) por Lance Livre`;
-        document.getElementById("desc-fixo50").textContent  = `${fixo50} contemplado(s) por Lance Fixo 50%`;
-        document.getElementById("desc-fixo25").textContent  = `${fixo25} contemplado(s) por Lance Fixo 25%`;
-        document.getElementById("total-usado").textContent  = `${total} contemplado(s)`;
+        document.getElementById("desc-livre").textContent    = `${livre} contemplado(s) por Lance Livre`;
+        document.getElementById("desc-fixo50").textContent   = `${fixo50} contemplado(s) por Lance Fixo 50%`;
+        document.getElementById("desc-fixo25").textContent   = `${fixo25} contemplado(s) por Lance Fixo 25%`;
+        document.getElementById("desc-sorteio").textContent  = `${sorteio} contemplado(s) por Sorteio`;
+        document.getElementById("total-usado").textContent   = `${total} contemplado(s)`;
 
-        const soma = livre + fixo50 + fixo25;
+        const soma = livre + fixo50 + fixo25 + sorteio;
         const avisoSoma = document.getElementById("aviso-soma");
         if (soma !== total) {
           avisoSoma.textContent = `Atenção: a soma das modalidades (${soma}) é diferente do total informado (${total}). Os percentuais são calculados com base no total.`;
@@ -398,29 +469,32 @@
         }
 
         const dados = [
-          { rotulo: "Lance Livre",    valor: livre,  cor: CORES.livre,  pct: fmt(pctLivre).replace("%","")  },
-          { rotulo: "Lance Fixo 50%", valor: fixo50, cor: CORES.fixo50, pct: fmt(pctFixo50).replace("%","") },
-          { rotulo: "Lance Fixo 25%", valor: fixo25, cor: CORES.fixo25, pct: fmt(pctFixo25).replace("%","") },
+          { rotulo: "Lance Livre",    valor: livre,    cor: CORES.livre,    pct: fmt(pctLivre).replace("%","")    },
+          { rotulo: "Lance Fixo 50%", valor: fixo50,   cor: CORES.fixo50,   pct: fmt(pctFixo50).replace("%","")   },
+          { rotulo: "Lance Fixo 25%", valor: fixo25,   cor: CORES.fixo25,   pct: fmt(pctFixo25).replace("%","")   },
+          { rotulo: "Sorteio",        valor: sorteio,  cor: CORES.sorteio,  pct: fmt(pctSorteio).replace("%","")  },
         ].filter(d => d.valor > 0);
 
         renderizarDonut(dados.length > 0 ? dados : [
-          { rotulo: "Lance Livre",    valor: 0, cor: CORES.livre,  pct: "0" },
-          { rotulo: "Lance Fixo 50%", valor: 0, cor: CORES.fixo50, pct: "0" },
-          { rotulo: "Lance Fixo 25%", valor: 0, cor: CORES.fixo25, pct: "0" },
+          { rotulo: "Lance Livre",    valor: 0, cor: CORES.livre,    pct: "0" },
+          { rotulo: "Lance Fixo 50%", valor: 0, cor: CORES.fixo50,   pct: "0" },
+          { rotulo: "Lance Fixo 25%", valor: 0, cor: CORES.fixo25,   pct: "0" },
+          { rotulo: "Sorteio",        valor: 0, cor: CORES.sorteio,  pct: "0" },
         ]);
 
         resultadoEl.classList.remove("hidden");
       }
 
       function zerar() {
-        ["total-contemplados","lance-livre","lance-fixo-50","lance-fixo-25"].forEach(id => {
+        ["total-contemplados","lance-livre","lance-fixo-50","lance-fixo-25","sorteio"].forEach(id => {
           document.getElementById(id).value = "";
         });
         erroEl.textContent = "";
         resultadoEl.classList.add("hidden");
-        document.getElementById("barra-livre").style.width   = "0%";
-        document.getElementById("barra-fixo50").style.width  = "0%";
-        document.getElementById("barra-fixo25").style.width  = "0%";
+        document.getElementById("barra-livre").style.width    = "0%";
+        document.getElementById("barra-fixo50").style.width   = "0%";
+        document.getElementById("barra-fixo25").style.width   = "0%";
+        document.getElementById("barra-sorteio").style.width  = "0%";
       }
 
       calcularBtn.addEventListener("click", calcular);
@@ -451,6 +525,32 @@
       modal.addEventListener("click", e => { if (e.target === modal) fecharModal(); });
       document.addEventListener("keydown", e => {
         if (e.key === "Escape" && modal.classList.contains("active")) fecharModal();
+      });
+
+      const modalLegal     = document.getElementById("modal-legal");
+      const fecharLegalBtn = document.getElementById("fechar-legal-btn");
+      let ultimoFocoLegal  = null;
+
+      const fecharModalLegal = () => {
+        modalLegal.classList.remove("active");
+        setTimeout(() => modalLegal.classList.add("hidden"), 300);
+        if (ultimoFocoLegal) ultimoFocoLegal.focus();
+      };
+
+      fecharLegalBtn.addEventListener("click", fecharModalLegal);
+      modalLegal.addEventListener("click", e => { if (e.target === modalLegal) fecharModalLegal(); });
+      document.addEventListener("keydown", e => {
+        if (e.key === "Escape" && modalLegal.classList.contains("active")) fecharModalLegal();
+      });
+
+      document.getElementById("btn-legal-from-manual").addEventListener("click", () => {
+        fecharModal();
+        setTimeout(() => {
+          ultimoFocoLegal = document.activeElement;
+          modalLegal.classList.remove("hidden");
+          setTimeout(() => modalLegal.classList.add("active"), 10);
+          setTimeout(() => fecharLegalBtn.focus(), 20);
+        }, 320);
       });
     });
   </script>

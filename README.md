@@ -55,10 +55,11 @@ Ferramenta completa para gestão de inadimplência:
 
 ### 📊 Percentual de Lance
 Calcula a representatividade de cada modalidade de lance em uma assembleia usando **D3.js**:
-- Percentual de Lance Livre, Lance Fixo 50% e Lance Fixo 25%
+- Percentual de Lance Livre, Lance Fixo 50%, Lance Fixo 25% e Sorteio
 - Visualização com gráfico donut interativo (hover com detalhes por fatia)
 - Barras de progresso animadas por modalidade
 - Alerta quando a soma das modalidades difere do total informado
+- Informações legais sobre oferta e contemplação por lance acessíveis direto no modal de ajuda, com referência às Cláusulas 19, 19.1, 19.1.1, 19.1.2, 20 e 21 e link para o regulamento completo
 
 ---
 
