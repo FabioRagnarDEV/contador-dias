@@ -134,6 +134,17 @@
           </div>
         </div>
       </a>
+      <a href="CalculadoraLance/calculadoraLance.html" class="group block bg-white p-6 rounded-2xl shadow-lg border border-transparent card-3d">
+        <div class="flex flex-col sm:flex-row items-center text-center sm:text-left gap-5">
+          <div class="p-3 rounded-full bg-opacity-20" id="icon-bg-5">
+            <img src="assets/percentual de lance.png" alt="Ícone de Percentual de Lance" class="h-12 w-12 icon-3d">
+          </div>
+          <div>
+            <h3 class="text-lg sm:text-xl font-bold text-slate-800 group-hover:transition-colors" id="link-text-5">Percentual de Lance</h3>
+            <p class="text-slate-500 mt-1 text-sm sm:text-base">Calcule o % de cotas contempladas por modalidades de lance.</p>
+          </div>
+        </div>
+      </a>
 
     </div>
   </main>
@@ -552,10 +563,12 @@
       nameSubmitBtn.classList.add("bg-gradient-to-br", ...tema.btn);
       document.getElementById("chatbot-btn").classList.add("bg-gradient-to-br", ...tema.btn);
       
-      for (let i = 1; i <= 4; i++) {
-        document.getElementById(`icon-bg-${i}`).classList.add(tema.text.replace("text-", "bg-") + "-100");
+      for (let i = 1; i <= 5; i++) {
+        document.getElementById(`icon-bg-${i}`).classList.add("bg-white", "shadow-sm");
         document.getElementById(`link-text-${i}`).classList.add(tema.text.replace("text-", "group-hover:text-"));
       }
+      const svgLance = document.querySelector('#icon-bg-5 svg');
+      if (svgLance) svgLance.classList.add(tema.text);
 
       // ==========================================
       // FOGOS DE ARTIFÍCIO

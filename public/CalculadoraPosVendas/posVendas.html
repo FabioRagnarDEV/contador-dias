@@ -238,7 +238,7 @@
       // Aplica as cores do tema aos elementos
       document.getElementById("header").classList.add("bg-gradient-to-r", ...tema.header);
       const iconBg = document.getElementById("icon-bg");
-      iconBg.classList.add(tema.bg.replace('-50', '-100'), tema.text);
+      iconBg.classList.add("bg-white", "shadow-sm");
       const avisoBox = document.getElementById('aviso-box');
       avisoBox.classList.add(tema.text.replace('600', '800'), tema.border, tema.bg);
       

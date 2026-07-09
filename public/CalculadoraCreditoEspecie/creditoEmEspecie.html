@@ -318,7 +318,7 @@
       document.querySelectorAll('input[type="text"]').forEach(input => input.classList.add(tema.focus));
       document.getElementById('grupo-encerrado-check').classList.add(tema.text, tema.focus);
       document.getElementById('aviso-box').classList.add(tema.text.replace('600', '800'), tema.border, tema.bg);
-      document.getElementById('icon-bg').classList.add(tema.bg.replace('-50', '-100'));
+      document.getElementById('icon-bg').classList.add("bg-white", "shadow-sm");
       document.querySelectorAll('#info-legal summary').forEach(link => { link.classList.add(tema.text, tema.hover); });
       
       const abrirInstrucoesBtn = document.getElementById('abrir-instrucoes-btn');
