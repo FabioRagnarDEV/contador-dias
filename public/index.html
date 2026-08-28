@@ -145,6 +145,19 @@
           </div>
         </div>
       </a>
+      <a href="ApuracaoAssembleia/apuracao.html" class="group block bg-white p-6 rounded-2xl shadow-lg border border-transparent card-3d">
+        <div class="flex flex-col sm:flex-row items-center text-center sm:text-left gap-5">
+          <div class="p-3 rounded-full bg-white shadow-sm" id="icon-bg-6">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-12 w-12 icon-3d text-slate-500">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-lg sm:text-xl font-bold text-slate-800 group-hover:transition-colors" id="link-text-6">Apuração Assembleia</h3>
+            <p class="text-slate-500 mt-1 text-sm sm:text-base">Apure centenas e milhares do sorteio pela Loteria Federal.</p>
+          </div>
+        </div>
+      </a>
 
     </div>
   </main>
@@ -563,12 +576,14 @@
       nameSubmitBtn.classList.add("bg-gradient-to-br", ...tema.btn);
       document.getElementById("chatbot-btn").classList.add("bg-gradient-to-br", ...tema.btn);
       
-      for (let i = 1; i <= 5; i++) {
+      for (let i = 1; i <= 6; i++) {
         document.getElementById(`icon-bg-${i}`).classList.add("bg-white", "shadow-sm");
         document.getElementById(`link-text-${i}`).classList.add(tema.text.replace("text-", "group-hover:text-"));
       }
       const svgLance = document.querySelector('#icon-bg-5 svg');
       if (svgLance) svgLance.classList.add(tema.text);
+      const svgApuracao = document.querySelector('#icon-bg-6 svg');
+      if (svgApuracao) svgApuracao.classList.add(tema.text);
 
       // ==========================================
       // FOGOS DE ARTIFÍCIO

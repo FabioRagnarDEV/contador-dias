@@ -156,46 +156,117 @@
 </footer>
   
   <div id="modal-instrucoes" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 transition-opacity duration-300 hidden p-4">
-    <div id="modal-instrucoes-box" class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-2xl relative h-full max-h-[90vh] overflow-y-auto">
-      <button id="fechar-instrucoes-btn" class="sticky top-0 right-0 float-right text-slate-400 hover:text-slate-600 transition bg-white/50 backdrop-blur-sm rounded-full p-1" aria-label="Fechar">
+    <div id="modal-instrucoes-box" class="bg-white p-6 sm:p-8 rounded-xl shadow-2xl w-full max-w-2xl relative max-h-[90vh] overflow-y-auto">
+
+      <button id="fechar-instrucoes-btn" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition" aria-label="Fechar manual">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
           <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
         </svg>
       </button>
-      <h3 class="text-2xl font-bold text-slate-900 mb-6 text-center">Manual da Calculadora Pós-Vendas</h3>
-      <div class="space-y-6 text-slate-600">
-        <div>
-            <h4 class="text-xl font-bold text-slate-800 border-b pb-2 mb-3">Como Usar a Ferramenta</h4>
-            <div class="space-y-3">
-              <p><strong class="text-slate-800">1. Pós Vendas Digital:</strong> Prazo de 48h úteis após efetivação.</p>
-              <p><strong class="text-slate-800">2. Caso Pós Vendas:</strong> Prazo de 50 dias úteis para tratamento.</p>
-              <p><strong class="text-slate-800">3. Divergência na Venda:</strong> Prazo de 90 dias corridos para acionamento.</p>
-            </div>
+
+      <div class="flex items-center gap-3 mb-6 border-b pb-4">
+        <div class="p-2 bg-blue-50 rounded-lg text-blue-600">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+          </svg>
         </div>
-        
-        <div>
-          <h4 class="text-xl font-bold text-slate-800 border-b pb-2 mb-3">Guia Rápido do Setor</h4>
-          <p class="mb-2"><strong class="text-slate-800">Objetivo:</strong> Garantir a satisfação dos clientes após a venda, confirmando dados, resolvendo dúvidas e oferecendo suporte.</p>
-          <p><strong class="text-slate-800">Horário:</strong> Segunda a sexta-feira, das 8h às 19h.</p>
+        <h3 class="text-2xl font-bold text-slate-900">Manual da Ferramenta</h3>
+      </div>
+
+      <div class="space-y-5 text-slate-600 text-sm">
+
+        <p class="text-base text-slate-700">Esta ferramenta verifica o status do prazo de atendimento para três modalidades do setor de Pós-Vendas, considerando dias úteis, feriados nacionais e dias corridos conforme cada regra.</p>
+
+        <!-- PVD -->
+        <div class="bg-slate-50 border border-slate-200 rounded-lg p-5">
+          <h4 class="font-bold text-lg text-slate-800 mb-3 flex items-center gap-2">
+            <span class="bg-blue-100 text-blue-800 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">1</span>
+            Pós Vendas Digital
+            <span class="ml-auto text-xs font-semibold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">48h úteis</span>
+          </h4>
+          <p class="mb-3 text-slate-600">Verifica se o atendimento do PVD ainda está dentro do prazo de 48 horas úteis após a efetivação.</p>
+          <div class="pl-4 border-l-2 border-blue-300 space-y-1">
+            <p class="text-xs text-slate-600">1. Selecione a aba <strong class="text-slate-800">Pós Vendas Digital</strong>.</p>
+            <p class="text-xs text-slate-600">2. Informe a <strong class="text-slate-800">Data da Efetivação</strong> do atendimento.</p>
+            <p class="text-xs text-slate-600">3. Clique em <strong class="text-slate-800">Verificar</strong> — o sistema consulta feriados e calcula automaticamente.</p>
+          </div>
+          <div class="mt-3 p-3 bg-white rounded border border-slate-200 text-xs text-slate-500">
+            <strong class="text-slate-700">Resultado verde:</strong> dentro do prazo — acionar o pós-vendas imediatamente.<br>
+            <strong class="text-slate-700">Resultado vermelho:</strong> prazo excedido — abrir vermelha comercial para a ouvidoria.
+          </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="bg-green-50 text-green-800 p-4 rounded-lg">
-            <h5 class="font-bold mb-2">✅ Quando o Pós-Vendas Atende</h5>
-            <ul class="list-disc list-inside text-sm space-y-1">
-              <li>Casos de Pós Vendas Digital encerrados em até 48h úteis.</li>
+        <!-- CPV -->
+        <div class="bg-slate-50 border border-slate-200 rounded-lg p-5">
+          <h4 class="font-bold text-lg text-slate-800 mb-3 flex items-center gap-2">
+            <span class="bg-blue-100 text-blue-800 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">2</span>
+            Caso Pós Vendas
+            <span class="ml-auto text-xs font-semibold bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">50 dias úteis</span>
+          </h4>
+          <p class="mb-3 text-slate-600">Calcula quantos dias úteis se passaram desde a abertura do caso e informa o saldo de dias restantes.</p>
+          <div class="pl-4 border-l-2 border-purple-300 space-y-1">
+            <p class="text-xs text-slate-600">1. Selecione a aba <strong class="text-slate-800">Caso Pós Vendas</strong>.</p>
+            <p class="text-xs text-slate-600">2. Informe a <strong class="text-slate-800">Data de Abertura</strong> do caso.</p>
+            <p class="text-xs text-slate-600">3. Informe o <strong class="text-slate-800">Número do Caso</strong>.</p>
+            <p class="text-xs text-slate-600">4. Clique em <strong class="text-slate-800">Verificar</strong>.</p>
+          </div>
+          <div class="mt-3 p-3 bg-white rounded border border-slate-200 text-xs text-slate-500">
+            <strong class="text-slate-700">Dentro do prazo:</strong> exibe os dias úteis restantes e orienta abrir caso na fila do setor.<br>
+            <strong class="text-slate-700">Prazo excedido:</strong> orientação para abrir vermelha comercial com evidências.
+          </div>
+        </div>
+
+        <!-- DV -->
+        <div class="bg-slate-50 border border-slate-200 rounded-lg p-5">
+          <h4 class="font-bold text-lg text-slate-800 mb-3 flex items-center gap-2">
+            <span class="bg-blue-100 text-blue-800 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">3</span>
+            Divergência na Venda
+            <span class="ml-auto text-xs font-semibold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">90 dias corridos</span>
+          </h4>
+          <p class="mb-3 text-slate-600">Verifica se o prazo de 90 dias corridos para tratativa ainda está vigente, válido para casos abertos ou fechados.</p>
+          <div class="pl-4 border-l-2 border-amber-300 space-y-1">
+            <p class="text-xs text-slate-600">1. Selecione a aba <strong class="text-slate-800">Divergência na Venda*</strong>.</p>
+            <p class="text-xs text-slate-600">2. Informe a <strong class="text-slate-800">Data de Abertura</strong> do caso.</p>
+            <p class="text-xs text-slate-600">3. Informe o <strong class="text-slate-800">Número do Caso</strong>.</p>
+            <p class="text-xs text-slate-600">4. Clique em <strong class="text-slate-800">Verificar</strong>.</p>
+          </div>
+          <div class="mt-3 p-3 bg-white rounded border border-slate-200 text-xs text-slate-500">
+            <strong class="text-slate-700">Dentro do prazo:</strong> exibe os dias corridos restantes e orienta o acionamento imediato.<br>
+            <strong class="text-slate-700">Prazo expirado:</strong> informa há quantos dias o prazo foi ultrapassado.
+          </div>
+        </div>
+
+        <!-- Guia do setor -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+            <h5 class="font-bold text-green-800 mb-2 flex items-center gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+              Quando o Pós-Vendas Atende
+            </h5>
+            <ul class="list-disc list-inside text-xs space-y-1 text-green-800">
+              <li>PVD encerrado em até 48h úteis.</li>
               <li>Cancelamento por desvio na venda em até 7 dias da adesão.</li>
-              <li>Divergência na venda com caso aberto há menos de 50 dias úteis.</li>
+              <li>Divergência com caso aberto há menos de 50 dias úteis.</li>
             </ul>
           </div>
-          <div class="bg-red-50 text-red-800 p-4 rounded-lg">
-            <h5 class="font-bold mb-2">❌ Quando o Pós-Vendas NÃO Atende</h5>
-            <ul class="list-disc list-inside text-sm space-y-1">
+          <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+            <h5 class="font-bold text-red-800 mb-2 flex items-center gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+              Quando NÃO Atende
+            </h5>
+            <ul class="list-disc list-inside text-xs space-y-1 text-red-800">
               <li>Processo com mais de 90 dias corridos.</li>
-              <li>Cotas de Motocicleta (exceto CE), Cooperativas, Contempladas.</li>
+              <li>Cotas de Motocicleta (exceto CE).</li>
+              <li>Cooperativas e Contempladas.</li>
             </ul>
           </div>
         </div>
+
+        <div class="p-3 bg-slate-100 rounded-lg text-xs text-slate-500 flex items-start gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 flex-shrink-0 text-slate-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+          <span><strong class="text-slate-600">Horário de atendimento:</strong> Segunda a sexta-feira, das 8h às 19h. Os cálculos consideram feriados nacionais via BrasilAPI em tempo real.</span>
+        </div>
+
       </div>
     </div>
   </div>

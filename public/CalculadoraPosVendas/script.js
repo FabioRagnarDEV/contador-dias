@@ -1,30 +1,25 @@
-document.addEventListener('DOMContentLoaded', () => {
+// Executado após o DOM e posVendasService.js já estarem carregados
 
-    const tabs = {
-        pvd: document.getElementById('pvd'),
-        cpv: document.getElementById('cpv'),
-        dv:  document.getElementById('dv')
-    };
+(function () {
 
-    const btnShow = {
-        pvd: document.getElementById('btn-show-pvd'),
-        cpv: document.getElementById('btn-show-cpv'),
-        dv:  document.getElementById('btn-show-dv')
-    };
+    // Controle de abas
+    const tabs   = { pvd: 'pvd', cpv: 'cpv', dv: 'dv' };
+    const btnMap = { pvd: 'btn-show-pvd', cpv: 'btn-show-cpv', dv: 'btn-show-dv' };
 
     function mostrarTab(id) {
         Object.keys(tabs).forEach(k => {
-            tabs[k].classList.add('hidden');
-            btnShow[k].classList.remove('active');
+            document.getElementById(k).classList.add('hidden');
+            document.getElementById(btnMap[k]).classList.remove('active');
         });
-        tabs[id].classList.remove('hidden');
-        btnShow[id].classList.add('active');
+        document.getElementById(id).classList.remove('hidden');
+        document.getElementById(btnMap[id]).classList.add('active');
     }
 
-    btnShow.pvd.addEventListener('click', () => mostrarTab('pvd'));
-    btnShow.cpv.addEventListener('click', () => mostrarTab('cpv'));
-    btnShow.dv.addEventListener('click',  () => mostrarTab('dv'));
+    document.getElementById('btn-show-pvd').addEventListener('click', () => mostrarTab('pvd'));
+    document.getElementById('btn-show-cpv').addEventListener('click', () => mostrarTab('cpv'));
+    document.getElementById('btn-show-dv').addEventListener('click',  () => mostrarTab('dv'));
 
+    // Exibição de resultado
     function mostrarResultado(elId, erroId, resultado) {
         const el   = document.getElementById(elId);
         const erro = document.getElementById(erroId);
@@ -36,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        el.className = `text-center mt-2 text-base font-semibold p-4 rounded-lg resultado-box transition-all ${resultado.corFundo} ${resultado.corTexto}`;
+        el.className = 'text-center mt-2 text-base font-semibold p-4 rounded-lg whitespace-pre-line resultado-box transition-all ' + resultado.corFundo + ' ' + resultado.corTexto;
         el.textContent = resultado.mensagem;
         el.classList.remove('hidden');
     }
@@ -52,18 +47,23 @@ document.addEventListener('DOMContentLoaded', () => {
         res.classList.add('hidden');
     }
 
-    // PVD
+    function setLoading(btnId, loading, label) {
+        const btn = document.getElementById(btnId);
+        btn.disabled = loading;
+        btn.textContent = loading ? 'Calculando...' : label;
+    }
+
+    // PVD — Pós Vendas Digital (48h úteis)
     document.getElementById('btn-process-pvd').addEventListener('click', async () => {
         const dataEfetivacao = document.getElementById('dataEfetivacao').value;
-        const btn = document.getElementById('btn-process-pvd');
-        btn.disabled = true;
-        btn.textContent = 'Calculando...';
+        setLoading('btn-process-pvd', true, 'Verificar');
         try {
             const resultado = await PosVendasService.calcularPVD(dataEfetivacao, new Date());
             mostrarResultado('resultadoPVD', 'erroPVD', resultado);
+        } catch (e) {
+            document.getElementById('erroPVD').textContent = e.message || 'Erro ao calcular.';
         } finally {
-            btn.disabled = false;
-            btn.textContent = 'Verificar';
+            setLoading('btn-process-pvd', false, 'Verificar');
         }
     });
 
@@ -71,19 +71,18 @@ document.addEventListener('DOMContentLoaded', () => {
         limpar(['dataEfetivacao'], 'erroPVD', 'resultadoPVD');
     });
 
-    // CPV
+    // CPV — Caso Pós Vendas (50 dias úteis)
     document.getElementById('btn-process-cpv').addEventListener('click', async () => {
         const dataAbertura = document.getElementById('dataAbertura').value;
         const numeroCaso   = document.getElementById('numeroCaso').value;
-        const btn = document.getElementById('btn-process-cpv');
-        btn.disabled = true;
-        btn.textContent = 'Calculando...';
+        setLoading('btn-process-cpv', true, 'Verificar');
         try {
             const resultado = await PosVendasService.calcularCPV(dataAbertura, numeroCaso, new Date());
             mostrarResultado('resultadoCPV', 'erroCPV', resultado);
+        } catch (e) {
+            document.getElementById('erroCPV').textContent = e.message || 'Erro ao calcular.';
         } finally {
-            btn.disabled = false;
-            btn.textContent = 'Verificar';
+            setLoading('btn-process-cpv', false, 'Verificar');
         }
     });
 
@@ -91,16 +90,20 @@ document.addEventListener('DOMContentLoaded', () => {
         limpar(['dataAbertura', 'numeroCaso'], 'erroCPV', 'resultadoCPV');
     });
 
-    // DV
+    // DV — Divergência na Venda (90 dias corridos)
     document.getElementById('btn-process-dv').addEventListener('click', () => {
         const dataAbertura = document.getElementById('dataAberturaDV').value;
         const numeroCaso   = document.getElementById('numeroCasoDV').value;
-        const resultado    = PosVendasService.calcularDV(dataAbertura, numeroCaso, new Date());
-        mostrarResultado('resultadoDV', 'erroDV', resultado);
+        try {
+            const resultado = PosVendasService.calcularDV(dataAbertura, numeroCaso, new Date());
+            mostrarResultado('resultadoDV', 'erroDV', resultado);
+        } catch (e) {
+            document.getElementById('erroDV').textContent = e.message || 'Erro ao calcular.';
+        }
     });
 
     document.getElementById('btn-reset-dv').addEventListener('click', () => {
         limpar(['dataAberturaDV', 'numeroCasoDV'], 'erroDV', 'resultadoDV');
     });
 
-});
+}());

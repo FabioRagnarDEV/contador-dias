@@ -32,7 +32,7 @@ app.use(helmet({
             fontSrc: ["'self'", "https://fonts.gstatic.com"],
             imgSrc: ["'self'", "data:", "https:"],
             frameSrc: ["'self'", "https://challenges.cloudflare.com"],
-            connectSrc: ["'self'", "https://servicodados.ibge.gov.br", "https://challenges.cloudflare.com"]
+            connectSrc: ["'self'", "https://servicodados.ibge.gov.br", "https://brasilapi.com.br", "https://challenges.cloudflare.com"]
         }
     },
     crossOriginEmbedderPolicy: false
