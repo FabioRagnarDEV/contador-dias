@@ -27,7 +27,6 @@
     }
     setTimeout(() => saudEl.classList.add('show'), 100);
 
-    // ── Seleção de grupo ──────────────────────────────────────
     function selecionarGrupo(modo) {
         modoGrupo = modo;
         dadosApurados = null;
@@ -64,11 +63,10 @@
         }
         for (let i = 1; i <= 5; i++) {
             document.getElementById(`premio-${i}`).addEventListener('keydown', e => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    const next = document.getElementById(`premio-${i + 1}`);
-                    if (next) next.focus(); else document.getElementById('btn-apurar').focus();
-                }
+                if (e.key !== 'Enter') return;
+                e.preventDefault();
+                const next = document.getElementById(`premio-${i + 1}`);
+                if (next) next.focus(); else document.getElementById('btn-apurar').focus();
             });
         }
     }
@@ -91,29 +89,20 @@
         }
     });
 
-    // ── Apurar ────────────────────────────────────────────────
     document.getElementById('btn-apurar').addEventListener('click', apurar);
     document.getElementById('btn-limpar').addEventListener('click', limpar);
 
     function apurar() {
         const erroEl = document.getElementById('mensagem-erro');
         erroEl.textContent = '';
-
         const maxPart = parseInt(document.getElementById('num-participantes').value);
-        if (!maxPart || maxPart < 1) {
-            erroEl.textContent = 'Informe o número máximo de participantes do grupo.';
-            return;
-        }
+        if (!maxPart || maxPart < 1) { erroEl.textContent = 'Informe o número máximo de participantes do grupo.'; return; }
         const premios = [];
         for (let i = 1; i <= 5; i++) {
             const val = document.getElementById(`premio-${i}`).value.replace(/\D/g, '');
-            if (!val || val.length !== 5) {
-                erroEl.textContent = `O ${i}º prêmio deve ter exatamente 5 dígitos.`;
-                return;
-            }
+            if (!val || val.length !== 5) { erroEl.textContent = `O ${i}º prêmio deve ter exatamente 5 dígitos.`; return; }
             premios.push(parseInt(val));
         }
-
         if (modoGrupo === 'ate1000') {
             if (maxPart > 1000) { erroEl.textContent = 'Máximo de participantes deve ser ≤ 1.000.'; return; }
             dadosApurados = ApuracaoService.apurarCentenas(premios, maxPart);
@@ -132,18 +121,14 @@
         document.getElementById('resultado').classList.add('hidden');
         document.getElementById('resultado-cota').classList.add('hidden');
         document.getElementById('input-cota-sorteio').value = '';
-        for (let i = 1; i <= 5; i++) {
-            const el = document.getElementById(`premio-${i}`);
-            if (el) el.value = '';
-        }
+        for (let i = 1; i <= 5; i++) { const el = document.getElementById(`premio-${i}`); if (el) el.value = ''; }
         dadosApurados = null;
         const first = document.getElementById('premio-1');
         if (first) first.focus();
     }
 
-    // ── Animação ──────────────────────────────────────────────
     function mostrarAnimacao(callback) {
-        const overlay = document.getElementById('anim-overlay');
+        const overlay  = document.getElementById('anim-overlay');
         const reelsRow = document.getElementById('reels-row');
         reelsRow.innerHTML = '';
         for (let r = 0; r < 4; r++) {
@@ -166,13 +151,78 @@
         drum.style.animationDuration = '0.4s';
         setTimeout(() => { drum.style.animationDuration = '0.8s'; }, 800);
         setTimeout(() => { drum.style.animationDuration = '1.4s'; }, 1400);
-        setTimeout(() => {
-            overlay.classList.remove('active');
-            setTimeout(callback, 300);
-        }, 2200);
+        setTimeout(() => { overlay.classList.remove('active'); setTimeout(callback, 300); }, 2200);
     }
 
-    // ── Render centenas ───────────────────────────────────────
+    function criarBadge(texto, classe, label, subLabel) {
+        const wrap = document.createElement('div');
+        wrap.className = 'flex flex-col items-center gap-0.5';
+        const span = document.createElement('span');
+        span.className = 'centena-badge ' + classe;
+        span.textContent = texto;
+        const lbl = document.createElement('span');
+        lbl.className = 'text-[10px] text-slate-400';
+        lbl.textContent = label;
+        const frm = document.createElement('span');
+        frm.className = 'text-[9px] text-slate-300';
+        frm.textContent = subLabel;
+        wrap.appendChild(span); wrap.appendChild(lbl); wrap.appendChild(frm);
+        return wrap;
+    }
+
+    function criarBlocoPremioCentenas(p, dados) {
+        const nomesPremios    = ['1º', '2º', '3º', '4º', '5º'];
+        const formacoesLabel  = ['3°4°5°', '2°3°4°', '1°2°3°'];
+        const bloco = document.createElement('div');
+        bloco.className = 'border border-slate-200 rounded-xl overflow-hidden';
+        const hdr = document.createElement('div');
+        hdr.className = 'bg-slate-100 px-4 py-2';
+        hdr.innerHTML = `<span class="text-xs font-bold text-slate-600">${nomesPremios[p]} prêmio</span>`;
+        const corpo = document.createElement('div');
+        corpo.className = 'px-4 py-3 flex flex-wrap gap-2 items-center';
+        for (let c = 0; c < 3; c++) {
+            const idx  = p * 3 + c;
+            const item = dados.resultado[idx];
+            const cl   = item.excluida ? 'centena-excluida' : item.isPrincipal ? 'centena-principal' : 'centena-reserva';
+            const lbl  = item.isPrincipal ? '★ Principal' : item.excluida ? 'Excluída' : `Reserva ${idx}`;
+            corpo.appendChild(criarBadge(item.centena, cl, lbl, formacoesLabel[c]));
+            if (c < 2) { const sep = document.createElement('span'); sep.className = 'text-slate-300 text-sm self-start mt-2'; sep.textContent = '·'; corpo.appendChild(sep); }
+        }
+        bloco.appendChild(hdr); bloco.appendChild(corpo);
+        return bloco;
+    }
+
+    function criarBlocoPremioMilhares(p, dados) {
+        const nomesPremios   = ['1º', '2º', '3º', '4º', '5º'];
+        const formacoesLabel = ['2°3°4°5°', '1°2°3°4°'];
+        const bloco = document.createElement('div');
+        bloco.className = 'border border-slate-200 rounded-xl overflow-hidden';
+        const hdr = document.createElement('div');
+        hdr.className = 'bg-slate-100 px-4 py-2';
+        hdr.innerHTML = `<span class="text-xs font-bold text-slate-600">${nomesPremios[p]} prêmio</span>`;
+        const corpo = document.createElement('div');
+        corpo.className = 'px-4 py-3 flex flex-wrap gap-2 items-center';
+        for (let m = 0; m < 2; m++) {
+            const idx  = p * 2 + m;
+            const item = dados.resultado[idx];
+            const cl   = item.excluida ? 'centena-excluida' : item.isPrincipal ? 'centena-principal' : 'centena-reserva';
+            let lbl    = item.isPrincipal ? '★ Principal' : item.excluida ? 'Excluído' : `Reserva ${idx}`;
+            if (item.reduzido) lbl += ` (−${dados.maxParticipantes})`;
+            const sub  = item.reduzido ? `${item.milharOriginal} − ${dados.maxParticipantes}` : formacoesLabel[m];
+            corpo.appendChild(criarBadge(item.milhar, cl, lbl, sub));
+            if (m < 1) { const sep = document.createElement('span'); sep.className = 'text-slate-300 text-sm self-start mt-2'; sep.textContent = '·'; corpo.appendChild(sep); }
+        }
+        bloco.appendChild(hdr); bloco.appendChild(corpo);
+        return bloco;
+    }
+
+    function resetValidacaoCota() {
+        document.getElementById('resultado-cota').classList.add('hidden');
+        document.getElementById('input-cota-sorteio').value = '';
+        document.getElementById('btn-validar-cota').classList.add('bg-gradient-to-br', ...tema.btn);
+        document.getElementById('input-cota-sorteio').classList.add(tema.focus);
+    }
+
     function renderCentenas(dados) {
         const res = document.getElementById('resultado');
         res.classList.remove('hidden');
@@ -182,9 +232,9 @@
         document.getElementById('badge-tipo').className = 'ml-auto text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700';
 
         const excluidas = dados.resultado.filter(r => r.excluida);
-        const infoExcl = document.getElementById('info-exclusao');
+        const infoExcl  = document.getElementById('info-exclusao');
         if (excluidas.length > 0) {
-            infoExcl.textContent = `Exclusão (§3°): centenas com cota acima de ${dados.maxParticipantes} são inválidas — ${excluidas.length} centena(s) excluída(s).`;
+            infoExcl.textContent = `Exclusão (§3°): centenas com cota acima de ${dados.maxParticipantes} são inválidas — ${excluidas.length} excluída(s).`;
             infoExcl.classList.remove('hidden');
         } else {
             infoExcl.classList.add('hidden');
@@ -193,60 +243,17 @@
 
         const tabela = document.getElementById('tabela-resultado');
         tabela.innerHTML = '';
-        const nomesPremios = ['1º', '2º', '3º', '4º', '5º'];
-        const formacoesLabel = ['3°4°5°', '2°3°4°', '1°2°3°'];
+        for (let p = 0; p < 5; p++) tabela.appendChild(criarBlocoPremioCentenas(p, dados));
 
-        for (let p = 0; p < 5; p++) {
-            const bloco = document.createElement('div');
-            bloco.className = 'border border-slate-200 rounded-xl overflow-hidden';
-            const hdr = document.createElement('div');
-            hdr.className = 'bg-slate-100 px-4 py-2';
-            hdr.innerHTML = `<span class="text-xs font-bold text-slate-600">${nomesPremios[p]} prêmio</span>`;
-            const corpo = document.createElement('div');
-            corpo.className = 'px-4 py-3 flex flex-wrap gap-2 items-center';
-
-            for (let c = 0; c < 3; c++) {
-                const idx = p * 3 + c;
-                const item = dados.resultado[idx];
-                const badge = document.createElement('div');
-                badge.className = 'flex flex-col items-center gap-0.5';
-                badge.dataset.centena = item.centena;
-
-                const span = document.createElement('span');
-                span.className = 'centena-badge ' + (item.excluida ? 'centena-excluida' : item.isPrincipal ? 'centena-principal' : 'centena-reserva');
-                span.textContent = item.centena;
-
-                const lbl = document.createElement('span');
-                lbl.className = 'text-[10px] text-slate-400';
-                lbl.textContent = item.isPrincipal ? '★ Principal' : item.excluida ? 'Excluída' : `Reserva ${idx}`;
-
-                const frm = document.createElement('span');
-                frm.className = 'text-[9px] text-slate-300';
-                frm.textContent = formacoesLabel[c];
-
-                badge.appendChild(span); badge.appendChild(lbl); badge.appendChild(frm);
-                corpo.appendChild(badge);
-                if (c < 2) { const sep = document.createElement('span'); sep.className = 'text-slate-300 text-sm self-start mt-2'; sep.textContent = '·'; corpo.appendChild(sep); }
-            }
-            bloco.appendChild(hdr); bloco.appendChild(corpo); tabela.appendChild(bloco);
-        }
-
-        // Desempate
         const d = dados.desempate;
         document.getElementById('desempate-numero').textContent = d.centena;
         document.getElementById('desempate-passos').classList.add('hidden');
-        document.getElementById('desempate-desc').textContent = '15ª centena apurada (1°2°3° do 5º prêmio) — referência para desempate de lances iguais.';
+        document.getElementById('desempate-desc').textContent = d.origemTexto + ' — referência para desempate de lances iguais.';
 
-        // Reset validação cota
-        document.getElementById('resultado-cota').classList.add('hidden');
-        document.getElementById('input-cota-sorteio').value = '';
-        document.getElementById('btn-validar-cota').classList.add('bg-gradient-to-br', ...tema.btn);
-        document.getElementById('input-cota-sorteio').classList.add(tema.focus);
-
+        resetValidacaoCota();
         res.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    // ── Render milhares ───────────────────────────────────────
     function renderMilhares(dados) {
         const res = document.getElementById('resultado');
         res.classList.remove('hidden');
@@ -259,8 +266,8 @@
         const infoAd   = document.getElementById('info-adicionais');
 
         if (dados.temExclusao) {
-            const excluidas = dados.resultado.filter(r => r.excluida).length;
-            infoExcl.textContent = `Exclusão (§3°): milhares com cota acima de ${dados.maxParticipantes} são inválidos — ${excluidas} milhar(es) excluído(s).`;
+            const n = dados.resultado.filter(r => r.excluida).length;
+            infoExcl.textContent = `Exclusão (§3°): milhares com cota acima de ${dados.maxParticipantes} são inválidos — ${n} excluído(s).`;
             infoExcl.classList.remove('hidden');
         } else { infoExcl.classList.add('hidden'); }
 
@@ -271,80 +278,38 @@
 
         const tabela = document.getElementById('tabela-resultado');
         tabela.innerHTML = '';
-        const nomesPremios = ['1º', '2º', '3º', '4º', '5º'];
-        const formacoesLabel = ['2°3°4°5°', '1°2°3°4°'];
+        for (let p = 0; p < 5; p++) tabela.appendChild(criarBlocoPremioMilhares(p, dados));
 
-        for (let p = 0; p < 5; p++) {
-            const bloco = document.createElement('div');
-            bloco.className = 'border border-slate-200 rounded-xl overflow-hidden';
-            const hdr = document.createElement('div');
-            hdr.className = 'bg-slate-100 px-4 py-2';
-            hdr.innerHTML = `<span class="text-xs font-bold text-slate-600">${nomesPremios[p]} prêmio</span>`;
-            const corpo = document.createElement('div');
-            corpo.className = 'px-4 py-3 flex flex-wrap gap-2 items-center';
-
-            for (let m = 0; m < 2; m++) {
-                const idx = p * 2 + m;
-                const item = dados.resultado[idx];
-                const badge = document.createElement('div');
-                badge.className = 'flex flex-col items-center gap-0.5';
-                badge.dataset.milhar = item.milhar;
-
-                const span = document.createElement('span');
-                span.className = 'centena-badge ' + (item.excluida ? 'centena-excluida' : item.isPrincipal ? 'centena-principal' : 'centena-reserva');
-                span.textContent = item.milhar;
-
-                const lbl = document.createElement('span');
-                lbl.className = 'text-[10px] text-slate-400';
-                let lt = item.isPrincipal ? '★ Principal' : item.excluida ? 'Excluído' : `Reserva ${idx}`;
-                if (item.reduzido) lt += ` (−${dados.maxParticipantes})`;
-                lbl.textContent = lt;
-
-                const frm = document.createElement('span');
-                frm.className = 'text-[9px] text-slate-300';
-                frm.textContent = item.reduzido ? `${item.milharOriginal} − ${dados.maxParticipantes}` : formacoesLabel[m];
-
-                badge.appendChild(span); badge.appendChild(lbl); badge.appendChild(frm);
-                corpo.appendChild(badge);
-                if (m < 1) { const sep = document.createElement('span'); sep.className = 'text-slate-300 text-sm self-start mt-2'; sep.textContent = '·'; corpo.appendChild(sep); }
-            }
-            bloco.appendChild(hdr); bloco.appendChild(corpo); tabela.appendChild(bloco);
-        }
-
-        // Desempate
         const desempate = dados.desempate;
         document.getElementById('desempate-numero').textContent = desempate.numero;
         const passosEl = document.getElementById('desempate-passos');
+
         if (desempate.tipo === 'subtracao' && desempate.passos.length > 1) {
             passosEl.classList.remove('hidden');
             passosEl.innerHTML = desempate.passos.map((p, i) => {
                 if (i === 0) return `<span class="text-slate-400">Bruto: <strong>${p}</strong></span>`;
-                const ant = desempate.passos[i - 1];
+                const ant  = desempate.passos[i - 1];
                 const last = i === desempate.passos.length - 1;
                 return `<span class="${last ? 'text-violet-700 font-bold' : 'text-slate-400'}">${ant} − ${dados.maxParticipantes} = <strong>${p}</strong>${last ? ' ✓' : ''}</span>`;
             }).join('<br>');
-            document.getElementById('desempate-desc').textContent = `1º milhar reduzido por subtração sucessiva de ${dados.maxParticipantes} até ficar dentro do limite.`;
+            document.getElementById('desempate-desc').textContent = `${desempate.origemTexto} — reduzido por subtração sucessiva de ${dados.maxParticipantes} até ficar dentro do limite.`;
         } else {
             passosEl.classList.add('hidden');
-            document.getElementById('desempate-desc').textContent = desempate.tipo === 'ultimo'
-                ? '10º milhar apurado (1°2°3°4° do 5º prêmio) — referência para desempate de lances iguais.'
-                : '1º milhar já dentro do limite — nenhuma subtração necessária.';
+            document.getElementById('desempate-desc').textContent = desempate.origemTexto + ' — referência para desempate de lances iguais.';
         }
 
-        // Reset validação cota
-        document.getElementById('resultado-cota').classList.add('hidden');
-        document.getElementById('input-cota-sorteio').value = '';
-        document.getElementById('btn-validar-cota').classList.add('bg-gradient-to-br', ...tema.btn);
-        document.getElementById('input-cota-sorteio').classList.add(tema.focus);
-
+        resetValidacaoCota();
         res.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    // ── Validação da cota contemplada por sorteio ─────────────
     function validarCota() {
         if (!dadosApurados) return;
         const cotaInput = parseInt(document.getElementById('input-cota-sorteio').value);
         const resultEl  = document.getElementById('resultado-cota');
+
+        document.querySelectorAll('.badge-contemplada, .badge-found').forEach(el => {
+            el.classList.remove('badge-contemplada', 'badge-found');
+        });
 
         if (!cotaInput || cotaInput < 1) {
             resultEl.className = 'rounded-xl p-4 space-y-1 fade-in bg-amber-50 border border-amber-300';
@@ -353,52 +318,38 @@
             return;
         }
 
-        const max = dadosApurados.maxParticipantes;
+        const max  = dadosApurados.maxParticipantes;
+        const tipo = dadosApurados.tipo;
 
-        // Anima os badges da tabela
         document.querySelectorAll('#tabela-resultado .centena-badge').forEach(el => {
             el.classList.add('scanning');
-            setTimeout(() => el.classList.remove('scanning'), 900);
+            setTimeout(() => el.classList.remove('scanning'), 2000);
         });
 
         setTimeout(() => {
+            const cotaStr = tipo === 'centenas'
+                ? (cotaInput === 1000 ? '000' : String(cotaInput % 1000).padStart(3, '0'))
+                : (cotaInput === 10000 ? '0000' : String(cotaInput).padStart(4, '0'));
+
             let encontrado = null;
             let ordemLabel = '';
-
-            if (dadosApurados.tipo === 'centenas') {
-                // Converte cota para centena (cota 1000 → centena "000")
-                const centenaCota = cotaInput === 1000 ? '000' : String(cotaInput % 1000).padStart(3, '0');
-                dadosApurados.resultado.forEach((item, i) => {
-                    if (item.centena === centenaCota && !encontrado) {
-                        encontrado = item;
-                        ordemLabel = item.isPrincipal ? 'centena principal' : `${i + 1}ª centena (reserva)`;
-                    }
-                });
-            } else {
-                // Para milhares: compara diretamente
-                const milharCota = cotaInput === 10000 ? '0000' : String(cotaInput).padStart(4, '0');
-                dadosApurados.resultado.forEach((item, i) => {
-                    if (item.milhar === milharCota && !encontrado) {
-                        encontrado = item;
-                        ordemLabel = item.isPrincipal ? 'milhar principal' : `${i + 1}º milhar (reserva)`;
-                    }
-                });
-                // Se não encontrou direto, verifica se a cota corresponde a algum milhar original antes da subtração
-                if (!encontrado) {
-                    dadosApurados.resultado.forEach((item, i) => {
-                        if (item.milharOriginal && item.milharOriginal === String(cotaInput).padStart(4,'0') && !encontrado) {
-                            encontrado = item;
-                            ordemLabel = `${i + 1}º milhar (valor original ${item.milharOriginal}, reduzido para ${item.milhar})`;
-                        }
-                    });
+            dadosApurados.resultado.forEach((item, i) => {
+                const val = tipo === 'centenas' ? item.centena : item.milhar;
+                if (val === cotaStr && !encontrado) {
+                    encontrado = item;
+                    ordemLabel = item.isPrincipal
+                        ? (tipo === 'centenas' ? 'centena principal' : 'milhar principal')
+                        : `${i + 1}ª ${tipo === 'centenas' ? 'centena' : 'milhar'} (reserva)`;
                 }
-            }
+            });
 
-            // Destaca o badge encontrado
             if (encontrado) {
                 document.querySelectorAll('#tabela-resultado .centena-badge').forEach(el => {
-                    const val = dadosApurados.tipo === 'centenas' ? encontrado.centena : encontrado.milhar;
-                    if (el.textContent === val) el.classList.add('badge-found');
+                    const val = tipo === 'centenas' ? encontrado.centena : encontrado.milhar;
+                    if (el.textContent.trim() === val) {
+                        el.classList.add('badge-contemplada');
+                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
                 });
             }
 
@@ -406,35 +357,63 @@
                 resultEl.className = 'rounded-xl p-4 space-y-2 fade-in bg-red-50 border border-red-300';
                 resultEl.innerHTML = `
                     <p class="text-sm font-bold text-red-700">❌ Cota ${cotaInput} não habilitada</p>
-                    <p class="text-xs text-red-600">A cota ${cotaInput} excede o número máximo de participantes do grupo (${max}). Não estava apta para contemplação por sorteio.</p>`;
+                    <p class="text-xs text-red-600">A cota ${cotaInput} excede o número máximo de participantes (${max}).</p>`;
+
             } else if (encontrado && !encontrado.excluida) {
                 resultEl.className = 'rounded-xl p-4 space-y-2 fade-in bg-green-50 border border-green-400';
                 resultEl.innerHTML = `
-                    <p class="text-sm font-bold text-green-700">✅ Cota ${cotaInput} estava apta para contemplação por sorteio</p>
-                    <p class="text-xs text-green-600">Correspondeu à <strong>${ordemLabel}</strong> apurada na extração. A cota estava dentro do limite do grupo e habilitada para o sorteio.</p>`;
+                    <p class="text-sm font-bold text-green-700">✅ Cota <span class="bg-yellow-200 text-yellow-900 px-1.5 py-0.5 rounded font-mono">${cotaInput}</span> saiu diretamente na extração</p>
+                    <p class="text-xs text-green-600">Correspondeu à <strong>${ordemLabel}</strong>. A cota estava dentro do limite e habilitada para o sorteio.</p>`;
+
             } else if (encontrado && encontrado.excluida) {
                 resultEl.className = 'rounded-xl p-4 space-y-2 fade-in bg-amber-50 border border-amber-400';
                 resultEl.innerHTML = `
-                    <p class="text-sm font-bold text-amber-700">⚠️ Cota ${cotaInput} encontrada, mas excluída</p>
-                    <p class="text-xs text-amber-600">Correspondeu à <strong>${ordemLabel}</strong>, porém este número foi excluído por ultrapassar o máximo de participantes (${max}).</p>`;
+                    <p class="text-sm font-bold text-amber-700">⚠️ Cota <span class="bg-yellow-200 text-yellow-900 px-1.5 py-0.5 rounded font-mono">${cotaInput}</span> excluída</p>
+                    <p class="text-xs text-amber-600">Correspondeu à <strong>${ordemLabel}</strong>, mas foi excluída por ultrapassar o máximo (${max}).</p>`;
+
             } else {
-                resultEl.className = 'rounded-xl p-4 space-y-2 fade-in bg-slate-50 border border-slate-300';
+                const numDesempate = parseInt(dadosApurados.desempate.numero || dadosApurados.desempate.centena);
+                const pad = n => String(n).padStart(tipo === 'centenas' ? 3 : 4, '0');
+                const passos = [];
+                let offset = 1;
+                let achou  = false;
+                while (offset <= max && !achou) {
+                    const acima  = numDesempate + offset;
+                    const abaixo = numDesempate - offset;
+                    if (acima <= max)  { passos.push({ valor: acima,  dir: `+${offset}` }); if (acima  === cotaInput) { achou = true; break; } }
+                    if (abaixo >= 1)   { passos.push({ valor: abaixo, dir: `-${offset}` }); if (abaixo === cotaInput) { achou = true; break; } }
+                    offset++;
+                }
+                const MAX_EX = 10;
+                const exibir = passos.slice(0, MAX_EX);
+                let passosHtml = `<div class="font-mono text-xs space-y-1 mt-2 border border-slate-200 rounded-lg p-3 bg-white">`;
+                passosHtml += `<p class="text-slate-500 mb-2">Busca a partir do desempate <strong class="text-slate-700">${pad(numDesempate)}</strong>:</p>`;
+                exibir.forEach(p => {
+                    const ok = p.valor === cotaInput;
+                    passosHtml += `<div class="flex items-center gap-2 ${ok ? 'font-bold text-green-700' : 'text-slate-500'}">
+                        <span class="w-12 text-right">${p.dir}</span><span>→</span>
+                        <span class="${ok ? 'bg-yellow-200 px-1.5 rounded text-yellow-900' : ''}">${pad(p.valor)}</span>
+                        ${ok ? '<span class="text-green-600 text-xs">✓ Cota contemplada</span>' : ''}
+                    </div>`;
+                });
+                if (passos.length > MAX_EX) passosHtml += `<p class="text-slate-400 text-xs mt-1">... e mais ${passos.length - MAX_EX} tentativas.</p>`;
+                passosHtml += `</div>`;
+
+                resultEl.className = 'rounded-xl p-4 space-y-2 fade-in bg-blue-50 border border-blue-400';
                 resultEl.innerHTML = `
-                    <p class="text-sm font-bold text-slate-700">ℹ️ Cota ${cotaInput} não correspondeu a nenhum número apurado</p>
-                    <p class="text-xs text-slate-500">Nenhuma das ${dadosApurados.tipo === 'centenas' ? '15 centenas' : '10 milhares'} apuradas nesta extração corresponde à cota ${cotaInput}. A contemplação por sorteio seguirá a ordem de centenas/milhares reservas.</p>`;
+                    <p class="text-sm font-bold text-blue-700">🔍 Cota <span class="bg-yellow-200 text-yellow-900 px-1.5 py-0.5 rounded font-mono">${cotaInput}</span> localizada por busca alternada</p>
+                    <p class="text-xs text-blue-600">Não saiu diretamente na extração. Localizada após <strong>${passos.length}</strong> tentativa(s) a partir do desempate <strong>${pad(numDesempate)}</strong>.</p>
+                    ${passosHtml}`;
             }
 
             resultEl.classList.remove('hidden');
             resultEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }, 1000);
+        }, 2000);
     }
 
     document.getElementById('btn-validar-cota').addEventListener('click', validarCota);
-    document.getElementById('input-cota-sorteio').addEventListener('keydown', e => {
-        if (e.key === 'Enter') validarCota();
-    });
+    document.getElementById('input-cota-sorteio').addEventListener('keydown', e => { if (e.key === 'Enter') validarCota(); });
 
-    // ── Modal instruções ──────────────────────────────────────
     const modal     = document.getElementById('modal-instrucoes');
     const abrirBtn  = document.getElementById('abrir-instrucoes-btn');
     const fecharBtn = document.getElementById('fechar-instrucoes-btn');
@@ -453,9 +432,7 @@
     };
     fecharBtn.addEventListener('click', fecharModal);
     modal.addEventListener('click', e => { if (e.target === modal) fecharModal(); });
-    document.addEventListener('keydown', e => {
-        if (e.key === 'Escape' && modal.classList.contains('active')) fecharModal();
-    });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && modal.classList.contains('active')) fecharModal(); });
 
     document.getElementById('btn-apurar').classList.add('bg-gradient-to-br', ...tema.btn);
 

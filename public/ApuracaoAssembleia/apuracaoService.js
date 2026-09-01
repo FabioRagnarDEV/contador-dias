@@ -5,13 +5,9 @@ const ApuracaoService = {
     },
 
     digitosPremio(premio) {
-        const s = this.pad(premio, 5);
-        return s.split('').map(Number);
+        return this.pad(premio, 5).split('').map(Number);
     },
 
-    // ─── GRUPOS ATÉ 1.000 — Centenas ────────────────────────
-    // 3 centenas por prêmio × 5 prêmios = 15 centenas
-    // Por prêmio: 3°4°5° / 2°3°4° / 1°2°3°
     gerarCentenas(premios) {
         const centenas = [];
         for (const premio of premios) {
@@ -25,31 +21,34 @@ const ApuracaoService = {
 
     apurarCentenas(premios, maxParticipantes) {
         const centenas = this.gerarCentenas(premios);
-        const cotaDeCentena = c => (c === 0 ? 1000 : c);
+        const cotaDe   = c => (c === 0 ? 1000 : c);
+        const formacoes = ['3°4°5°', '2°3°4°', '1°2°3°'];
+        const premioNomes = ['1º', '2º', '3º', '4º', '5º'];
 
         const resultado = centenas.map((c, i) => {
-            const cota = cotaDeCentena(c);
-            const excluida = cota > maxParticipantes;
+            const cota    = cotaDe(c);
+            const premio  = Math.floor(i / 3) + 1;
             return {
                 ordem: i + 1,
                 centena: this.pad(c, 3),
                 cota,
-                excluida,
-                isPrincipal: i === 0
+                excluida: cota > maxParticipantes,
+                isPrincipal: i === 0,
+                formacao: formacoes[i % 3],
+                nomePremio: premioNomes[premio - 1]
             };
         });
 
-        const principal = resultado[0];
-
-        // Desempate: última centena apurada (15ª = 1°2°3° do 5º prêmio)
-        const desempate = resultado.find(item => item.excluida === false) || null;
+        const principal    = resultado[0];
+        const desempateItem = resultado.find(item => !item.excluida) || resultado[0];
+        const desempate    = {
+            centena: desempateItem.centena,
+            origemTexto: `${desempateItem.ordem}ª centena extraída do ${desempateItem.nomePremio} prêmio (formação ${desempateItem.formacao})`
+        };
 
         return { resultado, principal, desempate, tipo: 'centenas', maxParticipantes };
     },
 
-    // ─── GRUPOS ACIMA DE 1.000 — Milhares ───────────────────
-    // 2 milhares por prêmio × 5 prêmios = 10 milhares
-    // Por prêmio: 2°3°4°5° / 1°2°3°4°
     gerarMilhares(premios) {
         const milhares = [];
         for (const premio of premios) {
@@ -60,53 +59,26 @@ const ApuracaoService = {
         return milhares;
     },
 
-    numerosAdicionais(cota, maxParticipantes) {
-        const adicionais = [];
-        const vezes = Math.floor(10000 / maxParticipantes) - 1;
-        for (let i = 1; i <= vezes; i++) {
-            let adicional = (cota + maxParticipantes * i) % 10000;
-            adicionais.push(adicional === 0 ? 10000 : adicional);
-        }
-        return adicionais;
-    },
-
-    // Desempate de lance para grupos até 5.000 participantes:
-    // Pega o 1º milhar (2°3°4°5° do 1º prêmio) e subtrai maxParticipantes
-    // sucessivamente até que o resultado seja <= maxParticipantes.
-    // Equivalente a: milhar % maxParticipantes, onde 0 representa maxParticipantes.
-    calcularDesempateMilhar(milharBruto, maxParticipantes) {
-        let valor = milharBruto === 0 ? 10000 : milharBruto;
-        const passos = [];
-        passos.push(valor);
-        while (valor > maxParticipantes) {
-            valor = valor - maxParticipantes;
-            passos.push(valor);
-        }
-        return { valor, passos };
-    },
-
     apurarMilhares(premios, maxParticipantes) {
-        const milhares = this.gerarMilhares(premios);
-        const cotaDeMilhar = m => (m === 0 ? 10000 : m);
-
+        const milhares    = this.gerarMilhares(premios);
+        const cotaDe      = m => (m === 0 ? 10000 : m);
         const temExclusao = maxParticipantes > 5000;
         const temAdicionais = maxParticipantes >= 1001 && maxParticipantes <= 5000;
-        const vezes = temAdicionais ? Math.floor(10000 / maxParticipantes) - 1 : 0;
+        const vezes       = temAdicionais ? Math.floor(10000 / maxParticipantes) - 1 : 0;
+        const formacoes   = ['2°3°4°5°', '1°2°3°4°'];
+        const premioNomes = ['1º', '2º', '3º', '4º', '5º'];
 
         const resultado = milhares.map((m, i) => {
-            const cotaBruta = cotaDeMilhar(m);
+            const cotaBruta = cotaDe(m);
             let cota = cotaBruta;
             let reduzido = false;
 
-            // Grupos até 5.000: subtrai maxParticipantes até ficar dentro do limite
             if (temAdicionais && cotaBruta > maxParticipantes) {
-                cota = cotaBruta % maxParticipantes;
-                if (cota === 0) cota = maxParticipantes;
+                cota = cotaBruta % maxParticipantes || maxParticipantes;
                 reduzido = true;
             }
 
-            const excluida = temExclusao && cotaBruta > maxParticipantes;
-
+            const premio = Math.floor(i / 2) + 1;
             return {
                 ordem: i + 1,
                 milharOriginal: this.pad(m, 4),
@@ -114,40 +86,41 @@ const ApuracaoService = {
                 cota,
                 cotaBruta,
                 reduzido,
-                excluida,
-                isPrincipal: i === 0
+                excluida: temExclusao && cotaBruta > maxParticipantes,
+                isPrincipal: i === 0,
+                formacao: formacoes[i % 2],
+                nomePremio: premioNomes[premio - 1]
             };
         });
 
         const principal = resultado[0];
-
-        // Desempate: 1º milhar já corrigido (regra subtração para <= 5000)
-        // Grupos > 5000: último milhar apurado
         let desempate;
+
         if (maxParticipantes <= 5000) {
             const item = resultado[0];
             const passos = [];
-            let v = cotaDeMilhar(milhares[0]);
+            let v = cotaDe(milhares[0]);
             passos.push(this.pad(v, 4));
             while (v > maxParticipantes) {
-                v = v - maxParticipantes;
+                v -= maxParticipantes;
                 passos.push(this.pad(v, 4));
             }
-            desempate = { numero: this.pad(v, 4), passos, tipo: 'subtracao' };
+            desempate = {
+                numero: this.pad(v, 4),
+                passos,
+                tipo: 'subtracao',
+                origemTexto: `${item.ordem}º milhar extraído do ${item.nomePremio} prêmio (formação ${item.formacao})`
+            };
         } else {
             const ultimo = resultado[resultado.length - 1];
-            desempate = { numero: ultimo.milhar, passos: [ultimo.milhar], tipo: 'ultimo' };
+            desempate = {
+                numero: ultimo.milhar,
+                passos: [ultimo.milhar],
+                tipo: 'ultimo',
+                origemTexto: `${ultimo.ordem}º milhar extraído do ${ultimo.nomePremio} prêmio (formação ${ultimo.formacao})`
+            };
         }
 
-        return {
-            resultado,
-            principal,
-            desempate,
-            tipo: 'milhares',
-            maxParticipantes,
-            temAdicionais,
-            vezes,
-            temExclusao
-        };
+        return { resultado, principal, desempate, tipo: 'milhares', maxParticipantes, temAdicionais, vezes, temExclusao };
     }
 };
