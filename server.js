@@ -46,6 +46,19 @@ app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 app.use(express.json({ limit: '10kb' }));
 app.use(hpp());
 
+const pingLimiter = rateLimit({
+    windowMs: 60 * 1000, 
+    max: 60, 
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: 'Too many requests'
+});
+
+app.get('/ping', pingLimiter, (req, res) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.status(200).send('pong');
+});
+
 app.use(session({
     store: new pgSession({ pool: pgPool, tableName: 'session' }),
     secret: process.env.SESSION_SECRET,
@@ -140,10 +153,6 @@ function verificarCsrf(req, res, next) {
     }
     next();
 }
-
-app.get('/ping', (req, res) => {
-    res.status(200).send('pong');
-});
 
 app.get('/login', (req, res) => {
     if (req.session.logado) return res.redirect('/');
