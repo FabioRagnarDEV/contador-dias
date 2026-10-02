@@ -1,92 +1,184 @@
 <div align="center">
 
-# 📅 Painel Interativo de Prazos
+<img src="public/assets/calendario.png" alt="Ícone Painel de Prazos" width="80" />
 
-**Aplicação web corporativa para automação de cálculos de prazos em processos de consórcio.**  
-Desenvolvida com foco em segurança, privacidade e experiência do usuário.
+# Painel Interativo de Prazos
+
+**Aplicação web corporativa para automação de cálculos de prazos em processos de consórcio.**
 
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org)
 [![Express](https://img.shields.io/badge/Express-5.x-000000?style=flat-square&logo=express&logoColor=white)](https://expressjs.com)
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?style=flat-square&logo=supabase&logoColor=white)](https://supabase.com)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
-[![License](https://img.shields.io/badge/License-ISC-blue?style=flat-square)](LICENSE)
 [![Deploy](https://img.shields.io/badge/Deploy-Render-46E3B7?style=flat-square&logo=render&logoColor=white)](https://render.com)
+[![License](https://img.shields.io/badge/License-ISC-blue?style=flat-square)](LICENSE)
 
 </div>
 
 ---
 
-## Sobre o projeto
+## Visão Geral
 
-O **Painel Interativo de Prazos** centraliza calculadoras especializadas para equipes que lidam diariamente com prazos legais e operacionais de consórcio. O objetivo é eliminar cálculos manuais, reduzir erros e dar agilidade ao atendimento.
+O **Painel Interativo de Prazos** centraliza em um único lugar as calculadoras e ferramentas operacionais que equipes de consórcio utilizam no dia a dia. O objetivo é eliminar cálculos manuais, reduzir erros e dar agilidade ao atendimento.
 
-A aplicação é de **acesso restrito** — todo o conteúdo é protegido por autenticação em duas etapas (senha + TOTP), garantindo que apenas colaboradores autorizados utilizem as ferramentas.
+O acesso é **totalmente restrito** — toda a aplicação é protegida por autenticação em dois fatores (senha + TOTP), garantindo que apenas colaboradores autorizados utilizem as ferramentas.
 
 ---
 
 ## Ferramentas disponíveis
 
 ### 💰 Crédito em Espécie
-Calcula o prazo para recebimento do crédito após contemplação, com duas lógicas distintas:
-- **Grupo ativo:** carência de 180 dias a partir da contemplação (Cláusula 32)
-- **Grupo encerrado:** liberação imediata após a última assembleia
-- **Módulo de compensação:** calcula o valor líquido após quitação do saldo devedor
+> `public/CalculadoraCreditoEspecie/`
 
-### ↩️ Direito de Arrependimento
-Verifica se o cliente está dentro do prazo legal de desistência (Art. 49 do CDC / Cláusula 44):
-- Contagem de 7 dias corridos a partir da alocação da cota
-- Alerta automático quando o prazo vence em fim de semana
+Verifica se uma cota está apta para receber o crédito em espécie e calcula o prazo restante, com base na **Cláusula 32** do regulamento.
 
-### 📋 Pós-Vendas
-Calcula prazos de atendimento com exclusão de fins de semana e **feriados nacionais em tempo real** (BrasilAPI):
-
-| Modalidade | Prazo |
+| Cenário | Regra |
 |---|---|
-| PVD (Pós-Vendas Digital) | 48 horas úteis |
-| Caso Pós-Vendas | 50 dias úteis |
-| Divergência na Venda | 90 dias corridos |
+| Grupo ativo | Carência de **180 dias** a partir da contemplação |
+| Grupo encerrado | Liberação **imediata** após a última assembleia |
 
-### ⚠️ Análise de Atraso
-Ferramenta completa para gestão de inadimplência:
-- Avaliação do risco da cota (cobrança simples, cancelamento, busca e apreensão)
-- Simulador financeiro de restituição (Lei 11.795/08) com multa escalonada
-- Gerador de scripts de atendimento para WhatsApp e e-mail
-- Suporte a múltiplas unidades de negócio (Embracon/Renault, CNVW/Stara/Unicred/Cresol)
-
-### 📊 Percentual de Lance
-Calcula a representatividade de cada modalidade de lance em uma assembleia usando **D3.js**:
-- Percentual de Lance Livre, Lance Fixo 50%, Lance Fixo 25% e Sorteio
-- Visualização com gráfico donut interativo (hover com detalhes por fatia)
-- Barras de progresso animadas por modalidade
-- Alerta quando a soma das modalidades difere do total informado
-- Informações legais sobre oferta e contemplação por lance acessíveis direto no modal de ajuda, com referência às Cláusulas 19, 19.1, 19.1.1, 19.1.2, 20 e 21 e link para o regulamento completo
+**Recursos:**
+- Módulo de compensação: calcula o valor líquido após quitação do saldo devedor com o próprio crédito (Cláusula 32)
+- Gerador de **script de e-mail** para o cliente quando o prazo ainda não foi cumprido, informando os dias restantes e a data de liberação
+- Exibição automática das cláusulas e base legal ao final do cálculo
 
 ---
 
-## Segurança e privacidade
+### ↩️ Direito de Arrependimento
+> `public/LeiArrependimento/`
 
-A aplicação foi projetada com segurança em camadas e em conformidade com princípios de privacidade (minimização de dados):
+Calcula o prazo legal de **7 dias corridos** para desistência do contrato (Art. 49 do CDC / Cláusula 44), contados a partir da data de alocação da cota.
+
+**Recursos:**
+- O dia da alocação já conta como Dia 1
+- Alerta automático quando o 7º dia cai em **fim de semana**, orientando consulta ao líder
+- Botão **"Entenda a contagem"**: exibe a linha do tempo dos 7 dias com dia da semana por extenso
+- Exibição do texto completo do Art. 49 do CDC e da Cláusula 44 após o cálculo, com links para os documentos oficiais
+
+---
+
+### 📋 Pós-Vendas
+> `public/CalculadoraPosVendas/`
+
+Verifica o status de prazo para três modalidades operacionais, com consulta de **feriados nacionais em tempo real** via BrasilAPI.
+
+| Modalidade | Prazo | Tipo |
+|---|---|---|
+| Pós Vendas Digital (PVD) | 48 horas | Dias úteis |
+| Caso Pós Vendas (CPV) | 50 dias | Dias úteis |
+| Divergência na Venda (DV) | 90 dias | Dias corridos |
+
+**Recursos:**
+- Feriados consultados dinamicamente na **BrasilAPI** e cacheados por ano-sessão
+- Orientação contextual de ação para cada resultado (dentro/fora do prazo)
+
+---
+
+### ⚠️ Análise de Atraso
+> `public/CalculadoraAtraso/`
+
+Ferramenta completa para gestão de inadimplência, com avaliação de risco e simulador financeiro de restituição.
+
+**Cálculo de risco:**
+- Avalia o status da cota: cobrança simples, risco de cancelamento ou busca e apreensão
+- Regras de cancelamento diferenciadas por data de inauguração do grupo:
+  - Grupos até 30/06/2024 → cancelamento com **2 parcelas** em atraso
+  - Grupos a partir de 01/07/2024 → cancelamento com **3 parcelas** em atraso
+- Suporte a múltiplas unidades de negócio (Embracon/Renault, CNVW, Stara/Unicred/Cresol)
+
+**Simulador de Devolução (Cláusula 39 + Lei 11.795/08):**
+
+| Faixa do fundo comum pago | Multa penal (Cl. 42) | Multa ao grupo (Cl. 41.1) |
+|---|---|---|
+| Até 20% | 20% | 10% |
+| 20,1% a 40% | 15% | 10% |
+| 40,1% a 50% | 10% | 10% |
+| Acima de 50% | Isento | 10% |
+
+**Recursos:**
+- Cálculo de diferença de descontemplação (Parágrafo 15) para cotas com crédito pendente
+- Memória de cálculo detalhada com cada etapa da dedução
+- Gerador de **scripts de atendimento** para WhatsApp e e-mail, copiados direto para a área de transferência
+- Os scripts gerados usam `[GRUPO E COTA]` como placeholder — nenhum dado sensível é inserido automaticamente
+
+---
+
+### 📊 Percentual de Lance
+> `public/CalculadoraLance/`
+
+Calcula e visualiza a representatividade de cada modalidade de lance em uma assembleia.
+
+**Modalidades suportadas:** Lance Livre · Lance Fixo 50% · Lance Fixo 25% · Sorteio
+
+**Recursos:**
+- **Gráfico de rosca (donut) interativo** com D3.js v7 — hover nos arcos expande o segmento e exibe o percentual no centro
+- Barras de progresso animadas por modalidade
+- Alerta quando a soma das modalidades difere do total informado
+- Modal com base legal: Cláusulas 19, 19.1, 19.1.1, 19.1.2, 20 e 21, com link para o regulamento
+
+---
+
+### 🏛️ Apuração de Assembleia
+> `public/ApuracaoAssembleia/`
+
+Apura os números de sorteio da Assembleia Geral Ordinária a partir do resultado da **Loteria Federal**, conforme a Cláusula 18 e Resolução BCB 285/23.
+
+**Dois modos de operação:**
+
+| Modo | Grupos | Extração |
+|---|---|---|
+| Centenas | Até 1.000 cotas | 3 centenas por prêmio × 5 prêmios = 15 centenas |
+| Milhares | 1.001 a 10.000 cotas | 2 milhares por prêmio × 5 prêmios = 10 milhares |
+
+**Recursos:**
+- Exclusão automática de centenas/milhares acima do máximo de participantes
+- Cálculo de números adicionais por subtração sucessiva para grupos entre 1.001 e 5.000
+- Cálculo do **número de desempate de lance**
+- Validação de cota contemplada: busca alternada (`+1`, `-1`, `+2`, `-2`...) com exibição de cada passo
+- Destaque animado na badge correspondente ao encontrar a cota
+- Animação visual durante o processamento (dado 3D girando + rolos de dígitos)
+
+---
+
+### 🔍 Validade do Laudo de Vistoria
+> `public/prazoLaudoVistoria/`
+
+Verifica se um laudo de vistoria ainda está dentro do prazo de validade de **45 dias corridos** a partir da data de aprovação.
+
+**Recursos:**
+- Barra de progresso visual mostrando quantos dos 45 dias já decorreram
+- Grid com as três datas: aprovação · dias restantes/vencidos · vencimento
+- Alerta de urgência automático quando restam **7 dias ou menos**
+- Saudação personalizada por horário (Bom dia / Boa tarde / Boa noite) com nome do usuário
+- Resultado nomeia o usuário diretamente: *"João, laudo dentro do prazo!"*
+- Mensagens bem-humoradas aleatórias nos casos de laudo expirado, sorteadas a cada verificação
+
+---
+
+## Segurança
+
+A aplicação foi projetada com segurança em camadas:
 
 **Autenticação**
-- Senha com hash `bcrypt` (salt rounds 10)
-- 2FA obrigatório via TOTP (Google Authenticator) com `window: 1`
-- CAPTCHA invisível via Cloudflare Turnstile na etapa de credenciais
-- Rate limiting: bloqueio após 5 tentativas em 20 minutos
-- Sessões persistidas em PostgreSQL (resistentes a restart)
+- Senha armazenada com hash `bcrypt` (salt 10)
+- **2FA obrigatório** via TOTP (compatível com Google Authenticator / Authy), com janela de tolerância de 1 período
+- CAPTCHA via **Cloudflare Turnstile** na etapa de credenciais
+- Rate limiting: bloqueio automático após **5 tentativas falhas** em 20 minutos
+- Sessões persistidas em **PostgreSQL** (resistentes a reinicializações do servidor)
 
 **Proteção de rotas e dados**
-- CSRF protection via double-submit token (sem dependência externa, usando `crypto` nativo)
+- Proteção CSRF via double-submit token (usando `crypto` nativo do Node.js)
 - `requireAuth` em todas as rotas e arquivos estáticos
-- Validação de inputs com Joi em todos os endpoints
-- Headers de segurança via Helmet (CSP, HSTS, X-Frame-Options)
-- Proteção contra HTTP Parameter Pollution (hpp)
+- Validação de todos os inputs com **Joi**
+- Headers de segurança via **Helmet** (CSP, HSTS, X-Frame-Options)
+- Proteção contra HTTP Parameter Pollution (**hpp**)
 - `trust proxy` ativado apenas em produção
 
 **Privacidade**
 - Nenhum IP gravado em banco de dados
-- Nenhuma geolocalização de usuários
-- Nenhum rastreamento de navegação ou tempo de permanência
-- Logs contêm apenas eventos de autenticação (login, 2FA, erros)
+- Nenhuma geolocalização ou rastreamento de navegação
+- Logs contêm apenas eventos de autenticação (login, 2FA, erros de servidor)
+- Scripts de atendimento gerados não incluem dados sensíveis de cotas ou clientes
 
 ---
 
@@ -103,9 +195,9 @@ A aplicação foi projetada com segurança em camadas e em conformidade com prin
 | Autenticação | bcrypt · speakeasy · qrcode |
 | Segurança | helmet · hpp · joi · express-rate-limit |
 | CAPTCHA | Cloudflare Turnstile |
-| Front-end | HTML5 · Vanilla JS (ES6+) · Tailwind CSS |
+| Front-end | HTML5 · Vanilla JS (ES6+) · Tailwind CSS (CDN) |
 | Visualização | D3.js v7 |
-| APIs externas | BrasilAPI (feriados) · IBGE (gênero) |
+| APIs externas | BrasilAPI (feriados nacionais) · IBGE (inferência de gênero) |
 | Infraestrutura | Render · Cloudflare |
 
 </div>
@@ -117,24 +209,59 @@ A aplicação foi projetada com segurança em camadas e em conformidade com prin
 ```
 painel-prazos/
 │
-├── server.js                        # Servidor principal — rotas, auth, middlewares
-├── login.html                       # Página de login (2FA + Turnstile + CSRF)
-├── criar-usuario.js                 # Script utilitário de provisionamento
+├── server.js                          # Servidor principal — rotas, auth, middlewares
+├── login.html                         # Página de login (2FA + Turnstile + CSRF)
+├── criar-usuario.js                   # Script utilitário de provisionamento
 ├── package.json
-├── .env                             # Variáveis de ambiente (não versionado)
+├── .env                               # Variáveis de ambiente (não versionado)
 │
-├── logs/                            # Logs de autenticação (gerados automaticamente)
-│   └── auth-YYYY-MM-DD.log
+├── logs/                              # Gerado automaticamente em runtime
+│   ├── auth-YYYY-MM-DD.log            # Eventos de autenticação
+│   ├── app-YYYY-MM-DD.log
+│   ├── alerts-YYYY-MM-DD.log
+│   └── security-YYYY-MM-DD.log
 │
-└── public/                          # Front-end — protegido por requireAuth
-    ├── index.html                   # Painel principal + admin modal
-    ├── assets/                      # Imagens e áudio
+├── documentacao/
+│   └── documentacao-tecnica.md        # Documentação técnica detalhada
+│
+└── public/                            # Front-end — protegido por requireAuth
+    ├── index.html                     # Painel principal + admin modal
+    ├── assets/                        # Imagens e áudio
     ├── favicon/
+    │
     ├── CalculadoraCreditoEspecie/
+    │   ├── creditoEmEspecie.html
+    │   ├── creditoService.js          # Lógica de negócio
+    │   └── script.js                  # Manipulação de DOM e eventos
+    │
+    ├── LeiArrependimento/
+    │   ├── leiArrependimento.html
+    │   ├── leiArrependimentoService.js
+    │   └── leiArrependimento.js
+    │
     ├── CalculadoraPosVendas/
+    │   ├── posVendas.html
+    │   ├── posVendasService.js        # Inclui integração BrasilAPI
+    │   └── script.js
+    │
     ├── CalculadoraAtraso/
-    ├── CalculadoraLance/            # Percentual de Lance (D3.js)
-    └── LeiArrependimento/
+    │   ├── analiseAtraso.html
+    │   ├── consorcioService.js        # Regras de cancelamento e devolução
+    │   ├── script.js                  # Inclui gerador de scripts de atendimento
+    │   └── style.css
+    │
+    ├── CalculadoraLance/
+    │   └── calculadoraLance.html      # D3.js inline (gráfico donut)
+    │
+    ├── ApuracaoAssembleia/
+    │   ├── apuracao.html
+    │   ├── apuracaoService.js         # Lógica Loteria Federal (centenas/milhares)
+    │   └── apuracaoScript.js
+    │
+    └── prazoLaudoVistoria/
+        ├── laudoVistoria.html
+        ├── laudoService.js            # Cálculo dos 45 dias + mensagens
+        └── script.js                  # UI, tema, saudação, renderização
 ```
 
 ---
@@ -150,36 +277,67 @@ cd contador-dias
 npm install
 
 # 3. Configure o ambiente
-cp .env.example .env
-# Edite o .env com suas credenciais
+# Crie um arquivo .env com as variáveis necessárias (veja a seção abaixo)
 
 # 4. Inicie o servidor
 npm start
 ```
 
+### Variáveis de ambiente necessárias
 
+```
+NODE_ENV=development
+PORT=3000
+SESSION_SECRET=
+SUPABASE_URL=
+SUPABASE_KEY=
+DATABASE_URL=
+TURNSTILE_SECRET=
+```
+
+> **Nunca versione o arquivo `.env`.** Ele já está no `.gitignore`.
+
+---
 
 ## Deploy
 
 O projeto está configurado para deploy no **Render**:
-
-1. Conecte o repositório no painel do Render
-2. Configure as variáveis de ambiente (nunca use `.env` em produção)
-3. Defina `NODE_ENV=production`
 
 ```
 Build Command:  npm install
 Start Command:  npm start
 ```
 
+Configure todas as variáveis de ambiente no painel do Render. Defina `NODE_ENV=production` para ativar cookies seguros e `trust proxy`.
+
 ---
 
-## Painel administrativo
+## Painel Administrativo
 
-Usuários com role `admin` têm acesso ao painel de gestão (ícone no canto inferior esquerdo):
+Usuários com role `admin` têm acesso ao painel de gestão diretamente no menu principal:
 
-- **Criar usuário** — provisiona acesso e gera QR Code para configuração do 2FA
-- **Resetar credenciais** — invalida senha e segredo TOTP atual, gerando novo QR Code
+| Ação | Descrição |
+|---|---|
+| Criar usuário | Provisiona acesso e gera QR Code para configuração do 2FA |
+| Resetar credenciais | Invalida senha e segredo TOTP atual, gerando novo QR Code |
+
+---
+
+## Personalização visual
+
+Cada usuário pode escolher entre **9 paletas de cor** para o tema da interface. A preferência é salva no `localStorage` e aplicada em todas as ferramentas:
+
+| Paleta | Cores |
+|---|---|
+| Oceanic Teal | Cyan + Teal |
+| Sunset Orange | Amber + Orange |
+| Grape Soda | Fuchsia + Purple |
+| Jungle Lime | Lime + Emerald |
+| Hot Pink | Pink + Rose |
+| Deep Sky | Sky + Indigo |
+| Burning Sunset | Red + Orange |
+| Minty Fresh | Green + Cyan |
+| Cyberpunk Night | Indigo + Fuchsia |
 
 ---
 
