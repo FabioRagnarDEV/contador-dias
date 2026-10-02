@@ -52,6 +52,8 @@ const CreditoService = {
             dataFinal.setDate(dataContemplacao.getDate() + 180); 
             
             const dataFinalFormatada = dataFinal.toLocaleDateString('pt-BR');
+            const diffMs        = dataFinal - dataAtual;
+            const diasRestantes = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 
             if (dataFinal <= dataAtual) {
                 resultado.icone = '✅';
@@ -60,12 +62,16 @@ const CreditoService = {
                 resultado.corFundo = 'bg-green-100';
                 resultado.corTexto = 'text-green-800';
                 resultado.tocarSom = true;
+                resultado.diasRestantes = 0;
+                resultado.dataFinalFormatada = dataFinalFormatada;
             } else {
                 resultado.icone = '❌';
                 resultado.titulo = 'NÃO, ainda não cumpriu o prazo.';
                 resultado.descricao = `Estará apto para receber a partir de ${dataFinalFormatada}.`;
                 resultado.corFundo = 'bg-red-100';
                 resultado.corTexto = 'text-red-800';
+                resultado.diasRestantes = diasRestantes;
+                resultado.dataFinalFormatada = dataFinalFormatada;
             }
         }
 

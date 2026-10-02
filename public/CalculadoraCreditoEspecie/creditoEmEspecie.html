@@ -27,9 +27,10 @@
 <body class="bg-slate-50 text-slate-800">
   <header id="header" class="shadow-md transition-colors duration-500">
     <nav class="container mx-auto px-4 py-3 flex items-center justify-between">
-      <h1 class="text-xl sm:text-2xl font-bold text-white drop-shadow-sm">
-        Recebimento em Espécie
-      </h1>
+      <div class="flex items-center gap-3">
+        <img src="../assets/crédito_especie.png" alt="" class="h-7 w-7 opacity-90" aria-hidden="true" />
+        <h1 class="text-xl sm:text-2xl font-bold text-white drop-shadow-sm">Recebimento em Espécie</h1>
+      </div>
       <a href="../index.html" class="flex items-center gap-2 text-white bg-white/20 hover:bg-white/30 font-semibold py-2 px-4 rounded-lg transition-colors">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
@@ -93,6 +94,16 @@
 
       <div id="mensagem-erro" class="text-center pt-2 text-sm font-bold text-amber-600 min-h-[20px]"></div>
       <div id="resultado" class="text-center text-lg p-4 rounded-lg transition-all duration-500 opacity-0 transform scale-95"></div>
+
+      <div class="flex flex-col items-center gap-2 mt-3">
+        <button id="btn-script-email" type="button" class="hidden w-full sm:w-auto bg-slate-700 hover:bg-slate-800 text-white font-bold py-2.5 px-6 rounded-lg shadow-md btn-3d transition text-sm flex items-center justify-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+          </svg>
+          Copiar script de e-mail para o cliente
+        </button>
+        <span id="msg-copiado-email" class="text-green-600 text-xs font-bold transition-opacity opacity-0">✅ Script copiado para a área de transferência!</span>
+      </div>
       
       <div class="w-full flex flex-col items-center justify-center">
         <div id="modulo-credito-debito" class="hidden w-full mt-2 transition-all duration-300">

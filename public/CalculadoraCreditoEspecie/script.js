@@ -24,6 +24,10 @@ const resDebito = document.getElementById('res-debito');
 const resLiquido = document.getElementById('res-liquido');
 const resMensagem = document.getElementById('res-mensagem');
 
+// Elementos do script de e-mail
+const btnScriptEmail = document.getElementById('btn-script-email');
+const msgCopiado = document.getElementById('msg-copiado-email');
+
 // Utilitários de formatação e conversão
 const formatMoeda = (valor) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
 const formatDataBR = (dataObj) => new Intl.DateTimeFormat('pt-BR').format(dataObj);
@@ -44,6 +48,9 @@ const mascaraMoeda = (event) => {
     event.target.value = formatMoeda(valor);
 };
 
+// Guarda o último resultado calculado para uso no gerador de e-mail
+let ultimoResultado = null;
+
 // Funções da Calculadora Principal
 function formatarData(input) {
     let valor = input.value.replace(/\D/g, '');
@@ -61,17 +68,20 @@ function resetCalculadora() {
     dataEncerramentoInput.value = '';
     grupoEncerradoCheck.checked = false;
     encerramentoContainer.classList.add('hidden');
-    resultadoDivEl.textContent = ''; 
+    resultadoDivEl.textContent = '';
     mensagemErroDivEl.textContent = '';
     resultadoDivEl.className = 'text-center text-lg p-4 rounded-lg transition-all duration-500 opacity-0 transform scale-95';
     infoLegalDiv.classList.add('hidden');
+    ultimoResultado = null;
+    if (btnScriptEmail) btnScriptEmail.classList.add('hidden');
 }
 
 function calcularData() {
     mensagemErroDivEl.textContent = '';
-    resultadoDivEl.textContent = ''; 
+    resultadoDivEl.textContent = '';
     resultadoDivEl.className = 'text-center text-lg p-4 rounded-lg transition-all duration-500 opacity-0 transform scale-95';
     infoLegalDiv.classList.add('hidden');
+    if (btnScriptEmail) btnScriptEmail.classList.add('hidden');
 
     const dataAtual = new Date();
     dataAtual.setHours(0, 0, 0, 0);
@@ -88,6 +98,8 @@ function calcularData() {
         return;
     }
 
+    ultimoResultado = resultado;
+
     resultadoDivEl.classList.add(resultado.corFundo, resultado.corTexto);
 
     const iconeNode = document.createTextNode(resultado.icone + ' ');
@@ -97,7 +109,6 @@ function calcularData() {
     const quebraLinha = document.createElement('br');
     const descricaoNode = document.createTextNode(resultado.descricao);
 
-    // Prevenção de XSS na injeção de dados
     resultadoDivEl.appendChild(iconeNode);
     resultadoDivEl.appendChild(spanTitulo);
     resultadoDivEl.appendChild(quebraLinha);
@@ -107,7 +118,11 @@ function calcularData() {
     resultadoDivEl.classList.add('opacity-100', 'scale-100');
     infoLegalDiv.classList.remove('hidden');
 
-    // Feedback sonoro
+    // Exibe o botão de e-mail apenas quando ainda não cumpriu os 180 dias (grupo ativo)
+    if (btnScriptEmail && resultado.diasRestantes > 0) {
+        btnScriptEmail.classList.remove('hidden');
+    }
+
     if (resultado.tocarSom) {
         somDinheiroEl.currentTime = 0;
         const promise = somDinheiroEl.play();
@@ -115,6 +130,47 @@ function calcularData() {
             promise.catch(error => console.error("Reprodução de áudio bloqueada pelo navegador.", error));
         }
     }
+}
+
+// Gerador de script de e-mail — prazo ainda não cumprido
+function gerarScriptEmail() {
+    if (!ultimoResultado || ultimoResultado.diasRestantes <= 0) return;
+
+    const nomeUsuario = localStorage.getItem('nomeUsuario') || '[Nome do Consorciado]';
+    const dias = ultimoResultado.diasRestantes;
+    const dataLiberacao = ultimoResultado.dataFinalFormatada;
+
+    const texto =
+`[Nome do Consorciado], agradecemos o seu contato.
+
+Em atenção à sua solicitação de recebimento do crédito em espécie referente à sua cota de consórcio, informamos que, após análise, a cota ainda não se encontra apta para o faturamento nesta modalidade.
+
+Conforme previsto na Cláusula 32 do regulamento, é necessário o cumprimento de um prazo de carência de 180 (cento e oitenta) dias contados a partir da data da contemplação para que o crédito possa ser recebido em espécie, desde que a cota esteja devidamente quitada.
+
+Situação atual da cota:
+
+• Prazo de carência: 180 dias após a contemplação
+• Dias restantes para liberação: ${dias} dia${dias !== 1 ? 's' : ''}
+• Data prevista para liberação: ${dataLiberacao}
+• Requisito adicional: quitação total das obrigações junto ao grupo e à administradora
+
+Após o cumprimento integral do prazo e a verificação dos demais requisitos contratuais, o crédito poderá ser solicitado e será pago exclusivamente em favor do titular da cota.
+
+Para maiores informações, consulte a Cláusula 32 do seu regulamento ou entre em contato com nossa equipe.
+
+Permanecemos à disposição para quaisquer esclarecimentos adicionais.
+
+Atenciosamente,
+[Assinatura]`;
+
+    navigator.clipboard.writeText(texto).then(() => {
+        if (msgCopiado) {
+            msgCopiado.style.opacity = '1';
+            setTimeout(() => { msgCopiado.style.opacity = '0'; }, 3000);
+        }
+    }).catch(() => {
+        alert('Erro ao copiar. Verifique as permissões do navegador.');
+    });
 }
 
 // Funções do Módulo Crédito Menos Débito
@@ -175,3 +231,5 @@ if (btnZerarModulo) btnZerarModulo.addEventListener('click', zerarModuloCreditoD
 
 if (inputCredito) inputCredito.addEventListener('input', mascaraMoeda);
 if (inputDebito) inputDebito.addEventListener('input', mascaraMoeda);
+
+if (btnScriptEmail) btnScriptEmail.addEventListener('click', gerarScriptEmail);

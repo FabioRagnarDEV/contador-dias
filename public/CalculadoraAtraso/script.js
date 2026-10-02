@@ -1,27 +1,20 @@
-// script.js
-
 document.addEventListener('DOMContentLoaded', () => {
-    
-    // ==========================================================================
-    //                    1. REFERÊNCIAS GERAIS (VARIÁVEIS)
-    // ==========================================================================
+
     const botaoCalcular = document.getElementById('calcular-btn');
     const botaoZerar = document.getElementById('reset-btn');
     const entradaDataVencimento = document.getElementById('data-vencimento');
     const entradaParcelas = document.getElementById('numero-parcelas');
     const caixaResultado = document.getElementById('resultado');
     const caixaErro = document.getElementById('mensagem-erro');
-    
-    // Elementos do Modal de Devolução
+
     const botaoAbrirDevolucao = document.getElementById('btnAbrirDevolucao');
     const modalDevolucao = document.getElementById('modalDevolucao');
     const botaoFecharDevolucao = document.getElementById('btnFecharDevolucao');
     const botaoCalcularDevolucao = document.getElementById('btnCalcularDevolucao');
     const botaoLimparDevolucao = document.getElementById('btnLimparDevolucao');
     const botaoAlternarMemoria = document.getElementById('btnToggleMemoria');
-    
-    // Entradas (Inputs) da Devolução
-    const entradaGrupoCota = document.getElementById('dev-grupoCota'); 
+
+    const entradaGrupoCota = null; // campo removido — dado sensível
     const entradaCredito = document.getElementById('dev-credito');
     const entradaPercentual = document.getElementById('dev-percentual');
     const entradaValorPago = document.getElementById('dev-valorPago');
@@ -31,17 +24,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const entradaCreditoCliente = document.getElementById('dev-credito-cliente');
     const caixaResultadoDevolucao = document.getElementById('dev-resultado');
 
-    // Botões de Script de Atendimento
     const botaoScriptEmail = document.getElementById('btnScriptEmail');
     const botaoScriptWhatsapp = document.getElementById('btnScriptWhatsapp');
     const mensagemCopiado = document.getElementById('msg-copiado');
 
-    
-    // ==========================================================================
-    //                    2. UTILITÁRIOS E MÁSCARAS
-    // ==========================================================================
 
-    // Máscara Data
     if (entradaDataVencimento) {
         entradaDataVencimento.addEventListener('input', (evento) => {
             let valor = evento.target.value.replace(/\D/g, '');
@@ -51,7 +38,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Máscara Moeda
     window.mascaraMoeda = function(evento) {
         let valor = evento.target.value.replace(/\D/g, '');
         valor = (valor / 100).toFixed(2) + '';
@@ -59,35 +45,32 @@ document.addEventListener('DOMContentLoaded', () => {
         valor = valor.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
         evento.target.value = valor;
     };
-    if(entradaCredito) entradaCredito.addEventListener('input', mascaraMoeda);
-    if(entradaValorPago) entradaValorPago.addEventListener('input', mascaraMoeda);
-    if(entradaCreditoGrupo) entradaCreditoGrupo.addEventListener('input', mascaraMoeda);
-    if(entradaCreditoCliente) entradaCreditoCliente.addEventListener('input', mascaraMoeda);
+    if (entradaCredito) entradaCredito.addEventListener('input', mascaraMoeda);
+    if (entradaValorPago) entradaValorPago.addEventListener('input', mascaraMoeda);
+    if (entradaCreditoGrupo) entradaCreditoGrupo.addEventListener('input', mascaraMoeda);
+    if (entradaCreditoCliente) entradaCreditoCliente.addEventListener('input', mascaraMoeda);
 
-    // Função auxiliar para converter moeda PT-BR para Float (Decimal)
     const converterMoeda = (valorTexto) => {
-        if(!valorTexto) return 0;
+        if (!valorTexto) return 0;
         return parseFloat(valorTexto.replace(/\./g, '').replace(',', '.'));
     };
 
-    // Função auxiliar para formatar Float para Moeda PT-BR
     const formatarMoeda = (valorNumerico) => valorNumerico.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
     const parseDataBrasileiraEstrita = (valorTexto) => {
         if (!/^\d{2}\/\d{2}\/\d{4}$/.test(valorTexto)) return null;
         const [diaTexto, mesTexto, anoTexto] = valorTexto.split('/');
         const dia = Number(diaTexto);
         const mes = Number(mesTexto);
         const ano = Number(anoTexto);
-
         if (!Number.isInteger(dia) || !Number.isInteger(mes) || !Number.isInteger(ano)) return null;
         if (mes < 1 || mes > 12) return null;
-
         const data = new Date(ano, mes - 1, dia);
         if (data.getFullYear() !== ano || data.getMonth() !== (mes - 1) || data.getDate() !== dia) return null;
-
         data.setHours(0, 0, 0, 0);
         return data;
     };
+
     const obterHojeSemHora = () => {
         const hoje = new Date();
         hoje.setHours(0, 0, 0, 0);
@@ -95,21 +78,17 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
 
-    // ==========================================================================
-    //              3. LÓGICA DA CALCULADORA DE ATRASO (PRINCIPAL)
-    // ==========================================================================
-
     function calcularAtraso() {
         caixaErro.textContent = '';
         caixaResultado.style.opacity = '0';
-        caixaResultado.className = "text-center p-4 rounded-lg transition-all duration-300 opacity-0 mt-4"; // Reseta as classes
+        caixaResultado.className = "text-center p-4 rounded-lg transition-all duration-300 opacity-0 mt-4";
 
         const textoDataVencimento = entradaDataVencimento.value;
         const numeroParcelas = parseInt(entradaParcelas.value);
         let statusConsorciado = 'nao-contemplado';
         const radioStatus = document.querySelector('input[name="status-consorciado"]:checked');
         if (radioStatus) statusConsorciado = radioStatus.value;
-        
+
         const ehInauguracaoAntiga = document.getElementById('data-ate-jun24').checked;
 
         const dataVencimento = parseDataBrasileiraEstrita(textoDataVencimento);
@@ -123,8 +102,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const dataHoje = obterHojeSemHora();
-        
-        // CÁLCULO PELO NOVO SERVIÇO
         const resultadoAtraso = ConsorcioService.analisarAtraso(dataVencimento, dataHoje, numeroParcelas, statusConsorciado, ehInauguracaoAntiga);
 
         if (resultadoAtraso.erro) {
@@ -132,23 +109,17 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // 🔒 CONSTRUÇÃO SEGURA E COLORIDA DA INTERFACE (XSS MITIGADO)
-        caixaResultado.textContent = ''; // Limpa tudo com segurança
-        
-        // Adiciona a cor de fundo personalizada retornada pelo serviço
+        caixaResultado.textContent = '';
         caixaResultado.className = `text-center p-5 rounded-lg transition-all duration-300 shadow-sm mt-4 ${resultadoAtraso.corFundo}`;
 
-        // Cria Título Principal
         const divTitulo = document.createElement('div');
         divTitulo.className = `${resultadoAtraso.cor} font-extrabold mb-1 text-xl flex items-center justify-center gap-2`;
         divTitulo.textContent = `${resultadoAtraso.icone} ${resultadoAtraso.titulo}`;
-        
-        // Cria a Descrição
+
         const divDescricao = document.createElement('div');
         divDescricao.className = `${resultadoAtraso.cor} font-semibold mb-3 text-base`;
         divDescricao.textContent = resultadoAtraso.descricao;
 
-        // Cria a Ação Recomendada
         const divAcao = document.createElement('div');
         divAcao.className = "text-slate-700 bg-white/60 p-2 rounded text-sm font-medium border border-white/40 inline-block";
         divAcao.textContent = resultadoAtraso.acao;
@@ -156,7 +127,6 @@ document.addEventListener('DOMContentLoaded', () => {
         caixaResultado.appendChild(divTitulo);
         caixaResultado.appendChild(divDescricao);
         caixaResultado.appendChild(divAcao);
-        
         caixaResultado.style.opacity = '1';
 
         verificarBotaoDevolucao(statusConsorciado, numeroParcelas, ehInauguracaoAntiga);
@@ -186,11 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ==========================================================================
-    //              4. LÓGICA DE DEVOLUÇÃO E CÁLCULOS
-    // ==========================================================================
 
-    // Descontemplação
     if (selecaoDescontemplacao) {
         selecaoDescontemplacao.addEventListener('change', (evento) => {
             if (evento.target.checked) {
@@ -202,7 +168,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Modal
     let ultimoFocoDevolucao = null;
     const obterFocaveisDevolucao = () => modalDevolucao.querySelectorAll(
         'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
@@ -213,7 +178,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!focaveis.length) return;
         const primeiro = focaveis[0];
         const ultimo = focaveis[focaveis.length - 1];
-
         if (evento.shiftKey && document.activeElement === primeiro) {
             evento.preventDefault();
             ultimo.focus();
@@ -231,6 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => botaoFecharDevolucao.focus(), 20);
         document.addEventListener('keydown', capturarTabNoModalDevolucao);
     };
+
     const funcaoFecharModal = () => {
         modalDevolucao.style.display = 'none';
         modalDevolucao.setAttribute('aria-hidden', 'true');
@@ -240,6 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ultimoFocoDevolucao.focus();
         }
     };
+
     botaoAbrirDevolucao.addEventListener('click', (evento) => {
         evento.preventDefault();
         abrirModalDevolucao();
@@ -252,7 +218,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Memória de Cálculo
     if (botaoAlternarMemoria) {
         botaoAlternarMemoria.addEventListener('click', () => {
             const caixaMemoria = document.getElementById('memoriaCalculo');
@@ -261,12 +226,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Acordeão
     window.alternarAcordeaoDevolucao = function(cabecalho) {
         const conteudo = cabecalho.nextElementSibling;
         const seta = cabecalho.querySelector('span');
-        document.querySelectorAll('.accordion-content').forEach(c => { if(c !== conteudo) c.classList.remove('open'); });
-        
+        document.querySelectorAll('.accordion-content').forEach(c => { if (c !== conteudo) c.classList.remove('open'); });
         if (conteudo.classList.contains('open')) {
             conteudo.classList.remove('open');
             seta.innerText = '▼';
@@ -276,7 +239,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // --- CÁLCULO PRINCIPAL DA DEVOLUÇÃO ---
     if (botaoCalcularDevolucao) {
         botaoCalcularDevolucao.addEventListener('click', () => {
             try {
@@ -289,27 +251,23 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
-                // 1. Descontemplação (service.js)
                 if (selecaoDescontemplacao.checked) {
                     const creditoGrupo = converterMoeda(entradaCreditoGrupo.value);
                     const creditoCliente = converterMoeda(entradaCreditoCliente.value);
                     const divResultado = document.getElementById('res-descontemplacao');
-                    
+
                     if (creditoGrupo > 0 && creditoCliente > 0) {
                         const diferencaValores = ConsorcioService.calcularDescontemplacao(creditoGrupo, creditoCliente);
-                        
                         divResultado.classList.remove('hidden');
-                        divResultado.textContent = ''; // Limpeza segura
+                        divResultado.textContent = '';
 
                         if (diferencaValores > 0) {
                             divResultado.className = "mb-4 p-3 bg-red-100 text-red-800 rounded-lg border border-red-200 text-sm font-bold block";
-                            
                             const textoDescontemplacao = document.createTextNode("Diferença a Pagar (Descontemplação): ");
                             const quebraLinha = document.createElement('br');
                             const spanValor = document.createElement('span');
                             spanValor.className = "text-lg";
                             spanValor.textContent = formatarMoeda(diferencaValores);
-                            
                             divResultado.appendChild(textoDescontemplacao);
                             divResultado.appendChild(quebraLinha);
                             divResultado.appendChild(spanValor);
@@ -322,10 +280,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     document.getElementById('res-descontemplacao').classList.add('hidden');
                 }
 
-                // 2. Devolução (service.js)
                 const resultado = ConsorcioService.calcularDevolucao(valorCredito, valorPercentual, valorTotalPago);
 
-                // Preencher DOM (Tela)
                 document.getElementById('dev-valorFinal').textContent = formatarMoeda(resultado.valorDevolucao);
                 document.getElementById('memTotalPago').textContent = formatarMoeda(valorTotalPago);
                 document.getElementById('memTaxasRetidas').textContent = '- ' + formatarMoeda(resultado.valorTaxasRetidas);
@@ -351,16 +307,13 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.dev-input').forEach(input => input.value = '');
             caixaResultadoDevolucao.style.display = 'none';
             document.getElementById('res-descontemplacao').classList.add('hidden');
-            if(selecaoDescontemplacao) {
+            if (selecaoDescontemplacao) {
                 selecaoDescontemplacao.checked = false;
                 caixaDescontemplacao.classList.add('hidden');
             }
         });
     }
 
-    // ==========================================================================
-    //              6. GERADOR DE SCRIPT 
-    // ==========================================================================
 
     const copiarScriptParaClipboard = (texto, nomeCanal) => {
         navigator.clipboard.writeText(texto).then(() => {
@@ -381,20 +334,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const nomeUsuario = '[Nome do Consorciado]';
-        const textoGrupoCota = entradaGrupoCota.value || '____/____';
+        const textoGrupoCota = '[GRUPO E COTA]';
         const valorPercentual = parseFloat((entradaPercentual.value || '0').replace(',', '.'));
         const valorTotalPago = converterMoeda(entradaValorPago.value);
-        
-        // Reaproveitando o Service para gerar o script com os mesmos dados calculados
         const res = ConsorcioService.calcularDevolucao(valorCredito, valorPercentual, valorTotalPago);
-
         const totalMultaPercentual = 10 + (res.taxaPenal * 100);
 
         return {
             nomeUsuario,
             textoGrupoCota,
             valorCredito,
-            valorPercentualStr: valorPercentual.toFixed(4).replace('.', ','), 
+            valorPercentualStr: valorPercentual.toFixed(4).replace('.', ','),
             valorPercentual,
             valorFundoComum: res.valorFundoComum,
             taxaPenal: res.taxaPenal,
@@ -403,36 +353,33 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     };
 
-    // --- SCRIPT PARA WHATSAPP ---
     if (botaoScriptWhatsapp) {
         botaoScriptWhatsapp.addEventListener('click', () => {
-            const dados = obterDadosParaScript();
-            if (!dados) return;
+            try {
+                const dados = obterDadosParaScript();
+                if (!dados) return;
 
-            const { nomeUsuario, textoGrupoCota, valorCredito, valorPercentualStr, valorFundoComum, taxaPenal, totalMultaPercentual, valorDevolucao, valorPercentual } = dados;
+                const { nomeUsuario, textoGrupoCota, valorCredito, valorPercentualStr, valorFundoComum, taxaPenal, totalMultaPercentual, valorDevolucao, valorPercentual } = dados;
 
-            let textoExplicacaoMultas = "";
-            let textoCalculoLinha2 = "";
+                let textoExplicacaoMultas = "";
+                let textoCalculoLinha2 = "";
 
-            if (valorPercentual > 50) {
-                textoExplicacaoMultas = 
+                if (valorPercentual > 50) {
+                    textoExplicacaoMultas =
 `No cancelamento do consórcio, houve a aplicação da multa contratual de 10% destinada ao grupo de consórcio, prevista para compensar o impacto da saída de um participante.
 Como você contribuiu com mais de 50% do fundo comum, houve isenção da cláusula penal compensatória (administradora).`;
-
-                textoCalculoLinha2 = `${formatarMoeda(valorFundoComum)} (FC) - 10% (Referente apenas ao prejuízo causado ao grupo)`;
-            
-            } else {
-                textoExplicacaoMultas = 
+                    textoCalculoLinha2 = `${formatarMoeda(valorFundoComum)} (FC) - 10% (Referente apenas ao prejuízo causado ao grupo)`;
+                } else {
+                    textoExplicacaoMultas =
 `No cancelamento do consórcio, podem existir dois tipos de descontos previstos no regulamento:
 
 O primeiro é uma multa de 10% que vai para o grupo de consórcio. Ela existe para compensar o impacto da saída de um participante para os demais.
 
 O segundo é uma cláusula penal compensatória, prevista no Código Civil (artigo 416), que pode ser aplicada para cobrir custos operacionais já realizados pela administradora — como a venda da cota e a formação do grupo, e a remuneração de representantes e corretores`;
+                    textoCalculoLinha2 = `${formatarMoeda(valorFundoComum)} (FC) - ${totalMultaPercentual}% (Somando os 10% por prejudicar o grupo e os ${(taxaPenal * 100)}% pela infração contratual [inadimplência das obrigações])`;
+                }
 
-                textoCalculoLinha2 = `${formatarMoeda(valorFundoComum)} (FC) - ${totalMultaPercentual}% (Somando os 10% por prejudicar o grupo e os ${(taxaPenal*100)}% pela infração contratual [inadimplência das obrigações])`;
-            }
-
-            const textoWhatsapp = 
+                const textoWhatsapp =
 `Olá, ${nomeUsuario}, tudo bem?
 
 Analisei o caso referente à cota ${textoGrupoCota}.
@@ -455,39 +402,39 @@ Resultado Estimado: ${formatarMoeda(valorDevolucao)}
 
 Qualquer dúvida, estou à disposição!`;
 
-            copiarScriptParaClipboard(textoWhatsapp, 'WhatsApp');
+                copiarScriptParaClipboard(textoWhatsapp, 'WhatsApp');
+            } catch (erro) {
+                console.error('Erro ao gerar script WhatsApp:', erro);
+                alert('Erro ao gerar script. Verifique se o cálculo foi realizado corretamente.');
+            }
         });
     }
 
-    // --- SCRIPT PARA E-MAIL ---
     if (botaoScriptEmail) {
         botaoScriptEmail.addEventListener('click', () => {
-            const dados = obterDadosParaScript();
-            if (!dados) return;
+            try {
+                const dados = obterDadosParaScript();
+                if (!dados) return;
 
-            const { nomeUsuario, textoGrupoCota, valorCredito, valorPercentualStr, valorPercentual, valorFundoComum, taxaPenal, totalMultaPercentual, valorDevolucao } = dados;
-            
-            let blocoJuridicoMultas = "";
-            let blocoAplicacaoMultas = "";
-            let blocoResumoMultas = "";
-            let blocoCalculoFinal = "";
+                const { nomeUsuario, textoGrupoCota, valorCredito, valorPercentualStr, valorPercentual, valorFundoComum, taxaPenal, totalMultaPercentual, valorDevolucao } = dados;
 
-            if (valorPercentual > 50) {
-                blocoJuridicoMultas = 
+                let blocoJuridicoMultas = "";
+                let blocoAplicacaoMultas = "";
+                let blocoResumoMultas = "";
+                let blocoCalculoFinal = "";
+
+                if (valorPercentual > 50) {
+                    blocoJuridicoMultas =
 `No cancelamento do consórcio, aplica-se a multa destinada ao grupo de consórcio, prevista na Cláusula 41.1, com fundamento no Art. 53, §2º do Código de Defesa do Consumidor e Lei 11.795/2008.
 Sua finalidade é indenizar o grupo pelos prejuízos decorrentes da saída de um consorciado, mantendo o equilíbrio financeiro do grupo.`;
-
-                blocoAplicacaoMultas = 
+                    blocoAplicacaoMultas =
 `Como contribuiu com um percentual maior que 50% ao fundo comum, a cláusula penal compensatória (administradora) foi isenta. Foi cobrada apenas a multa de 10% a título de prejuízos causados ao grupo.`;
-
-                blocoResumoMultas = 
+                    blocoResumoMultas =
 `• Multa contratual: 10% (Referente apenas ao prejuízo ao grupo)`;
-
-                blocoCalculoFinal = 
+                    blocoCalculoFinal =
 `${formatarMoeda(valorFundoComum)} - 10% (Multa) = ${formatarMoeda(valorDevolucao)}`;
-
-            } else {
-                blocoJuridicoMultas = 
+                } else {
+                    blocoJuridicoMultas =
 `No cancelamento do consórcio, não estamos tratando de uma única multa, mas de duas penalidades distintas, cada uma com fundamento legal e finalidade própria.
 
 1. Multa de 10% - destinada ao grupo de consórcio
@@ -501,22 +448,19 @@ Sua finalidade é indenizar o grupo pelos prejuízos decorrentes da saída de um
 - Finalidade: ressarcir a administradora por custos já realizados, como venda da cota, comissões e estrutura administrativa.
 
 De forma geral, essas penalidades impactam o valor final, podendo somar até 30% conforme previsto no contrato. Isso não configura cobrança em duplicidade, pois cada multa possui um fato gerador diferente.`;
-
-                blocoAplicacaoMultas = 
+                    blocoAplicacaoMultas =
 `Como contribuiu com um percentual ${valorPercentual <= 20 ? 'menor' : 'maior'} que 20% ao fundo comum, foi cobrada multa contratual total de ${totalMultaPercentual}%, sendo distribuída da seguinte forma:
 
 • 10% a título de prejuízos causados ao grupo;
 
 • ${taxaPenal * 100}% de infração contratual pela inadimplência.`;
-
-                blocoResumoMultas = 
+                    blocoResumoMultas =
 `• Multa contratual: ${totalMultaPercentual}% (10% por prejudicar o grupo + ${(taxaPenal * 100)}% pelo inadimplemento cláusulas 41.1 e 42)`;
-
-                blocoCalculoFinal = 
+                    blocoCalculoFinal =
 `${formatarMoeda(valorFundoComum)} - ${totalMultaPercentual}% (Multas) = ${formatarMoeda(valorDevolucao)}`;
-            }
+                }
 
-            const textoEmail = 
+                const textoEmail =
 `${nomeUsuario}, agradecemos o seu contato e a oportunidade em prestar os devidos esclarecimentos.
 
 Recebemos o seu relato em que analisamos com toda a atenção merecida, observando que você firmou conosco contrato por adesão, objetivando a utilização do crédito no segmento de bens móveis/imóveis após a contemplação.
@@ -565,7 +509,11 @@ ${blocoCalculoFinal}
 
 Cabe ressaltar que a administradora pauta sua atuação na mais estrita observância à legislação vigente, em especial à Lei nº 11.795/2008 (Lei dos Consórcios), à Circular Bacen nº 3.432/2009 - ou resolução 285 [vide a normativa do grupo], ao Código de Defesa do Consumidor (Lei nº 8.078/1990) e às cláusulas expressas no regulamento.`;
 
-            copiarScriptParaClipboard(textoEmail, 'E-mail');
+                copiarScriptParaClipboard(textoEmail, 'E-mail');
+            } catch (erro) {
+                console.error('Erro ao gerar script de e-mail:', erro);
+                alert('Erro ao gerar script. Verifique se o cálculo foi realizado corretamente.');
+            }
         });
     }
 
