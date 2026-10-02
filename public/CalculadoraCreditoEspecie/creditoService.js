@@ -65,13 +65,36 @@ const CreditoService = {
                 resultado.diasRestantes = 0;
                 resultado.dataFinalFormatada = dataFinalFormatada;
             } else {
-                resultado.icone = '❌';
+                const mensagensEngracadas = [
+                    "Calma, que ainda não chegou a hora!",
+                    "Eita! O caixa ainda está de férias.",
+                    "Rapaz... esse dinheiro ainda tá marinhando.",
+                    "Paciência, meu consagrado! O prazo ainda não deu.",
+                    "Ainda não, chefe. O relógio tá contando.",
+                    "Ih, esse crédito tá segurando as pontas por enquanto!",
+                    "Aguenta aí que o prazo ainda não bateu o ponto.",
+                    "Ainda não rolou. O contador de dias não mente!",
+                    "O crédito tá lá, mas ainda não tá liberado não.",
+                    "Mais um pouco de paciência e o crédito vira espécie!",
+                    "Ainda está no forno, esperando os 180 dias assarem.",
+                    "Quase lá! Mas ainda falta um tiquinho.",
+                    "O relógio tá correndo, mas ainda não chegou no fim.",
+                    "Esse crédito tá em modo espera ainda.",
+                    "Vish, ainda tem dias pela frente. Paciência é a chave!",
+                    "Ainda tá no prazo de carência, meu chapa.",
+                    "O dinheiro existe, mas ainda tá de quarentena.",
+                    "Putz! Ainda não, o prazo disse que não.",
+                    "Esse crédito ainda não terminou de contar os dias.",
+                    "Eita! O prazo ainda tá de pé, firme e forte.",
+                ];
+                resultado.icone = '⏳';
                 resultado.titulo = 'NÃO, ainda não cumpriu o prazo.';
                 resultado.descricao = `Estará apto para receber a partir de ${dataFinalFormatada}.`;
                 resultado.corFundo = 'bg-red-100';
                 resultado.corTexto = 'text-red-800';
                 resultado.diasRestantes = diasRestantes;
                 resultado.dataFinalFormatada = dataFinalFormatada;
+                resultado.listaMensagens = mensagensEngracadas;
             }
         }
 

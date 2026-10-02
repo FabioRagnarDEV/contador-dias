@@ -8,23 +8,63 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <style>
     body { font-family: 'Inter', sans-serif; }
-    details > summary { list-style: none; }
-    details > summary::-webkit-details-marker { display: none; }
-    .btn-3d { box-shadow: 4px 6px 0px rgba(0,0,0,0.2); transition: all 0.2s ease; }
-    .btn-3d:hover { transform: translateY(-2px); box-shadow: 6px 8px 0px rgba(0,0,0,0.2); }
-    .btn-3d:active { transform: translateY(1px); box-shadow: 2px 3px 0px rgba(0,0,0,0.2); }
+
+    .btn-3d { box-shadow: 4px 6px 0px rgba(0,0,0,0.2); transition: all 0.15s ease; }
+    .btn-3d:hover  { transform: translateY(-2px); box-shadow: 6px 8px 0px rgba(0,0,0,0.2); }
+    .btn-3d:active { transform: translateY(1px);  box-shadow: 2px 3px 0px rgba(0,0,0,0.2); }
+
     #saudacao-usuario { opacity: 0; transform: translateY(10px); transition: all 0.6s ease; }
     #saudacao-usuario.show { opacity: 1; transform: translateY(0); }
-    @keyframes float-and-sway { 0% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-8px) rotate(3deg); } 100% { transform: translateY(0) rotate(-3deg); } }
+
+    @keyframes float-and-sway {
+      0%   { transform: translateY(0) rotate(-3deg); }
+      50%  { transform: translateY(-8px) rotate(3deg); }
+      100% { transform: translateY(0) rotate(-3deg); }
+    }
     .icon-animated { animation: float-and-sway 3s ease-in-out infinite; }
+
+    /* Resultado card */
+    #resultado-card { opacity: 0; transform: translateY(16px); transition: opacity 0.4s ease, transform 0.4s ease; }
+    #resultado-card.visible { opacity: 1; transform: translateY(0); }
+
+    /* Modal */
     #modal-instrucoes-box { transform: scale(0.95); opacity: 0; transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1); }
     #modal-instrucoes.active #modal-instrucoes-box { transform: scale(1); opacity: 1; }
+
+    /* Etapas do formulário */
+    .etapa { opacity: 0; transform: translateY(10px); transition: opacity 0.3s ease, transform 0.3s ease; pointer-events: none; height: 0; overflow: hidden; }
+    .etapa.ativa { opacity: 1; transform: translateY(0); pointer-events: auto; height: auto; overflow: visible; }
+
+    /* Stepper */
+    .step-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; transition: all 0.3s ease; flex-shrink: 0; }
+    .step-dot.done    { background: #22c55e; color: #fff; }
+    .step-dot.active  { color: #fff; }
+    .step-dot.pending { background: #e2e8f0; color: #94a3b8; }
+    .step-line { flex: 1; height: 2px; background: #e2e8f0; transition: background 0.4s ease; margin: 0 4px; }
+    .step-line.done { background: #22c55e; }
+
+    /* Módulo crédito-débito */
+    #modulo-credito-debito { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+    #modulo-credito-debito.aberto { max-height: 800px; }
+
+    /* Pulse */
+    @keyframes pulse-once {
+      0%   { transform: scale(1); }
+      40%  { transform: scale(1.3); }
+      70%  { transform: scale(0.95); }
+      100% { transform: scale(1); }
+    }
+    .pulse-once { animation: pulse-once 0.5s ease forwards; }
+
+    details > summary { list-style: none; }
+    details > summary::-webkit-details-marker { display: none; }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800">
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
+
   <header id="header" class="shadow-md transition-colors duration-500">
     <nav class="container mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center gap-3">
@@ -32,278 +72,318 @@
         <h1 class="text-xl sm:text-2xl font-bold text-white drop-shadow-sm">Recebimento em Espécie</h1>
       </div>
       <a href="../index.html" class="flex items-center gap-2 text-white bg-white/20 hover:bg-white/30 font-semibold py-2 px-4 rounded-lg transition-colors">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
           <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
         </svg>
         <span class="hidden sm:inline">Voltar</span>
       </a>
     </nav>
   </header>
-  
-  <main class="container mx-auto px-4 py-8 sm:py-12">
-    <div class="relative bg-white p-6 sm:p-8 rounded-2xl shadow-xl w-full max-w-2xl mx-auto space-y-6">
-      <button id="abrir-instrucoes-btn" class="absolute top-6 right-6 text-white rounded-full h-8 w-8 flex items-center justify-center font-bold text-lg btn-3d transition z-10" aria-label="Abrir manual">?</button>
-      
-      <div class="text-center">
-        <div class="flex justify-center mb-4">
-          <div id="icon-bg" class="p-3 rounded-full bg-opacity-20">
-            <img src="../assets/crédito_especie.png" alt="Ícone de Crédito em Espécie" class="h-12 w-12 icon-animated">
-          </div>
+
+  <main class="flex-1 container mx-auto px-4 py-8 sm:py-12 flex flex-col items-center gap-6">
+
+    <p id="saudacao-usuario" class="text-slate-500 text-base"></p>
+
+    <!-- Card de entrada -->
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 sm:p-8 relative">
+
+      <button id="abrir-instrucoes-btn" type="button" aria-label="Abrir manual" aria-controls="modal-instrucoes" aria-expanded="false"
+        class="absolute top-5 right-5 text-white rounded-full h-8 w-8 flex items-center justify-center font-bold text-base btn-3d z-10">?</button>
+
+      <!-- Cabeçalho -->
+      <div class="flex flex-col items-center gap-2 mb-6">
+        <div id="icon-bg" class="p-3 rounded-full">
+          <img src="../assets/crédito_especie.png" alt="Crédito em Espécie" class="h-14 w-14 icon-animated" />
         </div>
-        <h2 class="text-3xl font-extrabold text-slate-900">Crédito em Espécie</h2>
-        <p id="saudacao-usuario" class="text-slate-500 mt-2 text-lg">Carregando...</p>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 text-center">Crédito em Espécie</h2>
+        <p class="text-sm text-slate-500 text-center">Verifique se a cota está apta para recebimento</p>
       </div>
-      
-      <div id="aviso-box" class="text-blue-800 border-l-4 p-4 rounded-r-md transition-colors duration-500">
-        <p class="font-medium">Informe a data para calcular se a cota está apta para receber em espécie.</p>
+
+      <!-- Stepper -->
+      <div class="flex items-center mb-6 px-2" aria-hidden="true">
+        <div id="dot-1" class="step-dot active">1</div>
+        <div id="line-1" class="step-line"></div>
+        <div id="dot-2" class="step-dot pending">2</div>
+        <div id="line-2" class="step-line"></div>
+        <div id="dot-3" class="step-dot pending">3</div>
       </div>
-      
-      <div class="space-y-4 pt-2">
+
+      <!-- Etapa 1: Situação do grupo -->
+      <div id="etapa-1" class="etapa ativa space-y-4">
+        <p class="text-sm font-bold text-slate-500 uppercase tracking-wide">Etapa 1 — Situação do grupo</p>
+        <p class="text-sm text-slate-600">O grupo do consorciado ainda está ativo ou já realizou a última assembleia?</p>
+        <div class="grid grid-cols-2 gap-3">
+          <label class="cursor-pointer">
+            <input type="radio" name="situacao-grupo" id="grupo-ativo-radio" value="ativo" class="sr-only peer">
+            <div class="peer-checked:ring-2 peer-checked:bg-blue-50 peer-checked:border-blue-400 peer-checked:text-blue-800 border-2 border-slate-200 rounded-xl p-4 text-center font-bold text-slate-500 transition-all hover:border-slate-300 select-none">
+              <div class="text-2xl mb-1">🔄</div>
+              <div class="text-sm">Grupo Ativo</div>
+            </div>
+          </label>
+          <label class="cursor-pointer">
+            <input type="radio" name="situacao-grupo" id="grupo-encerrado-radio" value="encerrado" class="sr-only peer">
+            <div class="peer-checked:ring-2 peer-checked:bg-green-50 peer-checked:border-green-400 peer-checked:text-green-800 border-2 border-slate-200 rounded-xl p-4 text-center font-bold text-slate-500 transition-all hover:border-slate-300 select-none">
+              <div class="text-2xl mb-1">✅</div>
+              <div class="text-sm">Grupo Encerrado</div>
+            </div>
+          </label>
+        </div>
+        <button id="btn-avancar-1" type="button" disabled
+          class="w-full mt-2 text-white py-3 rounded-xl font-bold text-base btn-3d disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none">
+          Avançar →
+        </button>
+      </div>
+
+      <!-- Etapa 2A: Grupo ativo — data de contemplação -->
+      <div id="etapa-2a" class="etapa space-y-4">
+        <p class="text-sm font-bold text-slate-500 uppercase tracking-wide">Etapa 2 — Grupo ativo</p>
         <div>
-          <label for="data-contemplacao" class="block mb-1 font-medium text-slate-700">Data da contemplação:</label>
-          <input type="text" id="data-contemplacao" class="w-full border border-slate-300 rounded-lg p-3 focus:outline-none focus:ring-2" placeholder="DD/MM/AAAA" required maxlength="10" />
+          <label for="data-contemplacao" class="block mb-2 font-semibold text-slate-600 text-sm uppercase tracking-wide">Data da contemplação</label>
+          <input type="text" id="data-contemplacao"
+            class="w-full border-2 border-slate-200 rounded-xl p-4 text-xl font-bold text-center tracking-widest focus:outline-none transition-colors"
+            placeholder="DD/MM/AAAA" maxlength="10" inputmode="numeric" autocomplete="off" />
         </div>
-        <div class="relative flex items-start">
-          <div class="flex h-6 items-center">
-            <input id="grupo-encerrado-check" type="checkbox" class="h-4 w-4 rounded border-gray-300">
+        <!-- Campo oculto do grupo encerrado para compatibilidade com script.js -->
+        <input type="checkbox" id="grupo-encerrado-check" class="hidden">
+        <input type="text" id="data-encerramento" class="hidden" />
+        <div id="container-data-contemplacao" class="hidden"></div>
+        <div id="encerramento-container" class="hidden"></div>
+        <div class="flex gap-3">
+          <button id="btn-voltar-2a" type="button"
+            class="w-1/3 bg-slate-200 hover:bg-slate-300 text-slate-700 py-3 rounded-xl font-bold btn-3d transition-colors">
+            ← Voltar
+          </button>
+          <button id="btn-calcular-2a" type="button"
+            class="flex-1 text-white py-3 rounded-xl font-bold text-base btn-3d">
+            Verificar
+          </button>
+        </div>
+      </div>
+
+      <!-- Etapa 2B: Grupo encerrado — saldo devedor -->
+      <div id="etapa-2b" class="etapa space-y-4">
+        <p class="text-sm font-bold text-slate-500 uppercase tracking-wide">Etapa 2 — Grupo encerrado</p>
+        <div>
+          <label for="data-encerramento-v" class="block mb-2 font-semibold text-slate-600 text-sm uppercase tracking-wide">Data de encerramento do grupo</label>
+          <input type="text" id="data-encerramento-v"
+            class="w-full border-2 border-slate-200 rounded-xl p-4 text-xl font-bold text-center tracking-widest focus:outline-none transition-colors"
+            placeholder="DD/MM/AAAA" maxlength="10" inputmode="numeric" autocomplete="off" />
+        </div>
+        <div class="rounded-xl border-2 border-slate-200 p-4 space-y-3">
+          <p class="text-sm font-semibold text-slate-700">O saldo devedor está quitado?</p>
+          <div class="grid grid-cols-2 gap-3">
+            <label class="cursor-pointer">
+              <input type="radio" name="saldo-quitado" id="saldo-sim" value="sim" class="sr-only peer">
+              <div class="peer-checked:ring-2 peer-checked:bg-green-50 peer-checked:border-green-400 peer-checked:text-green-800 border-2 border-slate-200 rounded-lg p-3 text-center text-sm font-bold text-slate-500 transition-all hover:border-slate-300 select-none">
+                ✅ Sim, quitada
+              </div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="saldo-quitado" id="saldo-nao" value="nao" class="sr-only peer">
+              <div class="peer-checked:ring-2 peer-checked:bg-red-50 peer-checked:border-red-400 peer-checked:text-red-800 border-2 border-slate-200 rounded-lg p-3 text-center text-sm font-bold text-slate-500 transition-all hover:border-slate-300 select-none">
+                ❌ Não, há débito
+              </div>
+            </label>
           </div>
-          <div class="ml-3 text-sm leading-6">
-            <label for="grupo-encerrado-check" class="font-medium text-slate-700">O grupo já encerrou?</label>
+        </div>
+        <div class="flex gap-3">
+          <button id="btn-voltar-2b" type="button"
+            class="w-1/3 bg-slate-200 hover:bg-slate-300 text-slate-700 py-3 rounded-xl font-bold btn-3d transition-colors">
+            ← Voltar
+          </button>
+          <button id="btn-calcular-2b" type="button"
+            class="flex-1 text-white py-3 rounded-xl font-bold text-base btn-3d">
+            Verificar
+          </button>
+        </div>
+      </div>
+
+      <div id="mensagem-erro" class="text-center text-sm font-bold text-amber-600 min-h-[20px] mt-2"></div>
+
+      <!-- Botão Zerar (sempre visível após calcular) -->
+      <button id="reset-btn" type="button"
+        class="hidden w-full mt-4 bg-slate-200 hover:bg-slate-300 text-slate-600 py-2.5 rounded-xl font-semibold text-sm btn-3d transition-colors">
+        ↺ Nova consulta
+      </button>
+    </div>
+
+    <!-- Card de resultado -->
+    <div id="resultado-card" class="w-full max-w-lg" aria-live="polite">
+      <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+
+        <div id="resultado-topo" class="p-5 flex items-center gap-4">
+          <div id="resultado-icone" class="text-4xl select-none flex-shrink-0" aria-hidden="true"></div>
+          <div>
+            <p id="resultado-titulo" class="text-lg font-extrabold leading-tight"></p>
+            <p id="resultado-descricao" class="text-sm font-medium opacity-90 mt-0.5"></p>
           </div>
         </div>
-        <div id="encerramento-container" class="hidden">
-          <label for="data-encerramento" class="block mb-1 font-medium text-slate-700">Data de encerramento do grupo:</label>
-          <input type="text" id="data-encerramento" class="w-full border border-slate-300 rounded-lg p-3 focus:outline-none focus:ring-2" placeholder="DD/MM/AAAA" required maxlength="10" />
-        </div>
-      </div>
-      
-      <div class="flex flex-col sm:flex-row justify-center gap-4 pt-2">
-        <button id="calcular-btn" class="w-full sm:w-[150px] text-white py-3 px-8 rounded-lg font-semibold shadow-md btn-3d">
-          Calcular
-        </button>
-        <button id="reset-btn" class="w-full sm:w-[150px] bg-slate-500 text-white py-3 px-8 rounded-lg hover:bg-slate-600 transition duration-300 font-semibold shadow-md btn-3d">
-          Zerar
-        </button>
-      </div>
 
-      <div class="flex justify-center mt-2 mb-2">
-        <button type="button" id="btn-toggle-credito-debito" class="w-full sm:w-[316px] bg-yellow-500 hover:bg-yellow-400 text-slate-900 font-bold py-3 px-8 rounded-lg shadow-md btn-3d transition-all active:scale-95">
-            Crédito menos débito
-        </button>
-      </div>
+        <div class="p-5 space-y-4">
+          <div id="resultado-detalhe" class="hidden rounded-xl p-4 text-sm font-medium border"></div>
 
-      <div id="mensagem-erro" class="text-center pt-2 text-sm font-bold text-amber-600 min-h-[20px]"></div>
-      <div id="resultado" class="text-center text-lg p-4 rounded-lg transition-all duration-500 opacity-0 transform scale-95"></div>
+          <!-- Script de e-mail -->
+          <div id="wrapper-script-email" class="hidden">
+            <button id="btn-script-email" type="button"
+              class="w-full bg-slate-700 hover:bg-slate-800 text-white font-bold py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 btn-3d transition">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+              </svg>
+              Copiar script de e-mail para o cliente
+            </button>
+            <p id="msg-copiado-email" class="text-green-600 text-xs font-bold mt-2 text-center transition-opacity opacity-0">✅ Script copiado para a área de transferência!</p>
+          </div>
 
-      <div class="flex flex-col items-center gap-2 mt-3">
-        <button id="btn-script-email" type="button" class="hidden w-full sm:w-auto bg-slate-700 hover:bg-slate-800 text-white font-bold py-2.5 px-6 rounded-lg shadow-md btn-3d transition text-sm flex items-center justify-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
-          </svg>
-          Copiar script de e-mail para o cliente
-        </button>
-        <span id="msg-copiado-email" class="text-green-600 text-xs font-bold transition-opacity opacity-0">✅ Script copiado para a área de transferência!</span>
-      </div>
-      
-      <div class="w-full flex flex-col items-center justify-center">
-        <div id="modulo-credito-debito" class="hidden w-full mt-2 transition-all duration-300">
-            <div id="theme-panel" class="w-full p-6 md:p-8 rounded-xl border border-slate-200 bg-slate-50 shadow-inner text-left">
-                
-                <h3 class="text-xl font-bold mb-1 text-slate-800">Quitar Saldo Devedor</h3>
-                <p class="text-sm text-slate-500 mb-6">Utilize o crédito para quitar o saldo devedor, e o restante receber em espécie</p>
-                
-                <form id="calc-form" class="space-y-5">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium mb-1 text-slate-700">Crédito Disponível (R$)</label>
-                            <input type="text" inputmode="numeric" id="input-credito" class="w-full border border-slate-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-colors" placeholder="Ex: R$ 50.000,00">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-1 text-slate-700">Saldo Devedor (R$)</label>
-                            <input type="text" inputmode="numeric" id="input-debito" class="w-full border border-slate-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-colors" placeholder="Ex: R$ 15.000,00">
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium mb-1 text-slate-700">Data da Contemplação</label>
-                        <input type="date" id="input-data" class="w-full border border-slate-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-colors">
-                    </div>
-                    
-                    <div class="flex flex-col sm:flex-row justify-center gap-4 mt-6">
-                        <button type="button" id="theme-btn" class="w-full sm:w-[150px] bg-yellow-500 hover:bg-yellow-400 text-slate-900 py-3 font-bold rounded-lg shadow-md btn-3d transition-transform hover:-translate-y-0.5">
-                            Calcular
-                        </button>
-                        <button type="button" id="btn-zerar" class="w-full sm:w-[150px] bg-slate-500 hover:bg-slate-600 text-white font-bold py-3 px-8 rounded-lg shadow-md btn-3d transition-all active:scale-95">
-                            Zerar
-                        </button>
-                    </div>
-                </form>
-
-                <div id="resultado-container" class="hidden mt-8 pt-6 border-t border-slate-200">
-                    <h4 class="text-lg font-bold mb-4 text-slate-800">Resumo da Operação</h4>
-                    
-                    <div class="space-y-3 mb-6 text-sm text-slate-700">
-                        <div class="flex justify-between items-center">
-                            <span>Crédito Disponível:</span>
-                            <span id="res-credito" class="font-medium text-slate-900">R$ 0,00</span>
-                        </div>
-                        <div class="flex justify-between items-center text-red-500">
-                            <span>(-) Saldo Devedor a quitar:</span>
-                            <span id="res-debito" class="font-medium">- R$ 0,00</span>
-                        </div>
-                        <div class="flex justify-between items-center pt-3 border-t border-slate-200 font-bold text-lg mt-2">
-                            <span>Valor líquido a receber:</span>
-                            <span id="res-liquido" class="text-slate-900">R$ 0,00</span>
-                        </div>
-                    </div>
-
-                    <div class="p-4 rounded-lg bg-yellow-50 border-l-4 border-yellow-500 text-yellow-800">
-                        <p id="res-mensagem" class="font-medium leading-relaxed"></p>
-                        <p class="text-xs mt-2 opacity-80">
-                            *Regulamento: Prazo de 180 dias após a contemplação.
-                        </p>
-                    </div>
+          <!-- Base legal -->
+          <div id="info-legal" class="hidden border-t pt-4">
+            <details class="group">
+              <summary id="info-legal-summary" class="font-semibold cursor-pointer text-sm flex items-center justify-between select-none">
+                <span>📋 Base Legal (Cláusula 32)</span>
+                <span class="group-open:rotate-180 transition-transform">▼</span>
+              </summary>
+              <div class="mt-3 space-y-3 text-xs text-slate-500">
+                <p class="italic">"É facultado ao CONSORCIADO contemplado, que não utilizar o crédito disponibilizado para aquisição de Bem ou Serviço, após o prazo de 180 (cento e oitenta) dias da contemplação de sua cota, mediante a quitação total de suas obrigações para com o grupo e para com a ADMINISTRADORA, observadas as disposições contratuais, receber o valor do crédito em espécie..."</p>
+                <div class="space-y-1 not-italic text-slate-600">
+                  <p>• Pagamento exclusivamente ao <strong>titular da cota</strong></p>
+                  <p>• Carência de <strong>180 dias</strong> após contemplação (grupo ativo)</p>
+                  <p>• Dispensado o prazo se o <strong>grupo encerrou</strong></p>
+                  <p>• Cota deve estar <strong>quitada</strong></p>
                 </div>
-            </div>
+                <a href="https://www.embracon.com.br/docs/regulamentos/Condi%C3%A7%C3%B5es%20Gerais%20-%20Embracon.pdf#page=42"
+                  target="_blank" rel="noopener noreferrer"
+                  class="inline-flex items-center gap-1 font-semibold hover:underline mt-1">
+                  Ver regulamento completo ↗
+                </a>
+              </div>
+            </details>
+          </div>
         </div>
       </div>
-      
-      <div id="info-legal" class="hidden mt-6 pt-4 border-t border-slate-200 text-sm text-slate-600">
-        <details class="bg-slate-50 p-4 rounded-lg">
-          <summary class="font-semibold cursor-pointer">Entendendo as Regras (Síntese e Cláusulas) ▼</summary>
-          <div class="mt-4 space-y-4">
+    </div>
+
+    <!-- Módulo Crédito menos débito -->
+    <div class="w-full max-w-lg">
+      <button type="button" id="btn-toggle-credito-debito"
+        class="w-full bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold py-3 px-6 rounded-xl shadow-md btn-3d transition-all flex items-center justify-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+        </svg>
+        Simular: Crédito menos débito
+      </button>
+
+      <div id="modulo-credito-debito" class="bg-white rounded-2xl shadow-xl mt-3 overflow-hidden">
+        <div class="p-6 space-y-5">
+          <div>
+            <h3 class="text-lg font-extrabold text-slate-800">Quitar Saldo Devedor</h3>
+            <p class="text-sm text-slate-500 mt-0.5">Use o crédito para quitar o débito e receba o restante em espécie (Cláusula 32)</p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <h5 class="font-bold text-slate-800 mb-2">Síntese Informativa</h5>
-              <ul class="list-disc list-inside space-y-2">
-                <li><span class="font-semibold">Regra Geral:</span> Após a contemplação, o prazo padrão para solicitar o crédito em espécie é de <strong class="text-slate-800">180 dias</strong>.</li>
-                <li><span class="font-semibold">Exceção por Encerramento de Grupo:</span> Se o grupo já encerrou oficialmente, o prazo de 180 dias <strong class="text-slate-800">não se aplica</strong> e o crédito fica disponível para solicitação.</li>
-                <li><span class="font-semibold">Requisitos Essenciais:</span> Em todos os casos, o recebimento está condicionado à <strong class="text-slate-800">quitação total</strong> da cota e à aprovação do cadastro. O pagamento é feito exclusivamente ao titular.</li>
-              </ul>
+              <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">Crédito Disponível (R$)</label>
+              <input type="text" inputmode="numeric" id="input-credito"
+                class="w-full border-2 border-slate-200 rounded-xl p-3 font-semibold focus:outline-none transition-colors"
+                placeholder="Ex: 50.000,00">
             </div>
-            <div class="pt-4 border-t border-slate-200">
-          <h5 class="font-bold text-slate-800 mb-2">
-            <a 
-              id="link-clausula-32"
-              href="https://www.embracon.com.br/docs/regulamentos/Condições%20Gerais%20-%20Embracon.pdf#page=42"
-              target="_blank" 
-              rel="noopener noreferrer"
-              class="cursor-pointer hover:underline"
-            >
-              <h5 class="font-bold text-slate-800 mb-2">Cláusula 32 (Regulamento)</h5>
-            </a>
-              <p class="text-xs text-slate-500 italic">É facultado ao CONSORCIADO contemplado, que não utilizar o crédito disponibilizado para aquisição de Bem ou Serviço, após o prazo de 180 (cento e oitenta) dias da contemplação de sua cota, mediante a quitação total de suas obrigações para com o grupo e para com a ADMINISTRADORA, observadas as disposições contratuais, receber o valor do crédito em espécie, somente em seu favor, podendo ainda o CONSORCIADO utilizar parte deste crédito para quitar seu saldo devedor, operando-se a compensação.</p>
-            </div>
-            <div class="pt-4 border-t border-slate-200">
-              <details>
-                <summary class="font-semibold cursor-pointer">Clique aqui e saiba mais sobre as regras desse processo ▼</summary>
-                <div class="mt-4 text-xs text-slate-500 italic space-y-3">
-                  <h6 class="font-semibold text-slate-700 not-italic">Disposições Gerais sobre o Recebimento em Espécie</h6>
-                  <p><strong>Grupo Encerrado:</strong> O consorciado poderá solicitar o valor do crédito em espécie, após a última assembleia ordinária do grupo, mediante quitação de suas obrigações junto ao grupo, caso não tenha utilizado o respectivo crédito.</p>
-                  <p>Além disso, o consorciado pode optar por receber o crédito em espécie, considerando os seguintes pontos:</p>
-                  <ul class="list-disc list-inside space-y-2 pl-4">
-                    <li>O crédito só poderá ser pago ao <strong>titular da cota</strong>, não sendo permitido o pagamento a terceiros, nem por procuração.</li>
-                    <li>Deve ter transcorrido o prazo de <strong>180 (cento e oitenta) dias</strong> da contemplação (para grupos ativos).</li>
-                    <li>Dentro do prazo de <strong>60 dias</strong>, contados da data da <strong>última assembleia</strong>, a administradora deverá comunicar sobre a disponibilidade dos créditos não utilizados.</li>
-                    <li>A cota deve estar <strong>quitada</strong> (parte do crédito pode ser usada para isso).</li>
-                    <li>Regras para <strong>sobra de crédito</strong> (após a compra do bem):
-                      <ul class="list-['-_'] list-inside space-y-1 pl-4 mt-1">
-                        <li>Se a sobra não ultrapassar <strong>10% do Crédito</strong> corrigido, pode receber a <strong>qualquer momento</strong> após o faturamento.</li>
-                        <li>Se a sobra for superior a <strong>10% do crédito</strong> corrigido, deve-se respeitar o prazo original da norma.</li>
-                        <br><p><strong>IMPORTANTE! Favor observar as condições previstas nas RN144 e RN0134</strong></p>
-                      </ul>
-                    </li>
-                  </ul>
-                </div>
-              </details>
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">Saldo Devedor (R$)</label>
+              <input type="text" inputmode="numeric" id="input-debito"
+                class="w-full border-2 border-slate-200 rounded-xl p-3 font-semibold focus:outline-none transition-colors"
+                placeholder="Ex: 15.000,00">
             </div>
           </div>
-        </details>
+
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">Data da Contemplação</label>
+            <input type="date" id="input-data"
+              class="w-full border-2 border-slate-200 rounded-xl p-3 font-semibold focus:outline-none transition-colors">
+          </div>
+
+          <div class="flex gap-3">
+            <button type="button" id="theme-btn"
+              class="flex-1 bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold py-3 rounded-xl btn-3d">
+              Calcular
+            </button>
+            <button type="button" id="btn-zerar"
+              class="w-1/3 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 rounded-xl btn-3d">
+              Zerar
+            </button>
+          </div>
+
+          <div id="resultado-container" class="hidden border-t pt-5 space-y-4">
+            <h4 class="text-base font-extrabold text-slate-800">Resumo da operação</h4>
+            <div class="space-y-2 text-sm">
+              <div class="flex justify-between items-center bg-slate-50 rounded-lg px-4 py-3">
+                <span class="text-slate-500">Crédito Disponível</span>
+                <span id="res-credito" class="font-bold text-slate-800">R$ 0,00</span>
+              </div>
+              <div class="flex justify-between items-center bg-red-50 rounded-lg px-4 py-3">
+                <span class="text-red-500">(-) Saldo Devedor</span>
+                <span id="res-debito" class="font-bold text-red-600">- R$ 0,00</span>
+              </div>
+              <div class="flex justify-between items-center bg-green-50 rounded-lg px-4 py-3 border border-green-200">
+                <span class="font-bold text-green-800">Valor líquido a receber</span>
+                <span id="res-liquido" class="font-extrabold text-lg text-green-700">R$ 0,00</span>
+              </div>
+            </div>
+            <div class="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-sm">
+              <p id="res-mensagem" class="font-medium leading-relaxed"></p>
+              <p class="text-xs mt-2 opacity-70">* Regulamento: prazo de 180 dias após a contemplação (Cláusula 32).</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="text-center">
-      <a href="../index.html" class="mt-8 inline-block text-slate-600 font-semibold transition hover:underline">
-        &larr; Voltar ao Menu Principal
-      </a>
-    </div>
+
+    <a href="../index.html" class="text-slate-500 hover:text-slate-700 font-semibold transition hover:underline text-sm">
+      &larr; Voltar ao Menu Principal
+    </a>
   </main>
 
-  <footer class="w-full py-8 mt-4 sm:mt-8 relative z-10 flex flex-col items-center gap-6">
-  <a href="/logout" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2.5 px-6 rounded-full shadow-md transition-transform transform hover:scale-105 flex items-center gap-2 text-sm w-max">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-    </svg>
-    Encerrar Sessão
-  </a>
-  <p class="text-sm text-slate-500">&copy; Todos os direitos reservados.</p>
-</footer>
+  <footer class="w-full py-8 flex flex-col items-center gap-4">
+    <a href="/logout" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2.5 px-6 rounded-full shadow-md transition-transform transform hover:scale-105 flex items-center gap-2 text-sm">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+      </svg>
+      Encerrar Sessão
+    </a>
+    <p class="text-sm text-slate-500">&copy; Todos os direitos reservados.</p>
+  </footer>
 
-  <div id="modal-instrucoes" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 transition-opacity duration-300 hidden p-4">
-    <div id="modal-instrucoes-box" class="bg-white p-6 sm:p-8 rounded-xl shadow-2xl w-full max-w-2xl relative max-h-[90vh] overflow-y-auto">
-      <button id="fechar-instrucoes-btn" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition" aria-label="Fechar manual">
+  <!-- Modal de instruções -->
+  <div id="modal-instrucoes" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 hidden p-4"
+    role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
+    <div id="modal-instrucoes-box" class="bg-white p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-lg relative max-h-[90vh] overflow-y-auto">
+      <button id="fechar-instrucoes-btn" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 transition" aria-label="Fechar manual">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
           <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
         </svg>
       </button>
-      
-      <div class="flex items-center gap-3 mb-6 border-b pb-4">
-        <div class="p-2 bg-blue-50 rounded-lg text-blue-600">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
-            </svg>
-        </div>
-        <h3 class="text-2xl font-bold text-slate-900">Manual da Ferramenta</h3>
-      </div>
+      <h3 id="modal-titulo" class="text-xl font-extrabold text-slate-900 mb-5">Como usar esta ferramenta</h3>
+      <div class="space-y-4 text-sm text-slate-600">
 
-      <div class="space-y-6 text-slate-600 text-sm">
-        <p class="text-base text-slate-700">Esta ferramenta ajuda a verificar a elegibilidade de uma cota para o recebimento do crédito em espécie, possuindo duas funções principais:</p>
-
-        <div class="bg-slate-50 border border-slate-200 rounded-lg p-5">
-            <h4 class="font-bold text-lg text-slate-800 mb-3 flex items-center gap-2">
-                <span class="bg-blue-100 text-blue-800 rounded-full w-6 h-6 flex items-center justify-center text-xs">1</span>
-                Calculadora Principal (Verificação de Prazo)
-            </h4>
-            <p class="mb-3">Verifica se o consorciado já cumpriu o prazo regulamentar para solicitar o valor em dinheiro.</p>
-            
-            <div class="space-y-4 mt-4">
-                <div class="pl-4 border-l-2 border-blue-300">
-                    <h5 class="font-semibold text-slate-800 mb-1">Cenário A: Grupo Ativo</h5>
-                    <p class="text-xs text-slate-600 mb-2">Aplica a regra padrão de carência de 180 dias após a contemplação.</p>
-                    <ul class="list-disc list-inside text-xs space-y-1 text-slate-500">
-                        <li>Insira a data em que a cota foi contemplada no campo <strong class="text-slate-700">"Data da contemplação"</strong>.</li>
-                        <li>Deixe a caixa "O grupo já encerrou?" <strong class="text-slate-700">desmarcada</strong>.</li>
-                        <li>Clique em <strong class="text-slate-700">"Calcular"</strong> para ver a data a partir da qual o crédito estará liberado.</li>
-                    </ul>
-                </div>
-                
-                <div class="pl-4 border-l-2 border-green-300">
-                    <h5 class="font-semibold text-slate-800 mb-1">Cenário B: Grupo Encerrado</h5>
-                    <p class="text-xs text-slate-600 mb-2">Se o grupo já realizou a última assembleia, o prazo de 180 dias não é exigido.</p>
-                    <ul class="list-disc list-inside text-xs space-y-1 text-slate-500">
-                        <li>Marque a opção <strong class="text-slate-700">"O grupo já encerrou?"</strong>.</li>
-                        <li>Informe a <strong class="text-slate-700">"Data de encerramento do grupo"</strong> no novo campo que aparecerá.</li>
-                        <li>Clique em <strong class="text-slate-700">"Calcular"</strong> para confirmar a liberação imediata.</li>
-                    </ul>
-                </div>
-            </div>
+        <div class="bg-blue-50 border border-blue-100 rounded-xl p-4">
+          <h4 class="font-bold text-slate-800 mb-2 flex items-center gap-2">
+            <span class="bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">1</span>
+            Grupo Ativo — regra dos 180 dias
+          </h4>
+          <p>Selecione <strong>Grupo Ativo</strong>, informe a data de contemplação e clique em Verificar. O sistema calcula se os 180 dias já foram cumpridos.</p>
         </div>
 
-        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-5">
-            <h4 class="font-bold text-lg text-slate-800 mb-3 flex items-center gap-2">
-                <span class="bg-yellow-200 text-yellow-800 rounded-full w-6 h-6 flex items-center justify-center text-xs">2</span>
-                Módulo "Crédito menos débito" (Compensação)
-            </h4>
-            <p class="mb-3">Simula a operação de quitação do saldo devedor utilizando o próprio crédito da cota (Cláusula 32).</p>
-            
-            <ul class="list-decimal list-inside space-y-2 mt-2 text-sm text-slate-700">
-                <li>Clique no botão amarelo <strong class="text-slate-800">"Crédito menos débito"</strong> para abrir o painel.</li>
-                <li>Informe o valor total do <strong class="text-slate-800">Crédito Disponível</strong>.</li>
-                <li>Informe o valor atual do <strong class="text-slate-800">Saldo Devedor</strong> da cota.</li>
-                <li>Insira a data em que a cota foi contemplada.</li>
-                <li>O sistema calculará o <strong class="text-green-700">valor líquido</strong> (o troco que sobrará para o cliente) e confirmará a data em que ele poderá solicitar esse valor em espécie na conta.</li>
-            </ul>
-            <div class="mt-3 p-3 bg-white bg-opacity-60 rounded border border-yellow-300 text-xs text-yellow-800">
-                <strong>Nota:</strong> Se o saldo devedor for maior ou igual ao crédito, a operação alertará que não haverá valor residual a receber.
-            </div>
+        <div class="bg-green-50 border border-green-100 rounded-xl p-4">
+          <h4 class="font-bold text-slate-800 mb-2 flex items-center gap-2">
+            <span class="bg-green-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">2</span>
+            Grupo Encerrado — liberação imediata
+          </h4>
+          <p>Selecione <strong>Grupo Encerrado</strong>, informe a data da última assembleia e indique se a cota está quitada. Se quitada, não é necessária a data de contemplação.</p>
+        </div>
+
+        <div class="bg-amber-50 border border-amber-100 rounded-xl p-4">
+          <h4 class="font-bold text-slate-800 mb-2 flex items-center gap-2">
+            <span class="bg-amber-400 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">3</span>
+            Simular: Crédito menos débito
+          </h4>
+          <p>Abra o módulo amarelo para calcular o valor líquido após quitar o saldo devedor com o próprio crédito (Cláusula 32).</p>
         </div>
 
       </div>
@@ -311,104 +391,94 @@
   </div>
 
   <audio id="som-dinheiro" src="../assets/som-caixa.mp3" preload="auto"></audio>
-  
+
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+
       const paletaDeTemas = [
-        { name: "Oceanic Teal", header: ["from-cyan-500", "to-teal-500"], btn: ["from-cyan-600", "to-teal-600"], text: "text-cyan-600", part: "rgba(6, 182, 212, 0.3)", focus: "focus:ring-cyan-500", border: "border-cyan-500", bg: "bg-cyan-50", hover: "hover:text-cyan-800" },
-        { name: "Sunset Orange", header: ["from-amber-500", "to-orange-600"], btn: ["from-amber-600", "to-orange-700"], text: "text-amber-600", part: "rgba(245, 158, 11, 0.3)", focus: "focus:ring-amber-500", border: "border-amber-500", bg: "bg-amber-50", hover: "hover:text-amber-800" },
+        { name: "Oceanic Teal",    header: ["from-cyan-500",    "to-teal-500"],    btn: ["from-cyan-600",    "to-teal-600"],    text: "text-cyan-600",    focus: "focus:border-cyan-500",    iconBg: "bg-cyan-100",    legalText: "text-cyan-700" },
+        { name: "Sunset Orange",   header: ["from-amber-500",   "to-orange-600"],  btn: ["from-amber-600",   "to-orange-700"],  text: "text-amber-600",   focus: "focus:border-amber-500",   iconBg: "bg-amber-100",   legalText: "text-amber-700" },
+        { name: "Grape Soda",      header: ["from-fuchsia-500", "to-purple-600"],  btn: ["from-fuchsia-600", "to-purple-700"],  text: "text-fuchsia-600", focus: "focus:border-fuchsia-500", iconBg: "bg-fuchsia-100", legalText: "text-fuchsia-700" },
+        { name: "Jungle Lime",     header: ["from-lime-400",    "to-emerald-600"], btn: ["from-lime-500",    "to-emerald-700"], text: "text-lime-500",    focus: "focus:border-lime-500",    iconBg: "bg-lime-100",    legalText: "text-lime-700" },
+        { name: "Hot Pink",        header: ["from-pink-500",    "to-rose-500"],    btn: ["from-pink-600",    "to-rose-600"],    text: "text-pink-600",    focus: "focus:border-pink-500",    iconBg: "bg-pink-100",    legalText: "text-pink-700" },
+        { name: "Deep Sky",        header: ["from-sky-500",     "to-indigo-600"],  btn: ["from-sky-600",     "to-indigo-700"],  text: "text-sky-600",     focus: "focus:border-sky-500",     iconBg: "bg-sky-100",     legalText: "text-sky-700" },
+        { name: "Burning Sunset",  header: ["from-red-500",     "to-orange-500"],  btn: ["from-red-600",     "to-orange-600"],  text: "text-red-600",     focus: "focus:border-red-500",     iconBg: "bg-red-100",     legalText: "text-red-700" },
+        { name: "Minty Fresh",     header: ["from-green-300",   "to-cyan-400"],    btn: ["from-green-400",   "to-cyan-500"],    text: "text-green-500",   focus: "focus:border-green-500",   iconBg: "bg-green-100",   legalText: "text-green-700" },
+        { name: "Cyberpunk Night", header: ["from-indigo-500",  "to-fuchsia-500"], btn: ["from-indigo-600",  "to-fuchsia-600"], text: "text-indigo-500",  focus: "focus:border-indigo-500",  iconBg: "bg-indigo-100",  legalText: "text-indigo-700" },
       ];
 
-      let tema = paletaDeTemas[0]; 
-      const temaSalvo = localStorage.getItem('temaAtivo');
-      if (temaSalvo) tema = JSON.parse(temaSalvo);
+      let tema = paletaDeTemas[0];
+      try { const s = localStorage.getItem('temaAtivo'); if (s) tema = JSON.parse(s); } catch (_) {}
 
-      document.getElementById("header").classList.add("bg-gradient-to-r", ...tema.header);
-      document.getElementById("calcular-btn").classList.add("bg-gradient-to-br", ...tema.btn);
-      
-      document.querySelectorAll('input[type="text"]').forEach(input => input.classList.add(tema.focus));
-      document.getElementById('grupo-encerrado-check').classList.add(tema.text, tema.focus);
-      document.getElementById('aviso-box').classList.add(tema.text.replace('600', '800'), tema.border, tema.bg);
-      document.getElementById('icon-bg').classList.add("bg-white", "shadow-sm");
-      document.querySelectorAll('#info-legal summary').forEach(link => { link.classList.add(tema.text, tema.hover); });
-      
-      const abrirInstrucoesBtn = document.getElementById('abrir-instrucoes-btn');
-      abrirInstrucoesBtn.classList.add("bg-gradient-to-br", ...tema.btn);
-      
-      const nomeUsuario = localStorage.getItem('nomeUsuario');
+      document.getElementById('header').classList.add('bg-gradient-to-r', ...tema.header);
+      document.getElementById('abrir-instrucoes-btn').classList.add('bg-gradient-to-br', ...tema.btn);
+      document.getElementById('icon-bg').classList.add(tema.iconBg);
+      document.querySelectorAll('#etapa-2a input[type="text"], #etapa-2b input[type="text"]')
+        .forEach(el => el.classList.add(tema.focus));
+      document.getElementById('btn-avancar-1').classList.add('bg-gradient-to-br', ...tema.btn);
+      document.getElementById('btn-calcular-2a').classList.add('bg-gradient-to-br', ...tema.btn);
+      document.getElementById('btn-calcular-2b').classList.add('bg-gradient-to-br', ...tema.btn);
+      document.querySelectorAll('.step-dot.active').forEach(d => d.classList.add(...tema.btn, 'bg-gradient-to-br'));
+      document.getElementById('info-legal-summary').classList.add(tema.legalText);
+
+      // Saudação
+      const nomeUsuario   = localStorage.getItem('nomeUsuario');
       const generoUsuario = localStorage.getItem('generoUsuario');
-      const saudacaoEl = document.getElementById('saudacao-usuario');
-      
+      const saudacaoEl    = document.getElementById('saudacao-usuario');
+      const obterSaudacao = () => { const h = new Date().getHours(); return h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite'; };
       if (nomeUsuario) {
-          let boasVindas = generoUsuario === 'M' ? 'Bem-vindo de volta.' : (generoUsuario === 'F' ? 'Bem-vinda de volta.' : 'Bem-vindo(a) de volta.');
-          saudacaoEl.textContent = 'Olá, ';
-          const spanNome = document.createElement('span');
-          spanNome.className = `font-bold ${tema.text}`;
-          spanNome.textContent = nomeUsuario;
-          saudacaoEl.appendChild(spanNome);
-          saudacaoEl.appendChild(document.createTextNode(`! ${boasVindas}`));
+        const bv = generoUsuario === 'F' ? 'Seja bem-vinda.' : 'Seja bem-vindo.';
+        saudacaoEl.textContent = `${obterSaudacao()}, `;
+        const span = document.createElement('span');
+        span.className = `font-bold ${tema.text}`;
+        span.textContent = nomeUsuario;
+        saudacaoEl.appendChild(span);
+        saudacaoEl.appendChild(document.createTextNode(`! ${bv}`));
       } else {
-          saudacaoEl.textContent = 'Calcule o prazo para o recebimento do crédito.';
+        saudacaoEl.textContent = 'Verifique o prazo para recebimento do crédito.';
       }
       setTimeout(() => saudacaoEl.classList.add('show'), 100);
 
-      const modal = document.getElementById('modal-instrucoes');
+      // Modal
+      const modal    = document.getElementById('modal-instrucoes');
       const abrirBtn = document.getElementById('abrir-instrucoes-btn');
       const fecharBtn = document.getElementById('fechar-instrucoes-btn');
       let ultimoFoco = null;
-
-      const obterFocaveis = () => modal.querySelectorAll(
-        'button:not([disabled]), [tabindex]:not([tabindex="-1"])'
-      );
-      
-      const capturarTabNoModal = (e) => {
+      const capturarTab = (e) => {
         if (e.key !== 'Tab') return;
-        const focaveis = obterFocaveis();
-        if (!focaveis.length) return;
-        const primeiro = focaveis[0];
-        const ultimo = focaveis[focaveis.length - 1];
-        if (e.shiftKey && document.activeElement === primeiro) {
-          e.preventDefault();
-          ultimo.focus();
-        } else if (!e.shiftKey && document.activeElement === ultimo) {
-          e.preventDefault();
-          primeiro.focus();
-        }
+        const fs = modal.querySelectorAll('button:not([disabled])');
+        if (!fs.length) return;
+        if (e.shiftKey && document.activeElement === fs[0]) { e.preventDefault(); fs[fs.length-1].focus(); }
+        else if (!e.shiftKey && document.activeElement === fs[fs.length-1]) { e.preventDefault(); fs[0].focus(); }
       };
-
       abrirBtn.addEventListener('click', () => {
         ultimoFoco = document.activeElement;
         modal.classList.remove('hidden');
-        setTimeout(() => modal.classList.add('active'), 10);
-        setTimeout(() => fecharBtn.focus(), 20);
-        document.addEventListener('keydown', capturarTabNoModal);
+        abrirBtn.setAttribute('aria-expanded', 'true');
+        setTimeout(() => { modal.classList.add('active'); fecharBtn.focus(); }, 10);
+        document.addEventListener('keydown', capturarTab);
       });
-      
       const fecharModal = () => {
         modal.classList.remove('active');
-        document.removeEventListener('keydown', capturarTabNoModal);
+        abrirBtn.setAttribute('aria-expanded', 'false');
+        document.removeEventListener('keydown', capturarTab);
         setTimeout(() => modal.classList.add('hidden'), 300);
-        if (ultimoFoco && typeof ultimoFoco.focus === 'function') {
-          ultimoFoco.focus();
-        }
+        if (ultimoFoco?.focus) ultimoFoco.focus();
       };
-      
       fecharBtn.addEventListener('click', fecharModal);
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) fecharModal();
-      });
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && modal.classList.contains('active')) {
-          fecharModal();
-        }
-      });
-    });
+      modal.addEventListener('click', e => { if (e.target === modal) fecharModal(); });
+      document.addEventListener('keydown', e => { if (e.key === 'Escape' && modal.classList.contains('active')) fecharModal(); });
 
-    window.addEventListener('DOMContentLoaded', () => {
-  });
+      // Módulo crédito-débito toggle
+      const moduloEl = document.getElementById('modulo-credito-debito');
+      document.getElementById('btn-toggle-credito-debito').addEventListener('click', () => {
+        moduloEl.classList.toggle('aberto');
+      });
+
+    }); // fim DOMContentLoaded
   </script>
-  
-  <script src="creditoService.js"></script> 
+
+  <script src="creditoService.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
